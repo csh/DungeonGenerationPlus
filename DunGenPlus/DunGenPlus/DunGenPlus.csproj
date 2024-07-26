@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{13CDE60E-1975-463B-9DA1-CCB3F3EBABD8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DunGenPlus</RootNamespace>
+    <AssemblyName>DunGenPlus</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\Libraries\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\Libraries\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-publicized">
+      <HintPath>..\..\..\Libraries\Assembly-CSharp-publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\..\Libraries\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>..\..\..\Libraries\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="LethalLevelLoader">
+      <HintPath>..\..\..\Libraries\LethalLevelLoader.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Unity.Collections">
+      <HintPath>..\..\..\Libraries\Unity.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.HighDefinition.Config.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.RenderPipelines.HighDefinition.Config.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\Libraries\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API.cs" />
+    <Compile Include="Assets.cs" />
+    <Compile Include="Collections\DunGenExtenderEvents.cs" />
+    <Compile Include="Collections\ExtenderEvent.cs" />
+    <Compile Include="Collections\NodeArchetype.cs" />
+    <Compile Include="Components\DoorwayCleanup.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwayConnectedDoorway.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwaySpawnedPrefab.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveGameObjectsConnectedDoorway.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DoorwayCleanupScript.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DCSConnectorBlockerSpawnedPrefab.cs" />
+    <Compile Include="Components\DoorwayCleanupScripting\DoorwayCleanupScriptDoorwayCompare.cs" />
+    <Compile Include="Components\DoorwaySisters.cs" />
+    <Compile Include="Components\MainRoomDoorwayGroups.cs" />
+    <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
+    <Compile Include="DunGenExtender.cs" />
+    <Compile Include="Collections\DunGenExtenderProperties.cs" />
+    <Compile Include="Generation\DunGenPlusGenerator.cs" />
+    <Compile Include="Managers\DoorwayManager.cs" />
+    <Compile Include="Patches\DoorwayConnectionPatch.cs" />
+    <Compile Include="Generation\DoorwaySistersRule.cs" />
+    <Compile Include="Patches\DungeonGeneratorPatch.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\TranspilerUtilities.cs" />
+    <Compile Include="Utils\Utility.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetPath)" "C:\Users\Jose Garcia\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\SDM Debug\BepInEx\plugins\Unknown-DunGenPlus\$(TargetName).dll"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
