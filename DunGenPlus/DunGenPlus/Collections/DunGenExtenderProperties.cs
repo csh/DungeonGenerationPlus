@@ -12,12 +12,20 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class DunGenExtenderProperties {
 
+    public enum CopyNodeBehaviour {
+      CopyFromMainPathPosition,
+      CopyFromNodeList
+    }
+
     [Header("Main Path")]
     [Tooltip("The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.")]
     [Range(1, 9)]
     public int MainPathCount = 1;
     [Tooltip("The Tile Prefab where the additional main paths will start from. Cannot be null if MainPathCount is more than 1.\n\nHighly advice for this Tile Prefab to have multiple doorways.")]
     public GameObject MainRoomTilePrefab;
+    [Tooltip("CopyFromMainPathPosition means that nodes will copy from the MainRoomTilePrefab's position in the main path.\n\nCopyFromNodeList means that nodes will copy from the MainRoomTilePrefab's location from the node list + 1.")]
+    public CopyNodeBehaviour MainPathCopyNodeBehaviour = CopyNodeBehaviour.CopyFromMainPathPosition;
+    //public bool MainPathCopyInjectionTiles;
 
     [Header("Dungeon Bounds")]
     [Tooltip("If enabled, restricts the dungeon's generation to the bounds described below.\n\nThis will help in condensing the dungeon, but it will increase the chance of dungeon generation failure (potentially guarantees failure if the bounds is too small).")]
@@ -33,7 +41,7 @@ namespace DunGenPlus.Collections {
 
     [Header("Archetypes on Normal Nodes")]
     [Tooltip("If enabled, adds archetypes to the normal nodes in the DungeonFlow.\n\nBy default, nodes cannot have branching paths since they don't have archetype references. This allows nodes to have branching paths.")]
-    public bool AddArchetypesToNormalNodes = true;
+    public bool AddArchetypesToNormalNodes = false;
     public List<NodeArchetype> NormalNodeArchetypes;
     internal Dictionary<string, NodeArchetype> _normalNodeArchetypesDictioanry;
     internal NodeArchetype _defaultNodeArchetype;
@@ -104,6 +112,8 @@ namespace DunGenPlus.Collections {
 
       copy.MainPathCount = MainPathCount;
       copy.MainRoomTilePrefab = MainRoomTilePrefab;
+      copy.MainPathCopyNodeBehaviour = MainPathCopyNodeBehaviour;
+      //copy.MainPathCopyInjectionTiles = MainPathCopyInjectionTiles;
 
       copy.UseDungeonBounds = UseDungeonBounds;
       copy.DungeonSizeBase = DungeonSizeBase;

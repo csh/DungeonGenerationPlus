@@ -18,5 +18,8 @@ namespace DunGenPlus {
     public DunGenExtenderProperties Properties;
     public DunGenExtenderEvents Events;
 
+    [Header("DEV ONLY: DON'T TOUCH")]
+    public string Version = "0";
+
   }
 }

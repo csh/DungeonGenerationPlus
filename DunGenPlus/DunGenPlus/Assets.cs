@@ -28,7 +28,7 @@ namespace DunGenPlus {
       }
 
       foreach(var e in extenders){
-        API.AddDunGenExtender(e.DungeonFlow, e);
+        API.AddDunGenExtender(e);
       }
     }
 

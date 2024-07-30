@@ -130,13 +130,19 @@ namespace DunGenPlus.Generation {
 
       // nodes
       var nodesSorted = gen.DungeonFlow.Nodes.OrderBy(n => n.Position).ToList();
-      var startingNodeIndex = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == Properties.MainRoomTilePrefab));
-      if (startingNodeIndex == -1) {
-        Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to MainRoomTilePrefab not existing in the Nodes' tilesets");
-        ActiveAlternative = false;
-        yield return gen.Wait(gen.GenerateBranchPaths());
-        ActiveAlternative = true;
-        yield break;
+      var startingNodeIndexCache = -1;
+      if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
+        startingNodeIndexCache = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == Properties.MainRoomTilePrefab));
+
+        if (startingNodeIndexCache == -1) {
+          Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets");
+          ActiveAlternative = false;
+          yield return gen.Wait(gen.GenerateBranchPaths());
+          ActiveAlternative = true;
+          yield break;
+        }
+
+        startingNodeIndexCache++;
       }
 
       //FixDoorwaysToAllFloors(mainRoom, doorwayGroups);
@@ -152,7 +158,18 @@ namespace DunGenPlus.Generation {
         var newMainPathTiles = new List<TileProxy>();
         newMainPathTiles.Add(mainRoom);
 
-        var nodes = nodesSorted.Skip(startingNodeIndex + 1);
+        int startingNodeIndex;
+        if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromMainPathPosition) {
+          var lineDepthRatio = Mathf.Clamp01(1f / (targetLength - 1));
+          startingNodeIndex = nodesSorted.FindIndex(n => n.Position >= lineDepthRatio);
+        } else if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
+          startingNodeIndex = startingNodeIndexCache;
+        } else {
+          Plugin.logger.LogError($"{Properties.MainPathCopyNodeBehaviour} is not yet defined. How did this happen?");
+          startingNodeIndex = -1;
+        }
+
+        var nodes = nodesSorted.Skip(startingNodeIndex);
         var nodesVisited = new List<GraphNode>(nodes.Count());
 
         // most of this code is a mix of the GenerateMainPath()
