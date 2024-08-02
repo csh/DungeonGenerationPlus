@@ -22,7 +22,7 @@ namespace DunGenPlus {
   [BepInProcess("Lethal Company.exe")]
   public class Plugin : BaseUnityPlugin {
 
-    internal const string modGUID = "ImoutoSama.DungeonGenerationPlus";
+    internal const string modGUID = "dev.ladyalice";
     private const string modName = "Dungeon Generation Plus";
     private const string modVersion = "1.0.0";
 
