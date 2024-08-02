@@ -39,6 +39,7 @@ namespace DunGenPlus.Generation {
       Properties = props;
 
       if (Properties.UseDungeonBounds) {
+        generator.DebugRender = true;
         generator.RestrictDungeonToBounds = Properties.UseDungeonBounds;
         var bounds = Properties.GetDungeonBounds(generator.LengthMultiplier);
         generator.TilePlacementBounds = bounds;

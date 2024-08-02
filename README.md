@@ -14,6 +14,10 @@ Please refer to the [wiki](https://git.touhou.dev/Raphtalia/DungeonGenerationPlu
 
 The prominent feature of this API is the ability to seemlesly add multiple main paths to your interior. Below are some examples.
 
+![](https://i.imgur.com/XvygIZx.png)
+
+![](https://i.imgur.com/GKZVqOa.png)
+
 ![](https://i.imgur.com/nN5Zz5e.png)
 
 ![](https://i.imgur.com/ogrUKAI.png)

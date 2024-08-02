@@ -42,6 +42,9 @@ namespace DunGenPlus {
 
       Harmony.PatchAll(typeof(DungeonGeneratorPatch));
       Harmony.PatchAll(typeof(DoorwayConnectionPatch));
+      Harmony.PatchAll(typeof(RoundManagerPatch));
+
+      //Harmony.PatchAll(typeof(StartOfRoundPatch));
 
       Assets.LoadAssets();
       DungeonManager.GlobalDungeonEvents.onBeforeDungeonGenerate.AddListener(OnDunGenExtenderLoad);

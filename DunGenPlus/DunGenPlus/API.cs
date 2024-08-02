@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DunGen;
 using DunGen.Graph;
+using UnityEngine;
 
 namespace DunGenPlus
 {
@@ -16,7 +17,7 @@ namespace DunGenPlus
         return false;
       }
 
-      if (Plugin.DunGenExtenders.ContainsKey(dungeonFlow)) {
+      if (ContainsDungeonFlow(dungeonFlow)) {
         Plugin.logger.LogWarning($"Already contains DunGenExtender asset for {dungeonFlow.name}");
         return false;
       }
@@ -34,6 +35,17 @@ namespace DunGenPlus
       }
 
       return AddDunGenExtender(dunGenExtender.DungeonFlow, dunGenExtender);
+    }
+
+    public static bool ContainsDungeonFlow(DungeonFlow dungeonFlow) {
+      return Plugin.DunGenExtenders.ContainsKey(dungeonFlow);
+    }
+
+    public static DunGenExtender CreateDunGenExtender(DungeonFlow dungeonFlow){
+      var extender = ScriptableObject.CreateInstance<DunGenExtender>();
+      extender.DungeonFlow = dungeonFlow;
+      
+      return extender;
     }
 
   }

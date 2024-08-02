@@ -60,6 +60,14 @@
     <Reference Include="Unity.Collections">
       <HintPath>..\..\..\Libraries\Unity.Collections.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Netcode.Components, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.Netcode.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Netcode.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.Netcode.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
@@ -99,6 +107,7 @@
     <Compile Include="Components\DoorwaySisters.cs" />
     <Compile Include="Components\MainRoomDoorwayGroups.cs" />
     <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
+    <Compile Include="Components\Scrap\RandomGuaranteedScrapSpawn.cs" />
     <Compile Include="DunGenExtender.cs" />
     <Compile Include="Collections\DunGenExtenderProperties.cs" />
     <Compile Include="Generation\DunGenPlusGenerator.cs" />
@@ -106,6 +115,8 @@
     <Compile Include="Patches\DoorwayConnectionPatch.cs" />
     <Compile Include="Generation\DoorwaySistersRule.cs" />
     <Compile Include="Patches\DungeonGeneratorPatch.cs" />
+    <Compile Include="Patches\RoundManagerPatch.cs" />
+    <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\TranspilerUtilities.cs" />

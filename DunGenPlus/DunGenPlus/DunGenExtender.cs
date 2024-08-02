@@ -15,8 +15,8 @@ namespace DunGenPlus {
 
     [Tooltip("DunGenExtender will only influence this DungeonFlow")]
     public DungeonFlow DungeonFlow;
-    public DunGenExtenderProperties Properties;
-    public DunGenExtenderEvents Events;
+    public DunGenExtenderProperties Properties = new DunGenExtenderProperties();
+    public DunGenExtenderEvents Events = new DunGenExtenderEvents();
 
     [Header("DEV ONLY: DON'T TOUCH")]
     public string Version = "0";

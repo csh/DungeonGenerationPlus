@@ -42,7 +42,7 @@ namespace DunGenPlus.Collections {
     [Header("Archetypes on Normal Nodes")]
     [Tooltip("If enabled, adds archetypes to the normal nodes in the DungeonFlow.\n\nBy default, nodes cannot have branching paths since they don't have archetype references. This allows nodes to have branching paths.")]
     public bool AddArchetypesToNormalNodes = false;
-    public List<NodeArchetype> NormalNodeArchetypes;
+    public List<NodeArchetype> NormalNodeArchetypes = new List<NodeArchetype>();
     internal Dictionary<string, NodeArchetype> _normalNodeArchetypesDictioanry;
     internal NodeArchetype _defaultNodeArchetype;
 
@@ -54,9 +54,9 @@ namespace DunGenPlus.Collections {
     [Tooltip("If enabled, every archetype in LineRandomizerArchetypes will have the last LineRandomizerTakeCount tilesets replaced by a randomly selected set of tilesets from LineRandomizerTileSets. This applies for both archetype's TileSets and BranchCapTileSets.\n\nThis is designed for the scenario where dungeon generation takes a long time due to the combination of too many tiles and/or doorways in those tiles. This can reduce dungeon generation time while keeping some of the randomness of dungeon generation.\n\nAs stated previously, this WILL replace the last LineRandomizerTakeCount tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
     public bool UseLineRandomizer = false;
     [Tooltip("The archetypes whose tilesets will be replaced.\n\nThese archetypes should ideally used in the Lines section of DungeonFlow, but it's a free country.")]
-    public List<DungeonArchetype> LineRandomizerArchetypes;
+    public List<DungeonArchetype> LineRandomizerArchetypes = new List<DungeonArchetype>();
     [Tooltip("The tilesets that will be used for replacement.")]
-    public List<TileSet> LineRandomizerTileSets;
+    public List<TileSet> LineRandomizerTileSets = new List<TileSet>();
     [Tooltip("The amount of tilesets that will be replaced from the archetypes, starting from the last element to the first element.\n\nAs stated previously, this WILL replace the tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
     public int LineRandomizerTakeCount = 3;
 

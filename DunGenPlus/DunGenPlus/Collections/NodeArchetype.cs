@@ -13,7 +13,7 @@ namespace DunGenPlus.Collections {
     [Tooltip("The normal node with this label will gain a randomly chosen archetype.\n\nIf empty, this becomes the default choice for any normal node without a NodeArchetype specified in this list.")]
     public string label;
     [Tooltip("The list of archetypes. One will be randomly chosen.")]
-    public List<DungeonArchetype> archetypes;
+    public List<DungeonArchetype> archetypes = new List<DungeonArchetype>();
   }
 
 }
