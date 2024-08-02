@@ -20,10 +20,12 @@ namespace DunGenPlus {
     }
 
     static void AutoAddLethalBundle(AssetBundle assetBundle){
+      if (assetBundle.isStreamedSceneAssetBundle) return;
+
       var extenders = assetBundle.LoadAllAssets<DunGenExtender>();
       var content = assetBundle.LoadAllAssets<ExtendedContent>();
 
-      if (content.Length == 0) {
+      if (content.Length == 0 && extenders.Length > 0) {
         Plugin.logger.LogWarning($".lethalbundle does not contain any ExtendedContent. Unless you are manually creating and adding your ExtendedDungeonFlow with code, the DunGenExtender will probably not work.");
       }
 
