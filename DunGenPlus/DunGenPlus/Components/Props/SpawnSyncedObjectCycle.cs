@@ -10,8 +10,8 @@ namespace DunGenPlus.Components.Props
 {
   public class SpawnSyncedObjectCycle : MonoBehaviour, IDungeonCompleteReceiver {
 
-    public static int cycle;
-    public static Dictionary<int, int> cycleDictionary;
+    internal static int cycle;
+    internal static Dictionary<int, int> cycleDictionary;
 
     [Tooltip("The SpawnSyncedObject reference.\n\nWhen the dungeon generation finishes, the spawnPrefab of the referenced SpawnSyncedObject will change to one of the Props based on a cycle. The starting value is random.\n\nThis is designed for the scenario where you have multiple very similar networked gameobjects that serve the same purpose, and you just want them all to spawn equally for diversity sake.")]
     public SpawnSyncedObject Spawn;
@@ -24,13 +24,13 @@ namespace DunGenPlus.Components.Props
       Spawn = GetComponent<SpawnSyncedObject>();
     }
 
-    public static void UpdateCycle(int value){
+    internal static void UpdateCycle(int value){
       Plugin.logger.LogInfo($"Updating SpawnSyncedObject start cycle to {value}");
       cycle = value;
       cycleDictionary = new Dictionary<int, int>();
     }
 
-    public int GetCycle(int id){
+    internal int GetCycle(int id){
       if (!cycleDictionary.TryGetValue(id, out var value)){
         value = cycle;
         cycleDictionary.Add(id, value);

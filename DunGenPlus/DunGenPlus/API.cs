@@ -11,6 +11,16 @@ namespace DunGenPlus
 {
   public class API {
 
+    /// <summary>
+    /// Registers the <paramref name="dungeonFlow"/> to recieve the alternate dungeon generation changes defined by <paramref name="dunGenExtender"/>.
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <param name="dunGenExtender"></param>
+    /// 
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="dunGenExtender"/> was successfully added. 
+    /// <see langword="false"/> if <paramref name="dungeonFlow"/> was null or already has a registered <see cref="DunGenExtender"/>.
+    /// </returns>
     public static bool AddDunGenExtender(DungeonFlow dungeonFlow, DunGenExtender dunGenExtender) {
       if (dungeonFlow == null) {
         Plugin.logger.LogError("dungeonFlow was null");
@@ -28,6 +38,15 @@ namespace DunGenPlus
       return true;
     }
 
+    /// <summary>
+    /// Registers the <see cref="DunGenExtender.DungeonFlow"/> to recieve the alternate dungeon generation changes defined by <paramref name="dunGenExtender"/>.
+    /// </summary>
+    /// <param name="dunGenExtender"></param>
+    /// 
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="dunGenExtender"/> was successfully added. 
+    /// <see langword="false"/> if <see cref="DunGenExtender.DungeonFlow"/> was null or already has a registered <see cref="DunGenExtender"/>.
+    /// </returns>
     public static bool AddDunGenExtender(DunGenExtender dunGenExtender) {
       if (dunGenExtender == null) {
         Plugin.logger.LogError("dunGenExtender was null");
@@ -37,10 +56,23 @@ namespace DunGenPlus
       return AddDunGenExtender(dunGenExtender.DungeonFlow, dunGenExtender);
     }
 
+    /// <summary>
+    /// Checks if <paramref name="dungeonFlow"/> has a registered <see cref="DunGenExtender"/>. 
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="dungeonFlow"/> has a registered <see cref="DunGenExtender"/>. 
+    /// <see langword="false"/> otherwise.
+    /// </returns>
     public static bool ContainsDungeonFlow(DungeonFlow dungeonFlow) {
       return Plugin.DunGenExtenders.ContainsKey(dungeonFlow);
     }
 
+    /// <summary>
+    /// Creates and returns an empty <see cref="DunGenExtender"/>.
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <returns>An empty <see cref="DunGenExtender"/>.</returns>
     public static DunGenExtender CreateDunGenExtender(DungeonFlow dungeonFlow){
       var extender = ScriptableObject.CreateInstance<DunGenExtender>();
       extender.DungeonFlow = dungeonFlow;

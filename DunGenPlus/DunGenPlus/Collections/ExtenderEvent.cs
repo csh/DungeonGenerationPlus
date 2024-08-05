@@ -9,14 +9,26 @@ namespace DunGenPlus.Collections {
 
     internal event ParameterEvent onParameterEvent;
 
+    /// <summary>
+    /// Calls listeners.
+    /// </summary>
+    /// <param name="param"></param>
     public void Invoke(T param) {
       onParameterEvent?.Invoke(param);
     }
 
+    /// <summary>
+    /// Adds listener.
+    /// </summary>
+    /// <param name="listener"></param>
     public void AddListener(ParameterEvent listener) {
       onParameterEvent += listener;
     }
 
+    /// <summary>
+    /// Removes listener.
+    /// </summary>
+    /// <param name="listener"></param>
     public void RemoveListener(ParameterEvent listener) {
       onParameterEvent -= listener;
     }

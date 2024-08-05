@@ -13,7 +13,13 @@ namespace DunGenPlus.Collections {
   public class DunGenExtenderProperties {
 
     public enum CopyNodeBehaviour {
+      /// <summary>
+      /// Nodes will copy from the MainRoomTilePrefab's position in the main path
+      /// </summary>
       CopyFromMainPathPosition,
+      /// <summary>
+      /// Nodes will copy from the MainRoomTilePrefab's location from the node list + 1
+      /// </summary>
       CopyFromNodeList
     }
 
@@ -21,7 +27,7 @@ namespace DunGenPlus.Collections {
     [Tooltip("The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.")]
     [Range(1, 9)]
     public int MainPathCount = 1;
-    [Tooltip("The Tile Prefab where the additional main paths will start from. Cannot be null if MainPathCount is more than 1.\n\nHighly advice for this Tile Prefab to have multiple doorways.")]
+    [Tooltip("The Tile Prefab where the additional main paths will start from. Cannot be null if MainPathCount is more than 1.")]
     public GameObject MainRoomTilePrefab;
     [Tooltip("CopyFromMainPathPosition means that nodes will copy from the MainRoomTilePrefab's position in the main path.\n\nCopyFromNodeList means that nodes will copy from the MainRoomTilePrefab's location from the node list + 1.")]
     public CopyNodeBehaviour MainPathCopyNodeBehaviour = CopyNodeBehaviour.CopyFromMainPathPosition;
@@ -46,9 +52,11 @@ namespace DunGenPlus.Collections {
     internal Dictionary<string, NodeArchetype> _normalNodeArchetypesDictioanry;
     internal NodeArchetype _defaultNodeArchetype;
 
-    [Header("Doorway Sisters")]
-    [Tooltip("If enabled, the DoorwaySisters component will become active.\n\nThe component prevents an intersecting doorway from generating if it's 'sister' doorway already generated and both doorways would lead to the same neighboring tile.\n\nThis is designed for the scenario where, two neighboring doorways would lead to the same tile, one doorway is a locked door and the other is an open doorway. This would defeat the purpose of the locked door, and such as, this feature exists if needed.\n\nThis feature slows down dungeon generation slightly when enabled.")]
-    public bool UseDoorwaySisters = false;
+    [Header("Forced Tiles")]
+    [Tooltip("If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.\n\nCan only be used if MainPathCount > 1.")]
+    public bool UseForcedTiles;
+    [Tooltip("The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.")]
+    public List<ForcedTileSetList> ForcedTileSets = new List<ForcedTileSetList>();
 
     [Header("Line Randomizer")]
     [Tooltip("If enabled, every archetype in LineRandomizerArchetypes will have the last LineRandomizerTakeCount tilesets replaced by a randomly selected set of tilesets from LineRandomizerTileSets. This applies for both archetype's TileSets and BranchCapTileSets.\n\nThis is designed for the scenario where dungeon generation takes a long time due to the combination of too many tiles and/or doorways in those tiles. This can reduce dungeon generation time while keeping some of the randomness of dungeon generation.\n\nAs stated previously, this WILL replace the last LineRandomizerTakeCount tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
@@ -65,6 +73,12 @@ namespace DunGenPlus.Collections {
     public bool UseMaxShadowsRequestUpdate = false;
     [Tooltip("The amount of MaxShadowsRequest.\n\n4 is the game's default value. I find 8 to be more than acceptable.")]
     public int MaxShadowsRequestAmount = 8;
+
+    [Header("Miscellaneous")]
+    [Tooltip("If enabled, the DoorwaySisters component will become active.\n\nThe component prevents an intersecting doorway from generating if it's 'sister' doorway already generated and both doorways would lead to the same neighboring tile.\n\nThis is designed for the scenario where, two neighboring doorways would lead to the same tile, one doorway is a locked door and the other is an open doorway. This would defeat the purpose of the locked door, and such as, this feature exists if needed.\n\nThis feature slows down dungeon generation slightly when enabled.")]
+    public bool UseDoorwaySisters = false;
+    [Tooltip("If enabled, the RandomGuaranteedScrapSpawn component will be come active.\n\nThe component allows random scrap of a specified minimum value to always be spawned on a specific point.")]
+    public bool UseRandomGuaranteedScrapSpawn = false;
 
     internal void SetupProperties(DungeonGenerator generator){
       _normalNodeArchetypesDictioanry = new Dictionary<string, NodeArchetype>();
@@ -124,7 +138,8 @@ namespace DunGenPlus.Collections {
       copy.AddArchetypesToNormalNodes = AddArchetypesToNormalNodes;
       copy.NormalNodeArchetypes = NormalNodeArchetypes;
 
-      copy.UseDoorwaySisters = UseDoorwaySisters;
+      copy.UseForcedTiles = UseForcedTiles;
+      copy.ForcedTileSets = ForcedTileSets;
 
       copy.UseLineRandomizer = UseLineRandomizer;
       copy.LineRandomizerTileSets = LineRandomizerTileSets; 
@@ -133,6 +148,9 @@ namespace DunGenPlus.Collections {
 
       copy.UseMaxShadowsRequestUpdate = UseMaxShadowsRequestUpdate;
       copy.MaxShadowsRequestAmount = MaxShadowsRequestAmount;
+
+      copy.UseDoorwaySisters = UseDoorwaySisters;
+      copy.UseRandomGuaranteedScrapSpawn = UseRandomGuaranteedScrapSpawn;
 
       return copy;
     }

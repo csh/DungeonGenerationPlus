@@ -96,6 +96,7 @@
     <Compile Include="Assets.cs" />
     <Compile Include="Collections\DunGenExtenderEvents.cs" />
     <Compile Include="Collections\ExtenderEvent.cs" />
+    <Compile Include="Collections\ForcedTileSetList.cs" />
     <Compile Include="Collections\NodeArchetype.cs" />
     <Compile Include="Components\DoorwayCleanup.cs" />
     <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwayConnectedDoorway.cs" />

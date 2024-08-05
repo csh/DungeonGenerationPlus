@@ -281,7 +281,46 @@ namespace DunGenPlus.Generation {
       ActiveAlternative = true;
 
       gen.proxyDungeon.MainPathTiles = allMainPathTiles[0];
+
+      AddForcedTiles(gen);
 		}
+
+    public static void AddForcedTiles(DungeonGenerator gen){
+      var forcedTileSetLists = DunGenPlusGenerator.Properties.ForcedTileSets.ToList();
+      while(forcedTileSetLists.Count > 0){
+        var item = forcedTileSetLists[forcedTileSetLists.Count - 1];
+        
+        // we have to check ALL tiles
+        var allTiles = gen.proxyDungeon.AllTiles
+          .Select(t => {
+            var depthValue = item.DepthWeightScale.Evaluate(t.Placement.NormalizedDepth);
+            var weight = t.Placement.IsOnMainPath ? item.MainPathWeight : item.BranchPathWeight;
+            return (t, depthValue * weight * gen.RandomStream.NextDouble());
+          })
+          .Where(pair => pair.Item2 > 0f)
+          .OrderBy(pair => pair.Item2);
+
+        // try every tile, if we somehow fail than man that sucks
+        foreach(var pair in allTiles){
+          var t = pair.t;
+          var tileProxy = gen.AddTile(t, item.Tilesets, t.Placement.NormalizedDepth, null, TilePlacementResult.None);
+          if (tileProxy == null) continue;
+
+          tileProxy.Placement.BranchDepth = t.Placement.BranchDepth;
+					tileProxy.Placement.NormalizedBranchDepth = t.Placement.NormalizedDepth;
+          tileProxy.Placement.GraphNode = t.Placement.GraphNode;
+					tileProxy.Placement.GraphLine = t.Placement.GraphLine;
+
+          Plugin.logger.LogInfo($"Forcefully added tile {tileProxy.Prefab.name}");
+          break;
+        }
+
+        forcedTileSetLists.RemoveAt(forcedTileSetLists.Count - 1);
+      }
+
+      Plugin.logger.LogInfo($"Forcefully added all tiles");
+
+    }
 
     public static void RandomizeLineArchetypes(DungeonGenerator gen, bool randomizeMainPath){
       if (!Properties.UseLineRandomizer) return;  

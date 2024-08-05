@@ -27,9 +27,11 @@ namespace DunGenPlus.Patches {
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateBranchPaths")]
     public static void GenerateBranchPathsPatch(ref DungeonGenerator __instance, ref IEnumerator __result){
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
-        __result = DunGenPlusGenerator.GenerateAlternativeMainPaths(__instance);
+        __result = DunGenPlusGenerator.GenerateAlternativeMainPaths(__instance); 
       }
+
     }
+
 
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]
