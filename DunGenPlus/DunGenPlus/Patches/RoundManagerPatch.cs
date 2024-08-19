@@ -25,7 +25,7 @@ namespace DunGenPlus.Patches {
         foreach(var s in sources) {
           var result = s.CreateItem(__instance, __instance.currentLevel.spawnableScrap);
           if (result.itemReference != null) {
-            Plugin.logger.LogInfo($"Created guaranteed item {result.itemReference.gameObject.name} w/ value {result.scrapValue}");
+            Plugin.logger.LogDebug($"Created guaranteed item {result.itemReference.gameObject.name} w/ value {result.scrapValue}");
             spawnedScrapList.Add(result.itemReference);
             scrapValuesList.Add(result.scrapValue);
           }

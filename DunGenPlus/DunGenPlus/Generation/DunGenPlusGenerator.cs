@@ -43,11 +43,11 @@ namespace DunGenPlus.Generation {
         generator.RestrictDungeonToBounds = Properties.UseDungeonBounds;
         var bounds = Properties.GetDungeonBounds(generator.LengthMultiplier);
         generator.TilePlacementBounds = bounds;
-        Plugin.logger.LogInfo($"Dungeon Bounds: {bounds}");
+        Plugin.logger.LogDebug($"Dungeon Bounds: {bounds}");
       }
 
       if (Properties.UseMaxShadowsRequestUpdate) {
-        Plugin.logger.LogInfo($"Updating HDRP asset: setting max shadows request to {Properties.MaxShadowsRequestAmount}");
+        Plugin.logger.LogDebug($"Updating HDRP asset: setting max shadows request to {Properties.MaxShadowsRequestAmount}");
         try {
           previousHDRPAsset = QualitySettings.renderPipeline as HDRenderPipelineAsset;
           newHDRPAsset = ScriptableObject.Instantiate(previousHDRPAsset);
@@ -74,7 +74,7 @@ namespace DunGenPlus.Generation {
       ActiveAlternative = false;
 
       if (previousHDRPAsset && QualitySettings.renderPipeline == newHDRPAsset) {
-        Plugin.logger.LogInfo("Restoring original HDRP asset");
+        Plugin.logger.LogDebug("Restoring original HDRP asset");
 
         QualitySettings.renderPipeline = previousHDRPAsset;
         previousHDRPAsset = null;
@@ -229,13 +229,13 @@ namespace DunGenPlus.Generation {
           var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, archetype, TilePlacementResult.None);
           
           if (tileProxy == null) {
-            Plugin.logger.LogInfo($"Alt. main branch gen failed at {b}:{lineDepthRatio}");
+            Plugin.logger.LogDebug($"Alt. main branch gen failed at {b}:{lineDepthRatio}");
             yield return gen.Wait(gen.InnerGenerate(true));
 						yield break;
           }
 
           if (lineDepthRatio >= 1f){
-            Plugin.logger.LogInfo($"Alt. main branch at {b} ended with {tileProxy.PrefabTile.name}");
+            Plugin.logger.LogDebug($"Alt. main branch at {b} ended with {tileProxy.PrefabTile.name}");
           }
 
 					tileProxy.Placement.BranchDepth = t;
@@ -267,12 +267,12 @@ namespace DunGenPlus.Generation {
       }
 
       ActiveAlternative = false;
-      Plugin.logger.LogInfo($"Created {altCount} alt. paths, creating branches now");
+      Plugin.logger.LogDebug($"Created {altCount} alt. paths, creating branches now");
       gen.ChangeStatus(GenerationStatus.Branching);
 
       // this is major trickery and it works still
       for(var b = 0; b < altCount + 1; ++b){
-        Plugin.logger.LogInfo($"Branch {b}");
+        Plugin.logger.LogDebug($"Branch {b}");
         RandomizeLineArchetypes(gen, false);
         gen.proxyDungeon.MainPathTiles = allMainPathTiles[b];
         yield return gen.Wait(gen.GenerateBranchPaths());
@@ -286,7 +286,9 @@ namespace DunGenPlus.Generation {
 		}
 
     public static void AddForcedTiles(DungeonGenerator gen){
-      var forcedTileSetLists = DunGenPlusGenerator.Properties.ForcedTileSets.ToList();
+      if (!Properties.UseForcedTiles) return;
+
+      var forcedTileSetLists = Properties.ForcedTileSets.ToList();
       while(forcedTileSetLists.Count > 0){
         var item = forcedTileSetLists[forcedTileSetLists.Count - 1];
         
@@ -311,15 +313,133 @@ namespace DunGenPlus.Generation {
           tileProxy.Placement.GraphNode = t.Placement.GraphNode;
 					tileProxy.Placement.GraphLine = t.Placement.GraphLine;
 
-          Plugin.logger.LogInfo($"Forcefully added tile {tileProxy.Prefab.name}");
+          Plugin.logger.LogDebug($"Forcefully added tile {tileProxy.Prefab.name}");
           break;
         }
 
         forcedTileSetLists.RemoveAt(forcedTileSetLists.Count - 1);
       }
 
-      Plugin.logger.LogInfo($"Forcefully added all tiles");
+      Plugin.logger.LogDebug($"Forcefully added all tiles");
+    }
 
+    public static (TilePlacementResult result, TileProxy tile) ProcessDoorwayPairs(DungeonGenerator gen, DungeonArchetype archetype, Queue<DoorwayPair> doorwayPairs) {
+      if (Properties.UseBranchLoopBoost && gen.Status == GenerationStatus.Branching) {
+        return EncourageBranchPathLoopEncouragement(gen, doorwayPairs);
+      } 
+
+      while(doorwayPairs.Count > 0) {
+        var pair = doorwayPairs.Dequeue();
+        var result = gen.TryPlaceTile(pair, archetype, out var tileProxy);
+        if (result == TilePlacementResult.None) return (result, tileProxy);
+        gen.AddTilePlacementResult(result);
+      }
+
+      return (TilePlacementResult.NoValidTile, null);
+    }
+
+    public static (TilePlacementResult result, TileProxy tile) EncourageBranchPathLoopEncouragement(DungeonGenerator gen, Queue<DoorwayPair> doorwayPairs) {
+      // get list of 5 potential targets
+      var validTiles = new List<TilePlacementResultProxy>();
+      while(doorwayPairs.Count > 0) {
+        var pair = doorwayPairs.Dequeue();
+        var value = GetTileProxyOfDoorwayPair(gen, pair);
+        if (value.result == TilePlacementResult.None) {
+          validTiles.Add(value);
+          if (validTiles.Count >= Properties.BranchLoopBoostTileSearch) break;
+        }
+      }
+
+      if (validTiles.Count == 0) {
+        return (TilePlacementResult.NoValidTile, null);
+      }
+
+      // update their weight based on their potential doorway partners
+      var allDungeonDoorways = gen.proxyDungeon.AllTiles.SelectMany(t => t.Doorways);
+      //Plugin.logger.LogInfo("NEW TILES");
+      foreach(var t in validTiles) {
+        var doorwayCount = 0;
+        foreach(var d in allDungeonDoorways) {
+          foreach(var l in t.tile.doorways) {
+            if (d.TileProxy == t.previousDoorway.TileProxy) continue;
+            if (gen.DungeonFlow.CanDoorwaysConnect(d.TileProxy.PrefabTile, l.TileProxy.PrefabTile, d.DoorwayComponent, l.DoorwayComponent) && Vector3.SqrMagnitude(d.Position - l.Position) < 1E-05)
+              doorwayCount++;
+          }
+        }
+
+        if (doorwayCount > 0) {
+          //Plugin.logger.LogInfo($"{t.weight} -> {t.weight * (1f + doorwayCount * Properties.BranchLoopBoostTileScale)} ({doorwayCount})");
+          t.weight *= (1f + doorwayCount * Properties.BranchLoopBoostTileScale);
+        } else {
+          //Plugin.logger.LogInfo($"{t.weight}");
+        }
+      }
+
+      var bestChoice = validTiles.OrderByDescending(t => t.weight).FirstOrDefault();
+      //Plugin.logger.LogInfo($"Best: {bestChoice.weight}");
+
+      MakeTileProxyConnection(gen, bestChoice);
+      gen.AddTilePlacementResult(bestChoice.result);
+
+      return (bestChoice.result, bestChoice.tile);
+    }
+
+    private class TilePlacementResultProxy {
+      public TilePlacementResult result;
+      public TileProxy tile;
+      public DoorwayProxy previousDoorway;
+      public DoorwayProxy nextDoorway;
+      public float weight;
+
+      public TilePlacementResultProxy(TilePlacementResult result) {
+        this.result = result;
+        tile = null;
+        previousDoorway = null;
+        nextDoorway = null;
+        weight = 0f;
+      }
+
+      public TilePlacementResultProxy(TilePlacementResult result, TileProxy tile, DoorwayProxy previousDoorway, DoorwayProxy nextDoorway, float weight) {
+        this.result = result;
+        this.tile = tile;
+        this.previousDoorway = previousDoorway;
+        this.nextDoorway = nextDoorway;
+        this.weight = weight;
+      }
+
+    }
+
+    private static TilePlacementResultProxy GetTileProxyOfDoorwayPair(DungeonGenerator gen, DoorwayPair pair){
+      var nextTemplate = pair.NextTemplate;
+      var previousDoorway = pair.PreviousDoorway;
+      if (nextTemplate == null) return new TilePlacementResultProxy(TilePlacementResult.TemplateIsNull);
+
+      var index = pair.NextTemplate.Doorways.IndexOf(pair.NextDoorway);
+      var tile = new TileProxy(nextTemplate);
+      tile.Placement.isOnMainPath = false;
+      tile.Placement.TileSet = pair.NextTileSet;
+
+      if (previousDoorway != null) {
+        var myDoorway = tile.Doorways[index];
+        tile.PositionBySocket(myDoorway, previousDoorway);
+        var bounds = tile.Placement.Bounds;
+        if (gen.RestrictDungeonToBounds && !gen.TilePlacementBounds.Contains(bounds)) return new TilePlacementResultProxy(TilePlacementResult.OutOfBounds);
+        if (gen.IsCollidingWithAnyTile(tile, previousDoorway.TileProxy)) return new TilePlacementResultProxy(TilePlacementResult.TileIsColliding);
+      }
+
+      if (tile == null) return new TilePlacementResultProxy(TilePlacementResult.NewTileIsNull);
+
+      tile.Placement.PathDepth = pair.PreviousTile.Placement.PathDepth;
+      tile.Placement.BranchDepth = pair.PreviousTile.Placement.IsOnMainPath ? 0 : (pair.PreviousTile.Placement.BranchDepth + 1);
+
+      return new TilePlacementResultProxy(TilePlacementResult.None, tile, previousDoorway, tile.Doorways[index], pair.TileWeight);
+    }
+
+    private static void MakeTileProxyConnection(DungeonGenerator gen, TilePlacementResultProxy proxy) {
+      if (proxy.previousDoorway != null) {
+        gen.proxyDungeon.MakeConnection(proxy.previousDoorway, proxy.nextDoorway);
+      }
+      gen.proxyDungeon.AddTile(proxy.tile);
     }
 
     public static void RandomizeLineArchetypes(DungeonGenerator gen, bool randomizeMainPath){

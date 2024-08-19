@@ -22,7 +22,7 @@ namespace DunGenPlus.Generation {
     public static void UpdateCache(IEnumerable<DoorwayProxy> list){
       if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.UseDoorwaySisters) return;
 
-      Plugin.logger.LogInfo("Updating DoorwayProxy cache for DoorwaySistersRule");
+      Plugin.logger.LogDebug("Updating DoorwayProxy cache for DoorwaySistersRule");
       doorwayDictionary = new Dictionary<Doorway, Data>();
       doorwayProxyDictionary = new Dictionary<DoorwayProxy, Data>();
 
@@ -51,6 +51,8 @@ namespace DunGenPlus.Generation {
     }
 
     public static bool CanDoorwaysConnect(bool result, TileProxy tileA, TileProxy tileB, DoorwayProxy doorwayA, DoorwayProxy doorwayB){
+      //if (tileA.Prefab.name.ToLowerInvariant().Contains("mayor") || tileB.Prefab.name.ToLowerInvariant().Contains("mayor"))
+      //Plugin.logger.LogInfo($"{tileA.Prefab.name} <-> {tileB.Prefab.name}: {(doorwayA.Position - doorwayB.Position).sqrMagnitude}");
 
       if (!result) return false; 
       if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.UseDoorwaySisters) return true;

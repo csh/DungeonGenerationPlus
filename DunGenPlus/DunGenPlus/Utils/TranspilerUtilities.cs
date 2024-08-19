@@ -46,7 +46,7 @@ namespace DunGenPlus.Utils {
       if (counter == 0) {
         Plugin.logger.LogError($"{debugFunction} could not inject {name}. Probably scary");
       } else if (!expectedCounter.HasValue) {
-        Plugin.logger.LogInfo($"{debugFunction} inject {name} {counter} time(s)");
+        Plugin.logger.LogDebug($"{debugFunction} inject {name} {counter} time(s)");
       } else if (expectedCounter.Value != counter){
         Plugin.logger.LogWarning($"{debugFunction} inject {name} {counter} time(s) (Expected {expectedCounter.Value}). Probably not an error but be warned");
       }
@@ -54,22 +54,22 @@ namespace DunGenPlus.Utils {
 
   }
 
-  internal class InstructionSequence {
+  internal abstract class InstructionSequence {
+    protected List<Func<CodeInstruction, bool>> seq;
+    protected string name;
+    protected string extraErrorMessage;
+    protected int stage;
+    protected bool completed;
+    protected bool single;
 
-    public static ManualLogSource logger => Plugin.logger;
+    public InstructionSequence(string name, bool single = true, string extraErrorMessage = default(string)) {
+      seq = new List<Func<CodeInstruction, bool>>();
+      stage = 0;
+      completed = false;
 
-    List<Func<CodeInstruction, bool>> seq;
-    string name;
-    string extraErrorMessage;
-    int stage = 0;
-    bool completed = false;
-    bool single;
-
-    public InstructionSequence(string name, bool single = true, string extraErrorMessage = default(string)){
       this.name = name;
       this.single = single;
       this.extraErrorMessage = extraErrorMessage;
-      seq = new List<Func<CodeInstruction, bool>>();
     }
 
     public void Add(Func<CodeInstruction, bool> next){
@@ -88,6 +88,10 @@ namespace DunGenPlus.Utils {
       seq.Add((i) => i.opcode == opcode && (i.operand as LocalBuilder).LocalIndex == operand);
     }
 
+    public void AddAny(){
+      seq.Add(null);
+    }
+
     public void AddOperandTypeCheck(OpCode opcode, Type operandType){
       seq.Add((i) => {
         var fieldInfo = i.operand as FieldInfo;
@@ -97,7 +101,6 @@ namespace DunGenPlus.Utils {
         return false;
       });
     }
-
 
     public void AddBasicWithAlternateMethodName(OpCode opcode, object operand, string methodName){
       seq.Add((i) => {
@@ -115,17 +118,40 @@ namespace DunGenPlus.Utils {
       seq.Add((i) => i.opcode == opcode && extra.Invoke(i));
     }
 
-    public void AddQuickInjection(MethodInfo methodInfo){
-      
+    public void ReportComplete(){
+      if (completed == false){
+        var errorM = string.IsNullOrWhiteSpace(extraErrorMessage) ? "BIG PROBLEM!" : extraErrorMessage;
+        Plugin.logger.LogError($"HarmonyTranspiler for {name} has failed. {errorM}");
+      }
     }
 
-    public bool VerifyStage(CodeInstruction current){
+    protected enum AdvanceResult {
+      Failed,
+      Advanced,
+      Finished
+    }
+
+    protected AdvanceResult AdvanceStage(CodeInstruction current) {
       var s = seq[stage];
-      if (s.Invoke(current)) {
-        //Plugin.logger.LogInfo($"{name}({stage}): current.ToString()");
-        stage++;
+      var result = AdvanceResult.Failed;
+
+      // null is magic number to accept anything,
+      // increase the counter if the NEXT sequence succeeds
+      // but not reset the counter if it fails
+      if (s == null) {
+        s = seq[stage + 1];
+        if (s.Invoke(current)) {
+          stage += 2;
+        }
+        result = AdvanceResult.Advanced;
       } else {
-        stage = 0;
+        if (s.Invoke(current)) {
+          stage++;
+          result = AdvanceResult.Advanced;
+        } else {
+          stage = 0;
+          result = AdvanceResult.Failed;
+        }
       }
 
       if (stage >= seq.Count){
@@ -136,18 +162,66 @@ namespace DunGenPlus.Utils {
 
         stage = 0;
         completed = true;
-        return true;
+        result = AdvanceResult.Finished;
       }
 
-      return false;
+      return result;
     }
 
-    public void ReportComplete(){
-      if (completed == false){
-        var errorM = string.IsNullOrWhiteSpace(extraErrorMessage) ? "BIG PROBLEM!" : extraErrorMessage;
-        logger.LogError($"HarmonyTranspiler for {name} has failed. {errorM}");
+  }
+
+  internal class InstructionSequenceStandard : InstructionSequence {
+
+    public InstructionSequenceStandard(string name, bool single = true, string extraErrorMessage = default(string)) : base(name, single, extraErrorMessage) { }
+
+    public bool VerifyStage(CodeInstruction current){
+      return AdvanceStage(current) == AdvanceResult.Finished;
+    }
+  }
+
+  internal class InstructionSequenceHold : InstructionSequence {
+    
+    public enum HoldResult {
+      None,
+      Hold,
+      Release,
+      Finished
+    }
+
+    public List<CodeInstruction> Instructions;
+    List<Func<CodeInstruction, bool>> seq;
+    string name;
+    string extraErrorMessage;
+    int stage = 0;
+    bool completed = false;
+
+    public InstructionSequenceHold(string name, bool single = true, string extraErrorMessage = default(string)) : base(name, single, extraErrorMessage) {
+      Instructions = new List<CodeInstruction>();
+    }
+
+    public HoldResult VerifyStage(CodeInstruction current) {
+      var result = AdvanceStage(current);
+      if (result == AdvanceResult.Failed) {
+        if (Instructions.Count > 0) {
+          Instructions.Add(current);
+          return HoldResult.Release;
+        }
+        return HoldResult.None;
+      }
+      else if (result == AdvanceResult.Advanced) {
+        Instructions.Add(current);
+        return HoldResult.Hold;
+      }
+      else {
+        Instructions.Add(current);
+        return HoldResult.Finished;
       }
     }
+
+    public void ClearInstructions(){
+      Instructions.Clear();
+    }
+
 
   }
 

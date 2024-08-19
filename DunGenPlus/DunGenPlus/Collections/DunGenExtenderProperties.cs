@@ -41,7 +41,7 @@ namespace DunGenPlus.Collections {
     [Tooltip("The factor that's multiplied with the base size AND the dungeon's size. The resulting value is added to the base size of the bounds.\n\n0 means that the bound size is not influenced by the dungeon's size and is therefore a constant.")]
     public Vector3 DungeonSizeFactor = new Vector3(1f, 0f, 1f);
     [Tooltip("The base positional offset of the bounds.")]
-    public Vector3 DungeonPositionOffset;
+    public Vector3 DungeonPositionOffset = Vector3.zero;
     [Tooltip("The pivot of the bounds.")]
     public Vector3 DungeonPositionPivot = new Vector3(0.5f, 0f, 0.5f);
 
@@ -54,9 +54,17 @@ namespace DunGenPlus.Collections {
 
     [Header("Forced Tiles")]
     [Tooltip("If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.\n\nCan only be used if MainPathCount > 1.")]
-    public bool UseForcedTiles;
+    public bool UseForcedTiles = false;
     [Tooltip("The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.")]
     public List<ForcedTileSetList> ForcedTileSets = new List<ForcedTileSetList>();
+
+    [Header("Branch Loop Boost")]
+    [Tooltip("If enabled, dungeon generation will prioritize branch tiles that connect to already generated tiles.\n\nThis increases the chance of circular/looping paths. Slows dungeon generation times a bit at the end.")]
+    public bool UseBranchLoopBoost = false;
+    [Tooltip("The maximum amount of tiles the dungeon generation will consider before choosing the best tile.\nIncreasing this value gives the dungeon generation a higher chance of finding a good tile but impacts dungeon generation times. Decreasing this value gives the dungeon generation a lower chance of finding a good tile but also lessens the impact to dungeon generation times.")]
+    public int BranchLoopBoostTileSearch = 5;
+    [Tooltip("The tile weight scale added for each additional doorway connection if that tile was selected.")]
+    public float BranchLoopBoostTileScale = 0.25f;
 
     [Header("Line Randomizer")]
     [Tooltip("If enabled, every archetype in LineRandomizerArchetypes will have the last LineRandomizerTakeCount tilesets replaced by a randomly selected set of tilesets from LineRandomizerTileSets. This applies for both archetype's TileSets and BranchCapTileSets.\n\nThis is designed for the scenario where dungeon generation takes a long time due to the combination of too many tiles and/or doorways in those tiles. This can reduce dungeon generation time while keeping some of the randomness of dungeon generation.\n\nAs stated previously, this WILL replace the last LineRandomizerTakeCount tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
@@ -140,6 +148,10 @@ namespace DunGenPlus.Collections {
 
       copy.UseForcedTiles = UseForcedTiles;
       copy.ForcedTileSets = ForcedTileSets;
+
+      copy.UseBranchLoopBoost = UseBranchLoopBoost;
+      copy.BranchLoopBoostTileSearch = BranchLoopBoostTileSearch;
+      copy.BranchLoopBoostTileScale = BranchLoopBoostTileScale;
 
       copy.UseLineRandomizer = UseLineRandomizer;
       copy.LineRandomizerTileSets = LineRandomizerTileSets; 

@@ -33,7 +33,7 @@ namespace DunGenPlus.Managers {
           var dungeonGen = RoundManager.Instance.dungeonGenerator;
           var navmesh = dungeonGen.transform.parent.GetComponentInChildren<UnityNavMeshAdapter>();
           navmesh.Run(dungeonGen.Generator);
-          Plugin.logger.LogInfo("Rebuild nav mesh");
+          Plugin.logger.LogDebug("Rebuild nav mesh");
         } catch (Exception e){
           Plugin.logger.LogError("Failed to rebuild nav mesh");
           Plugin.logger.LogError(e.ToString());

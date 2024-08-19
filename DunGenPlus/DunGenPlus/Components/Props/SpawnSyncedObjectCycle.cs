@@ -25,7 +25,7 @@ namespace DunGenPlus.Components.Props
     }
 
     internal static void UpdateCycle(int value){
-      Plugin.logger.LogInfo($"Updating SpawnSyncedObject start cycle to {value}");
+      Plugin.logger.LogDebug($"Updating SpawnSyncedObject start cycle to {value}");
       cycle = value;
       cycleDictionary = new Dictionary<int, int>();
     }
@@ -37,7 +37,7 @@ namespace DunGenPlus.Components.Props
       }
 
       cycleDictionary[id] = value + 1;
-      Plugin.logger.LogInfo($"Cycle{id}: {value}");
+      Plugin.logger.LogDebug($"Cycle{id}: {value}");
       return value;
     }
 

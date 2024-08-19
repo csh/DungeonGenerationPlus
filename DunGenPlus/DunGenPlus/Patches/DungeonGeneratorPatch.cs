@@ -11,6 +11,7 @@ using System.Collections;
 using DunGenPlus.Utils;
 using DunGenPlus.Generation;
 using DunGenPlus.Managers;
+using DunGenPlus.Collections;
 
 namespace DunGenPlus.Patches {
   internal class DungeonGeneratorPatch {
@@ -39,7 +40,7 @@ namespace DunGenPlus.Patches {
       
       var addArchFunction = typeof(List<DungeonArchetype>).GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
 
-      var archSequence = new InstructionSequence("archetype node");
+      var archSequence = new InstructionSequenceStandard("archetype node");
       archSequence.AddOperandTypeCheck(OpCodes.Ldfld, typeof(List<DungeonArchetype>));
       archSequence.AddBasic(OpCodes.Ldnull);
       archSequence.AddBasic(OpCodes.Callvirt, addArchFunction);
@@ -66,11 +67,78 @@ namespace DunGenPlus.Patches {
       archSequence.ReportComplete();
     }
 
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(DungeonGenerator), "AddTile")]
+    public static IEnumerable<CodeInstruction> AddTilePatch(IEnumerable<CodeInstruction> instructions, ILGenerator generator) {
+
+      var getCountFunction = typeof(Queue<DoorwayPair>).GetMethod("get_Count", BindingFlags.Instance | BindingFlags.Public);
+
+      var whileLoopSequence = new InstructionSequenceHold("while loop");
+      whileLoopSequence.AddBasic(OpCodes.Br);
+      whileLoopSequence.AddBasicLocal(OpCodes.Ldloc_S, 8);
+      whileLoopSequence.AddAny();
+      whileLoopSequence.AddBasic(OpCodes.Ldc_I4_0);
+      whileLoopSequence.AddBasic(OpCodes.Bgt);
+
+      foreach(var instruction in instructions){
+        var yieldInstruction = true;
+        var result = whileLoopSequence.VerifyStage(instruction);
+
+        switch(result) {
+          case InstructionSequenceHold.HoldResult.None:
+            break;
+          case InstructionSequenceHold.HoldResult.Hold:
+            yieldInstruction = false;
+            break;
+          case InstructionSequenceHold.HoldResult.Release:
+            foreach(var i in whileLoopSequence.Instructions){
+              yield return i;
+            }
+            whileLoopSequence.ClearInstructions();
+            yieldInstruction = false;
+            break;
+          case InstructionSequenceHold.HoldResult.Finished:
+            
+            // my special function
+            var specialFunction = typeof(DunGenPlusGenerator).GetMethod("ProcessDoorwayPairs");
+            var resultLocal = generator.DeclareLocal(typeof((TilePlacementResult result, TileProxy tile)));
+
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_S, 4);
+            yield return new CodeInstruction(OpCodes.Ldloc_S, 8);
+            yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+            var item1Field = typeof((TilePlacementResult result, TileProxy tile)).GetField("Item1");
+            var item2Field = typeof((TilePlacementResult result, TileProxy tile)).GetField("Item2");
+
+            yield return new CodeInstruction(OpCodes.Stloc_S, resultLocal);
+            
+            yield return new CodeInstruction(OpCodes.Ldloc_S, resultLocal);
+            yield return new CodeInstruction(OpCodes.Ldfld, item1Field);
+            yield return new CodeInstruction(OpCodes.Stloc_S, 9);
+
+            yield return new CodeInstruction(OpCodes.Ldloc_S, resultLocal);
+            yield return new CodeInstruction(OpCodes.Ldfld, item2Field);
+            yield return new CodeInstruction(OpCodes.Stloc_S, 10);
+
+            whileLoopSequence.ClearInstructions();
+            yieldInstruction = false;
+
+            break;
+        }
+
+        if (yieldInstruction) yield return instruction;
+      }
+
+      whileLoopSequence.ReportComplete();
+
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RoundManager), "FinishGeneratingLevel")]
     public static void GenerateBranchPathsPatch(){
       if (DunGenPlusGenerator.Active) {
-        Plugin.logger.LogInfo("Alt. InnerGenerate() function complete");
+        Plugin.logger.LogDebug("Alt. InnerGenerate() function complete");
       }
     }
 

@@ -26,7 +26,7 @@ namespace DunGenPlus.Patches {
     public static IEnumerable<CodeInstruction> ConnectOverlappingDoorwaysPatch(IEnumerable<CodeInstruction> instructions){
       var callFunction = typeof(DunGen.Graph.DungeonFlow).GetMethod("CanDoorwaysConnect", BindingFlags.Instance | BindingFlags.Public);
 
-      var sequence = new InstructionSequence("doorway connect", false);
+      var sequence = new InstructionSequenceStandard("doorway connect", false);
       sequence.AddBasic(OpCodes.Callvirt, callFunction);
       sequence.AddBasic(OpCodes.Brfalse);
 
