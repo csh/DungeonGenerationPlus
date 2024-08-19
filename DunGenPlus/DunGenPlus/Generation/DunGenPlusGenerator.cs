@@ -324,7 +324,7 @@ namespace DunGenPlus.Generation {
     }
 
     public static (TilePlacementResult result, TileProxy tile) ProcessDoorwayPairs(DungeonGenerator gen, DungeonArchetype archetype, Queue<DoorwayPair> doorwayPairs) {
-      if (Properties.UseBranchLoopBoost && gen.Status == GenerationStatus.Branching) {
+      if (Properties != null && Properties.UseBranchLoopBoost && gen.Status == GenerationStatus.Branching) {
         return EncourageBranchPathLoopEncouragement(gen, doorwayPairs);
       } 
 
