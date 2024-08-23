@@ -1,5 +1,6 @@
 ﻿using DunGen;
 using DunGenPlus.Components.Scrap;
+using DunGenPlus.DevTools;
 using DunGenPlus.Generation;
 using HarmonyLib;
 using System;
@@ -9,9 +10,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace DunGenPlus.Patches {
   public class RoundManagerPatch {
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RoundManager), "Awake")]
+    public static void AwakePatch(){
+      var devDebug = new GameObject("DevDebugOpen", typeof(DevDebugOpen));
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(RoundManager), "waitForScrapToSpawnToSync")]

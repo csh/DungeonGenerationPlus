@@ -20,6 +20,7 @@ namespace DunGenPlus {
 
     [Header("DEV ONLY: DON'T TOUCH")]
     public string Version = "0";
+    internal bool Active = true;
 
   }
 }

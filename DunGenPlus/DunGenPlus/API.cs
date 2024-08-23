@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using DunGen;
 using DunGen.Graph;
+using DunGenPlus.Generation;
+using LethalLevelLoader;
 using UnityEngine;
 
 namespace DunGenPlus
@@ -66,6 +69,31 @@ namespace DunGenPlus
     /// </returns>
     public static bool ContainsDungeonFlow(DungeonFlow dungeonFlow) {
       return Plugin.DunGenExtenders.ContainsKey(dungeonFlow);
+    }
+
+    /// <summary>
+    /// Checks if <paramref name="extendedDungeonFlow"/> has a registered <see cref="DunGenExtender"/>. 
+    /// </summary>
+    /// <param name="extendedDungeonFlow"></param>
+    /// <returns>
+    /// <see langword="true"/> if <paramref name="extendedDungeonFlow"/> has a registered <see cref="DunGenExtender"/>. 
+    /// <see langword="false"/> otherwise.
+    /// </returns>
+    public static bool ContainsDungeonFlow(ExtendedDungeonFlow extendedDungeonFlow) {
+      if (extendedDungeonFlow == null) return false;
+      return ContainsDungeonFlow(extendedDungeonFlow.DungeonFlow);
+    }
+
+    /// <summary>
+    /// Returns corresponding <see cref="DunGenExtender"/> for <paramref name="dungeonFlow"/>.
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <returns></returns>
+    public static DunGenExtender GetDunGenExtender(DungeonFlow dungeonFlow) {
+      if (Plugin.DunGenExtenders.TryGetValue(dungeonFlow, out var value)) {
+        return value;
+      }
+      return null;
     }
 
     /// <summary>

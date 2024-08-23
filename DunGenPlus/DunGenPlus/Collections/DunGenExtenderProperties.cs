@@ -125,45 +125,46 @@ namespace DunGenPlus.Collections {
 
     internal Bounds GetDungeonBounds(float dungeonScale) {
       var size = DungeonSizeBase + Vector3.Scale(DungeonSizeBase * (dungeonScale - 1), DungeonSizeFactor);
-      var offset = DungeonPositionOffset + Vector3.Scale(size, DungeonPositionPivot);
+      var offset = DungeonPositionOffset + Vector3.Scale(size, DungeonPositionPivot - Vector3.one * 0.5f);
       return new Bounds(offset, size);
+    }
+
+    internal void CopyFrom(DunGenExtenderProperties props) {
+      MainPathCount = props.MainPathCount;
+      MainRoomTilePrefab = props.MainRoomTilePrefab;
+      MainPathCopyNodeBehaviour = props.MainPathCopyNodeBehaviour;
+
+      UseDungeonBounds = props.UseDungeonBounds;
+      DungeonSizeBase = props.DungeonSizeBase;
+      DungeonSizeFactor = props.DungeonSizeFactor;
+      DungeonPositionOffset = props.DungeonPositionOffset;
+      DungeonPositionPivot = props.DungeonPositionPivot;
+
+      AddArchetypesToNormalNodes = props.AddArchetypesToNormalNodes;
+      NormalNodeArchetypes = props.NormalNodeArchetypes;
+
+      UseForcedTiles = props.UseForcedTiles;
+      ForcedTileSets = props.ForcedTileSets;
+
+      UseBranchLoopBoost = props.UseBranchLoopBoost;
+      BranchLoopBoostTileSearch = props.BranchLoopBoostTileSearch;
+      BranchLoopBoostTileScale = props.BranchLoopBoostTileScale;
+
+      UseLineRandomizer = props.UseLineRandomizer;
+      LineRandomizerTileSets = props.LineRandomizerTileSets;
+      LineRandomizerArchetypes = props.LineRandomizerArchetypes;
+      LineRandomizerTakeCount = props.LineRandomizerTakeCount;
+
+      UseMaxShadowsRequestUpdate = props.UseMaxShadowsRequestUpdate;
+      MaxShadowsRequestAmount = props.MaxShadowsRequestAmount;
+
+      UseDoorwaySisters = props.UseDoorwaySisters;
+      UseRandomGuaranteedScrapSpawn = props.UseRandomGuaranteedScrapSpawn;
     }
 
     internal DunGenExtenderProperties Copy() {
       var copy = new DunGenExtenderProperties();
-
-      copy.MainPathCount = MainPathCount;
-      copy.MainRoomTilePrefab = MainRoomTilePrefab;
-      copy.MainPathCopyNodeBehaviour = MainPathCopyNodeBehaviour;
-      //copy.MainPathCopyInjectionTiles = MainPathCopyInjectionTiles;
-
-      copy.UseDungeonBounds = UseDungeonBounds;
-      copy.DungeonSizeBase = DungeonSizeBase;
-      copy.DungeonSizeFactor = DungeonSizeFactor;
-      copy.DungeonPositionOffset = DungeonPositionOffset;
-      copy.DungeonPositionPivot = DungeonPositionPivot;
-
-      copy.AddArchetypesToNormalNodes = AddArchetypesToNormalNodes;
-      copy.NormalNodeArchetypes = NormalNodeArchetypes;
-
-      copy.UseForcedTiles = UseForcedTiles;
-      copy.ForcedTileSets = ForcedTileSets;
-
-      copy.UseBranchLoopBoost = UseBranchLoopBoost;
-      copy.BranchLoopBoostTileSearch = BranchLoopBoostTileSearch;
-      copy.BranchLoopBoostTileScale = BranchLoopBoostTileScale;
-
-      copy.UseLineRandomizer = UseLineRandomizer;
-      copy.LineRandomizerTileSets = LineRandomizerTileSets; 
-      copy.LineRandomizerArchetypes = LineRandomizerArchetypes;
-      copy.LineRandomizerTakeCount = LineRandomizerTakeCount;
-
-      copy.UseMaxShadowsRequestUpdate = UseMaxShadowsRequestUpdate;
-      copy.MaxShadowsRequestAmount = MaxShadowsRequestAmount;
-
-      copy.UseDoorwaySisters = UseDoorwaySisters;
-      copy.UseRandomGuaranteedScrapSpawn = UseRandomGuaranteedScrapSpawn;
-
+      copy.CopyFrom(this);
       return copy;
     }
 

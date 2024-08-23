@@ -46,8 +46,8 @@
     <Reference Include="BepInEx.Harmony">
       <HintPath>..\..\..\Libraries\BepInEx.Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="LethalLevelLoader">
-      <HintPath>..\..\..\Libraries\LethalLevelLoader.dll</HintPath>
+    <Reference Include="LethalLevelLoader-publicized">
+      <HintPath>..\..\..\Libraries\LethalLevelLoader-publicized.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,6 +59,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.Collections">
       <HintPath>..\..\..\Libraries\Unity.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.InputSystem, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.InputSystem.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Netcode.Components, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -80,6 +84,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\Libraries\UnityEngine.dll</HintPath>
     </Reference>
@@ -90,6 +98,33 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\Libraries\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>..\..\..\Libraries\UnityEngine.UIElementsNativeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API.cs" />
@@ -98,6 +133,7 @@
     <Compile Include="Collections\ExtenderEvent.cs" />
     <Compile Include="Collections\ForcedTileSetList.cs" />
     <Compile Include="Collections\NodeArchetype.cs" />
+    <Compile Include="Collections\NullObject.cs" />
     <Compile Include="Components\DoorwayCleanup.cs" />
     <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwayConnectedDoorway.cs" />
     <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwaySpawnedPrefab.cs" />
@@ -109,6 +145,24 @@
     <Compile Include="Components\MainRoomDoorwayGroups.cs" />
     <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
     <Compile Include="Components\Scrap\RandomGuaranteedScrapSpawn.cs" />
+    <Compile Include="DevTools\DevDebugManager.cs" />
+    <Compile Include="DevTools\DevDebugManagerUI.cs" />
+    <Compile Include="DevTools\DevDebugOpen.cs" />
+    <Compile Include="DevTools\Panels\BasePanel.cs" />
+    <Compile Include="DevTools\Panels\DunGenPlusPanel.cs" />
+    <Compile Include="DevTools\Panels\MainPanel.cs" />
+    <Compile Include="DevTools\PanelTab.cs" />
+    <Compile Include="DevTools\UIElements\BaseInputField.cs" />
+    <Compile Include="DevTools\UIElements\BaseUIElement.cs" />
+    <Compile Include="DevTools\UIElements\BoolInputField.cs" />
+    <Compile Include="DevTools\UIElements\DropdownInputField.cs" />
+    <Compile Include="DevTools\UIElements\FloatInputField.cs" />
+    <Compile Include="DevTools\UIElements\IntInputField.cs" />
+    <Compile Include="DevTools\UIElements\IntSliderField.cs" />
+    <Compile Include="DevTools\UIElements\ListUIElement.cs" />
+    <Compile Include="DevTools\UIElements\StringInputField.cs" />
+    <Compile Include="DevTools\UIElements\TextUIElement.cs" />
+    <Compile Include="DevTools\UIElements\Vector3InputField.cs" />
     <Compile Include="DunGenExtender.cs" />
     <Compile Include="Collections\DunGenExtenderProperties.cs" />
     <Compile Include="Generation\DunGenPlusGenerator.cs" />
@@ -116,6 +170,7 @@
     <Compile Include="Patches\DoorwayConnectionPatch.cs" />
     <Compile Include="Generation\DoorwaySistersRule.cs" />
     <Compile Include="Patches\DungeonGeneratorPatch.cs" />
+    <Compile Include="Patches\LethalLevelLoaderPatches.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Plugin.cs" />
@@ -124,8 +179,17 @@
     <Compile Include="Utils\Utility.cs" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <None Remove="dungen" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="dungen" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "C:\Users\Jose Garcia\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\SDM Debug\BepInEx\plugins\Alice-DungeonGenerationPlus\$(TargetName).dll"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>copy "D:\Previous Computer\Desktop\LethalCompany Modding\Unity Template\Assets\AssetBundles\dungen" "$(ProjectDir)\dungen"</PreBuildEvent>
   </PropertyGroup>
 </Project>

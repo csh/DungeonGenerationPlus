@@ -1,0 +1,201 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using DunGen;
+using UnityEngine.UI;
+using TMPro;
+using DunGen.Graph;
+using LethalLevelLoader;
+using UnityEngine.InputSystem;
+using DunGenPlus.DevTools.Panels;
+using DunGenPlus.DevTools.UIElements;
+
+namespace DunGenPlus.DevTools {
+  internal partial class DevDebugManager : MonoBehaviour {
+    public static DevDebugManager Instance { get; private set; }
+
+    [Header("References")]
+    public RuntimeDungeon dungeon;
+    public GameObject devCamera;
+    public BasePanel[] panels;
+
+    public TMP_Dropdown dungeonFlowSelectionDropDown;
+    private ExtendedDungeonFlow[] dungeonFlows;
+    internal ExtendedDungeonFlow selectedDungeonFlow;
+
+    public TextMeshProUGUI statusTextMesh;
+    public TextMeshProUGUI statsTextMesh;
+
+    // fake
+    private GameObject disabledGameObject;
+    private RoundManager fakeRoundManager;
+
+    // cache
+    private Camera lastMainCamera;
+    private Vector3 lastCameraPosition;
+    private Quaternion lastCameraRotation;
+
+    void Awake(){
+      Instance = this;
+
+      Cursor.lockState = CursorLockMode.None;
+      Cursor.visible = true;
+
+      CacheMainCamera();
+      BeginDevCamera();
+      GetAllDungeonFlows();
+      
+      foreach(var p in panels) p.AwakeCall();
+      OpenPanel(0);
+
+      dungeon.Generator.OnGenerationStatusChanged += OnDungeonFinished;
+
+      disabledGameObject =  new GameObject("Disabled GOBJ");
+      disabledGameObject.SetActive(false);
+      disabledGameObject.transform.SetParent(transform);
+    }
+
+    void OnDestroy(){
+      Instance = null;
+
+      EndDevCamera();
+    }
+
+    void Update(){
+      statusTextMesh.text = dungeon.Generator.Status.ToString();
+
+      if (!DevDebugOpen.IsSinglePlayerInShip()) {
+        CloseDevDebug();
+      }
+
+      if (Mouse.current.middleButton.isPressed) {
+        var delta = Mouse.current.delta.value;
+        var movement = delta;
+        devCamera.transform.position += new Vector3(-movement.x, 0f, -movement.y);
+      }
+    }
+
+    public void OpenPanel(int index) {
+      for(var i = 0; i < panels.Length; ++i) {
+        panels[i].SetPanelVisibility(i == index);
+      }
+    }
+
+    public void SelectDungeonFlow(int index){
+      selectedDungeonFlow = dungeonFlows[index];
+      dungeon.Generator.DungeonFlow = selectedDungeonFlow.DungeonFlow;
+      UpdatePlusPanel();
+      Plugin.logger.LogInfo($"Selecting {selectedDungeonFlow.DungeonName}");
+    }
+
+    public void GenerateDungeon(){
+      DeleteDungeon();
+      Plugin.logger.LogInfo($"Generating dungeon: {dungeon.Generator.IsGenerating}");
+
+      fakeRoundManager = disabledGameObject.AddComponent<RoundManager>();
+      fakeRoundManager.dungeonGenerator = dungeon;
+
+      selectedDungeonFlow.DungeonEvents.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
+      DungeonManager.GlobalDungeonEvents?.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
+      
+      dungeon.Generate();
+    }
+
+    public void DeleteDungeon(){
+      Plugin.logger.LogInfo($"Deleting dungeon");
+      dungeon.Generator.Clear(true);
+      dungeon.Generator.Cancel();
+
+      dungeon.Generator.RestrictDungeonToBounds = false;
+
+      if (fakeRoundManager) Destroy(fakeRoundManager);
+
+      ClearTransformChildren(dungeon.Root.transform);
+    }
+
+    public void ClearTransformChildren(Transform root){
+      var childCount = root.childCount;
+      for(var i = childCount - 1; i >= 0; --i) {
+        GameObject.Destroy(root.GetChild(i).gameObject);
+      }
+    }
+
+    public void CloseDevDebug(){
+      DeleteDungeon();
+      Destroy(gameObject);
+    }
+
+    public void OnDungeonFinished(DungeonGenerator generator, GenerationStatus status) {
+      var textList = new List<string>();
+      if (status == GenerationStatus.Complete) {
+        textList.Add($"Tiles: {generator.CurrentDungeon.AllTiles.Count}");
+        textList.Add($"Main Tiles: {generator.CurrentDungeon.MainPathTiles.Count}");
+        textList.Add($"Branch Tiles: {generator.CurrentDungeon.BranchPathTiles.Count}");
+        textList.Add($"Doors: {generator.CurrentDungeon.Doors.Count}");
+      } else if (status == GenerationStatus.Failed) {
+        textList.Add("<color=red>Failed</color>");
+      }
+
+      textList.Add("<u>DunGen</u>");
+      textList.Add(generator.GenerationStats.ToString());
+
+      SetNewSeed();
+      statsTextMesh.text = string.Join("\n", textList);
+    }
+
+    private void SetNewSeed(){
+      foreach(var p in panels) {
+        var mainPanel = p as MainPanel;
+        if (mainPanel) mainPanel.seedInputField.Set(dungeon.Generator.ChosenSeed);
+      }
+    }
+
+    private void UpdatePlusPanel() {
+      foreach(var p in panels) {
+        var plusPanel = p as DunGenPlusPanel;
+        if (plusPanel) plusPanel.UpdatePanel();
+      }
+    }
+
+    public void UpdateDungeonBounds(){
+      foreach(var p in panels) {
+        var plusPanel = p as DunGenPlusPanel;
+        if (plusPanel) plusPanel.UpdateDungeonBoundsHelper();
+      }
+    }
+
+    private void GetAllDungeonFlows(){
+      dungeonFlows = LethalLevelLoader.PatchedContent.ExtendedDungeonFlows.ToArray();
+      dungeonFlowSelectionDropDown.options = dungeonFlows.Select(d => new TMP_Dropdown.OptionData(d.DungeonName)).ToList();
+      SelectDungeonFlow(0);
+    }
+
+    private void CacheMainCamera() {
+	    var main = Camera.main;
+      if (main) {
+        lastMainCamera = main;
+        lastCameraPosition = main.transform.position;
+        lastCameraRotation = main.transform.rotation;
+      }
+    }
+
+    private void BeginDevCamera(){
+      lastMainCamera?.gameObject.SetActive(false);
+      devCamera.SetActive(true);
+    }
+
+    private void EndDevCamera(){
+      devCamera.SetActive(false);
+      if (lastMainCamera) {
+        lastMainCamera.transform.position = lastCameraPosition;
+        lastMainCamera.transform.rotation = lastCameraRotation;
+        lastMainCamera.gameObject.SetActive(true);
+      }
+    }
+
+
+  }
+}

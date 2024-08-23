@@ -19,6 +19,7 @@ using UnityEngine.Assertions;
 namespace DunGenPlus {
 
   [BepInPlugin(modGUID, modName, modVersion)]
+  [BepInDependency("imabatby.lethallevelloader", "1.2.0.3")]
   [BepInProcess("Lethal Company.exe")]
   public class Plugin : BaseUnityPlugin {
 
@@ -44,9 +45,17 @@ namespace DunGenPlus {
       Harmony.PatchAll(typeof(DoorwayConnectionPatch));
       Harmony.PatchAll(typeof(RoundManagerPatch));
 
+      try {
+        Harmony.PatchAll(typeof(LethalLevelLoaderPatches));
+      } catch (Exception e) {
+        Plugin.logger.LogError("Failed to patch LLL for dev debug. You can ignore this.");
+        Plugin.logger.LogError(e);
+      }
+
       //Harmony.PatchAll(typeof(StartOfRoundPatch));
 
       Assets.LoadAssets();
+      Assets.LoadAssetBundle();
       DungeonManager.GlobalDungeonEvents.onBeforeDungeonGenerate.AddListener(OnDunGenExtenderLoad);
       DoorwayManager.onMainEntranceTeleportSpawnedEvent.AddEvent("DoorwayCleanup", DoorwayManager.onMainEntranceTeleportSpawnedFunction);
     }
@@ -56,9 +65,10 @@ namespace DunGenPlus {
 
       var generator = roundManager.dungeonGenerator.Generator;
       var flow = generator.DungeonFlow;
-      if (DunGenExtenders.TryGetValue(flow, out var value)) {
+      var extender = API.GetDunGenExtender(flow);
+      if (extender && extender.Active) {
         Plugin.logger.LogInfo($"Loading DunGenExtender for {flow.name}");
-        DunGenPlusGenerator.Activate(generator, value);
+        DunGenPlusGenerator.Activate(generator, extender);
         return;
       }
 
