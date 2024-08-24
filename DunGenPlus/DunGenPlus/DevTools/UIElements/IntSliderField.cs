@@ -26,6 +26,7 @@ namespace DunGenPlus.DevTools.UIElements {
     private void SetValue(Action<int> setAction, float value) {
       Plugin.logger.LogInfo($"Setting {title} to {value}");
       setAction.Invoke((int)value);
+      textMesh.text = value.ToString();
     }
 
     public override void Set(int value){

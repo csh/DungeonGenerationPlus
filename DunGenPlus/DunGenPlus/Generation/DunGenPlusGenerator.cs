@@ -16,6 +16,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using BepInEx.Logging;
 using static UnityEngine.Rendering.HighDefinition.ScalableSettingLevelParameter;
+using DunGenPlus.DevTools;
 
 [assembly: SecurityPermission( SecurityAction.RequestMinimum, SkipVerification = true )]
 namespace DunGenPlus.Generation {
@@ -34,7 +35,8 @@ namespace DunGenPlus.Generation {
       ActiveAlternative = true;
 
       var props = extender.Properties.Copy();
-      Instance.Events.OnModifyDunGenExtenderProperties.Invoke(props);
+      var callback = new EventCallbackScenario(DevDebugManager.Instance);
+      Instance.Events.OnModifyDunGenExtenderProperties.Invoke(props, callback);
       props.SetupProperties(generator);
       Properties = props;
 

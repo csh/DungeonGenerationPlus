@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DunGenPlus.DevTools.UIElements;
 using DunGenPlus.DevTools.UIElements.Collections;
-using System.Collections.ObjectModel;
+using DunGenPlus.DevTools.Panels.Collections;
 
 namespace DunGenPlus.DevTools.Panels {
   internal class DunGenPlusPanel : BasePanel {
@@ -26,87 +26,17 @@ namespace DunGenPlus.DevTools.Panels {
     [Header("Panel References")]
     public GameObject createGameObject;
     public GameObject selectedGameObject;
+    public GameObject selectedListGameObject;
 
     [Header("Dungeon Bounds Helper")]
     public GameObject dungeonBoundsHelperGameObject;
 
-    [Header("Selected Panel References")]
-    public Toggle activateDunGenPlusToggle;
-    
     private GameObject mainPathParentGameobject;
     private GameObject dungeonBoundsParentGameobject;
     private GameObject archetypesNodesParentGameobject;
-
-    public class DungeonFlowCacheAssets {
-      public DunGenExtenderProperties originalProperties;
-
-      // Albino said that readonly is safer
-      public struct Collection<T> {
-        public ReadOnlyCollection<T> list;
-        public ReadOnlyDictionary<T, int> dictionary;
-        public ReadOnlyCollection<string> options;
-
-        public Collection(List<T> list) {
-          this.list = new ReadOnlyCollection<T>(list);
-
-          var tempDictionary = new Dictionary<T, int>();  
-          for(var i = 0;  i < list.Count; i++) {
-            tempDictionary.Add(list[i], i);
-          }
-          dictionary = new ReadOnlyDictionary<T, int>(tempDictionary);
-
-          options = new ReadOnlyCollection<string>(list.Select(l => l.ToString()).ToList());
-        }
-      }
-
-      public readonly Collection<NullObject<TileSet>> tileSets;
-      public readonly Collection<NullObject<GameObject>> tiles;
-      public readonly Collection<NullObject<DungeonArchetype>> archetypes;
-
-      public DungeonFlowCacheAssets(DunGenExtender extender){
-        originalProperties = extender.Properties.Copy();
-        
-        var tileSetsHashSet = new HashSet<NullObject<TileSet>>() { new NullObject<TileSet>(null) };
-        var tilesHashSet = new HashSet<NullObject<GameObject>>() { new NullObject<GameObject>(null) };
-        var archetypesHashSet = new HashSet<NullObject<DungeonArchetype>>() { new NullObject<DungeonArchetype>(null) };
-
-        foreach(var t in extender.DungeonFlow.Nodes) {
-          var label = t.Label.ToLowerInvariant();
-          if (label == "lchc gate" || label == "goal"){
-            foreach(var n in t.TileSets.SelectMany(x => x.TileWeights.Weights)) {
-              n.Value.GetComponent<Tile>().RepeatMode = TileRepeatMode.Allow;
-            }
-          }
-
-        }
-
-        foreach(var t in extender.DungeonFlow.Nodes.SelectMany(n => n.TileSets)) {
-          tileSetsHashSet.Add(t);
-          foreach(var x in t.TileWeights.Weights) {
-            tilesHashSet.Add(x.Value);
-          }
-        }
-        foreach(var a in extender.DungeonFlow.Lines.SelectMany(l => l.DungeonArchetypes)) {
-          archetypesHashSet.Add(a);
-          foreach(var t in a.TileSets) {
-            tileSetsHashSet.Add(t);
-            foreach(var x in t.TileWeights.Weights) {
-              tilesHashSet.Add(x.Value);
-            }
-          }
-        }
-
-        foreach(var n in extender.Properties.NormalNodeArchetypes) {
-          foreach(var a in n.archetypes){
-            archetypesHashSet.Add(a);
-          }
-        }
-
-        tileSets = new Collection<NullObject<TileSet>>(tileSetsHashSet.ToList());
-        tiles = new Collection<NullObject<GameObject>>(tilesHashSet.ToList());
-        archetypes = new Collection<NullObject<DungeonArchetype>>(archetypesHashSet.ToList());
-      }
-    }
+    private GameObject forcedTilesParentGameobject;
+    private GameObject branchLoopBoostParentGameobject;
+    private GameObject maxShadowsParentGameobject;
 
     public Dictionary<DungeonFlow, DungeonFlowCacheAssets> cacheDictionary = new Dictionary<DungeonFlow, DungeonFlowCacheAssets>();
 
@@ -160,7 +90,7 @@ namespace DunGenPlus.DevTools.Panels {
       selectedExtenderer = extender;
       selectedAssetCache = cache;
 
-      var parentTransform = selectedGameObject.transform;
+      var parentTransform = selectedListGameObject.transform;
       var properties = selectedExtenderer.Properties;
       manager.CreateBoolInputField(parentTransform, "Activate DunGenPlus", selectedExtenderer.Active, SetActivateDunGenPlus);
       manager.CreateSpaceUIField(parentTransform);
@@ -193,12 +123,43 @@ namespace DunGenPlus.DevTools.Panels {
       manager.CreateListUIField(archetypesTransform, "Normal Node Archetypes", properties.NormalNodeArchetypes);
       manager.CreateSpaceUIField(parentTransform);
 
+      var forcedTilesTransform = manager.CreateVerticalLayoutUIField(parentTransform);
+      forcedTilesParentGameobject = forcedTilesTransform.gameObject;
+      manager.CreateHeaderUIField(parentTransform, "Forced Tiles");
+      manager.CreateBoolInputField(parentTransform, "Use Forced Tiles", properties.UseForcedTiles, SetUseForcedTiles);
+      forcedTilesTransform.SetAsLastSibling();
+      manager.CreateListUIField(forcedTilesTransform, "Forced Tile Sets", properties.ForcedTileSets);
+      manager.CreateSpaceUIField(parentTransform);
+
+      var branchLoopTransform = manager.CreateVerticalLayoutUIField(parentTransform);
+      branchLoopBoostParentGameobject = branchLoopTransform.gameObject;
+      manager.CreateHeaderUIField(parentTransform, "Branch Loop Boost");
+      manager.CreateBoolInputField(parentTransform, "Use Branch Loop Boost", properties.UseBranchLoopBoost, SetUseBranchLoopBoost);
+      branchLoopTransform.SetAsLastSibling();
+      manager.CreateIntInputField(branchLoopTransform, "Tile Search Count", new IntParameter(properties.BranchLoopBoostTileSearch, 1, 100, 1), SetTileBoostSearch);
+      manager.CreateFloatInputField(branchLoopTransform, "Tile Boost Search", new FloatParameter(properties.BranchLoopBoostTileScale, 0f, 2f, 0f), SetTileBoostScale);
+      manager.CreateSpaceUIField(parentTransform);
+
+      var maxShadowsTransform = manager.CreateVerticalLayoutUIField(parentTransform);
+      maxShadowsParentGameobject = maxShadowsTransform.gameObject;
+      manager.CreateHeaderUIField(parentTransform, "Max Shadows Request");
+      manager.CreateBoolInputField(parentTransform, "Use Max Shadows Request", properties.UseMaxShadowsRequestUpdate, SetUseMaxShadows);
+      maxShadowsTransform.SetAsLastSibling();
+      manager.CreateIntInputField(maxShadowsTransform, "Shadows Request Amount", new IntParameter(properties.MaxShadowsRequestAmount, 4, 20, 4), SetMaxShadowsAmount);
+      manager.CreateSpaceUIField(parentTransform);
+
+      // miss
+      manager.CreateHeaderUIField(parentTransform, "Miscellaneous");
+      manager.CreateBoolInputField(parentTransform, "Use Doorway Sisters", properties.UseDoorwaySisters, SetUseDoorwaySisters);
+      manager.CreateBoolInputField(parentTransform, "Use Random Guaranteed Scrap", properties.UseRandomGuaranteedScrapSpawn, SetUseRandomGuaranteedScrap);
+      manager.CreateSpaceUIField(parentTransform);
+
       dungeonBoundsHelperGameObject.SetActive(selectedExtenderer.Properties.UseDungeonBounds);
       UpdateDungeonBoundsHelper();
     }
 
     public void ClearPanel(){
-      manager.ClearTransformChildren(selectedGameObject.transform);
+      manager.ClearTransformChildren(selectedListGameObject.transform);
     }
 
     public void SetActivateDunGenPlus(bool state){
@@ -256,6 +217,45 @@ namespace DunGenPlus.DevTools.Panels {
     public void SetAddArchetypes(bool state){
       selectedExtenderer.Properties.AddArchetypesToNormalNodes = state;
       archetypesNodesParentGameobject.SetActive(state);
+    }
+
+    public void SetUseForcedTiles(bool state){
+      selectedExtenderer.Properties.UseForcedTiles = state;
+      forcedTilesParentGameobject.SetActive(state);
+    }
+
+    public void SetUseBranchLoopBoost(bool state){
+      selectedExtenderer.Properties.UseBranchLoopBoost = state;
+      branchLoopBoostParentGameobject.SetActive(state);
+    }
+
+    public void SetTileBoostSearch(int value){
+      selectedExtenderer.Properties.BranchLoopBoostTileSearch = value;
+    }
+
+    public void SetTileBoostScale(float value){
+      selectedExtenderer.Properties.BranchLoopBoostTileScale = value;
+    }
+
+    public void SetUseMaxShadows(bool state){
+      selectedExtenderer.Properties.UseMaxShadowsRequestUpdate = state;
+      maxShadowsParentGameobject.SetActive(state);
+    }
+
+    public void SetMaxShadowsAmount(int value){
+      selectedExtenderer.Properties.MaxShadowsRequestAmount = value;
+    }
+
+    public void SetUseDoorwaySisters(bool state){
+      selectedExtenderer.Properties.UseDoorwaySisters = state;
+    }
+
+    public void SetUseRandomGuaranteedScrap(bool state){
+      selectedExtenderer.Properties.UseRandomGuaranteedScrapSpawn = state;
+    }
+
+    public void RestoreOriginalState(){
+      selectedExtenderer.Properties.CopyFrom(selectedAssetCache.originalProperties);
     }
 
   }

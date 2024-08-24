@@ -127,6 +127,11 @@ namespace DunGenPlus.DevTools {
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tiles.list[i].Item, assetCache.tiles.options);
     }
 
+    public DropdownInputField CreateTileSetsOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<TileSet> setAction){
+      var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tileSets.list[i].Item, assetCache.tileSets.options);
+    }
+
     public DropdownInputField CreateArchetypeOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DungeonArchetype> setAction){
       var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.archetypes.list[i].Item, assetCache.archetypes.options);
@@ -135,6 +140,40 @@ namespace DunGenPlus.DevTools {
     public DropdownInputField CreateCopyNodeBehaviourOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DunGenExtenderProperties.CopyNodeBehaviour> setAction){
       var options = Enum.GetNames(typeof(DunGenExtenderProperties.CopyNodeBehaviour));
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (DunGenExtenderProperties.CopyNodeBehaviour)i, options);
+    }
+
+    public DropdownInputField CreateAnimationCurveOptionsUIField(Transform parentTransform, TitleParameter titleParameter, AnimationCurve baseValue, Action<AnimationCurve> setAction){
+      var result = CreateAnimationCurves(baseValue);
+      var curves = result.animationCurves;
+      var options = result.options;
+      setAction.Invoke(curves[0]);
+      return CreateOptionsUIField(parentTransform, titleParameter, 0, setAction, (i) => curves[i], options);
+    }
+
+    private (List<AnimationCurve> animationCurves, List<string> options) CreateAnimationCurves(AnimationCurve custom){
+      var curves = new List<AnimationCurve>();
+      var options = new List<string>();
+      if (custom != null){
+        curves.Add(custom);
+        options.Add("Custom");
+      }
+
+      curves.Add(AnimationCurve.Constant(0f, 1f, 1f));
+      options.Add("Constant 1");
+
+      curves.Add(AnimationCurve.Linear(0f, 0f, 1f, 1f));
+      options.Add("Linear 0-1");
+
+      curves.Add(AnimationCurve.Linear(1f, 1f, 0f, 0f));
+      options.Add("Linear 1-0");
+
+      curves.Add(AnimationCurve.EaseInOut(0f, 0f, 1f, 1f));
+      options.Add("EaseInOut 0-1");
+
+      curves.Add(AnimationCurve.EaseInOut(1f, 1f, 0f, 0f));
+      options.Add("EaseInOut 1-0");
+
+      return (curves, options);
     }
 
   }

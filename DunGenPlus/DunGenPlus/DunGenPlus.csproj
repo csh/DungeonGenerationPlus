@@ -149,6 +149,7 @@
     <Compile Include="DevTools\DevDebugManagerUI.cs" />
     <Compile Include="DevTools\DevDebugOpen.cs" />
     <Compile Include="DevTools\Panels\BasePanel.cs" />
+    <Compile Include="DevTools\Panels\Collections\DungeonFlowCacheAssets.cs" />
     <Compile Include="DevTools\Panels\DunGenPlusPanel.cs" />
     <Compile Include="DevTools\Panels\MainPanel.cs" />
     <Compile Include="DevTools\PanelTab.cs" />
