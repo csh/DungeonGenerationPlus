@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,8 @@ namespace DunGenPlus.DevTools.UIElements {
 
     public Toggle toggle;
 
-    public override void SetupInputField(string title,  float offset, bool baseValue, Action<bool> setAction, bool defaultValue) {
-      base.SetupInputField(title, offset, baseValue, setAction, defaultValue);
+    public void SetupInputField(TitleParameter titleParameter, bool baseValue, Action<bool> setAction) {
+      SetupBase(titleParameter);
 
       toggle.onValueChanged.AddListener((t) => SetValue(setAction, t));
       Set(baseValue);

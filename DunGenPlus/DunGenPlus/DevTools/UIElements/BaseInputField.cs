@@ -8,10 +8,6 @@ using UnityEngine.UI;
 namespace DunGenPlus.DevTools.UIElements {
   internal abstract class BaseInputField<T> : BaseUIElement {
 
-    public virtual void SetupInputField(string titleText, float offset, T baseValue, Action<T> setAction, T defaultValue){
-      SetupBase(titleText, offset);
-    }
-
     public abstract void Set(T value);
 
     protected int ParseTextInt(string text, int defaultValue = 0) {

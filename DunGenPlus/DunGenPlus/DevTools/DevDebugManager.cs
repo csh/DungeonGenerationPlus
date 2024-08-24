@@ -129,28 +129,38 @@ namespace DunGenPlus.DevTools {
     }
 
     public void OnDungeonFinished(DungeonGenerator generator, GenerationStatus status) {
-      var textList = new List<string>();
+      // Albino said StringBuilder
+      // I forget it even exists ngl
+      var textList = new StringBuilder();
+
+      // seeds
+      textList.AppendLine($"Initial seed: {MainPanel.Instance.seedInputField.inputField.text}");
+      textList.AppendLine($"Last seed: {generator.ChosenSeed}");
+
       if (status == GenerationStatus.Complete) {
-        textList.Add($"Tiles: {generator.CurrentDungeon.AllTiles.Count}");
-        textList.Add($"Main Tiles: {generator.CurrentDungeon.MainPathTiles.Count}");
-        textList.Add($"Branch Tiles: {generator.CurrentDungeon.BranchPathTiles.Count}");
-        textList.Add($"Doors: {generator.CurrentDungeon.Doors.Count}");
+        textList.AppendLine($"Tiles: {generator.CurrentDungeon.AllTiles.Count}");
+        textList.AppendLine($"Main Tiles: {generator.CurrentDungeon.MainPathTiles.Count}");
+        textList.AppendLine($"Branch Tiles: {generator.CurrentDungeon.BranchPathTiles.Count}");
+        textList.AppendLine($"Doors: {generator.CurrentDungeon.Doors.Count}");
       } else if (status == GenerationStatus.Failed) {
-        textList.Add("<color=red>Failed</color>");
+        textList.AppendLine("<color=red>Failed</color>");
       }
+      textList.AppendLine();
 
-      textList.Add("<u>DunGen</u>");
-      textList.Add(generator.GenerationStats.ToString());
+      var stats = generator.GenerationStats;
+      textList.AppendLine("<u>DunGen</u>");
+      textList.AppendLine($"Retrys: {stats.TotalRetries}");
+      textList.AppendLine($"Pre Process Time: {stats.PreProcessTime:F2} ms");
+      textList.AppendLine($"Main Path Time: {stats.MainPathGenerationTime:F2} ms");
+      textList.AppendLine($"Branch Path Time: {stats.BranchPathGenerationTime:F2} ms");
+      textList.AppendLine($"Post Process Time: {stats.PostProcessTime:F2} ms");
+      textList.AppendLine($"Total Time: {stats.TotalTime:F2} ms");
 
-      SetNewSeed();
-      statsTextMesh.text = string.Join("\n", textList);
+      statsTextMesh.text = textList.ToString();
     }
 
-    private void SetNewSeed(){
-      foreach(var p in panels) {
-        var mainPanel = p as MainPanel;
-        if (mainPanel) mainPanel.seedInputField.Set(dungeon.Generator.ChosenSeed);
-      }
+    public void RecordNewSeed(int seed){
+      MainPanel.Instance.seedInputField.Set(seed);
     }
 
     private void UpdatePlusPanel() {

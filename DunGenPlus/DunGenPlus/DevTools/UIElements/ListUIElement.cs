@@ -1,6 +1,7 @@
 ﻿using DunGen;
 using DunGenPlus.Collections;
 using DunGenPlus.DevTools.Panels;
+using DunGenPlus.DevTools.UIElements.Collections;
 using LethalLevelLoader;
 using System;
 using System.Collections;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DunGenPlus.DevTools.UIElements {
   internal class ListUIElement : BaseUIElement {
@@ -20,8 +22,11 @@ namespace DunGenPlus.DevTools.UIElements {
     internal IList list;
     internal Type listType;
 
-    public void SetupList<T>(string titleText, float offset, List<T> list) {
-      SetupBase(titleText, offset);
+    public void SetupList<T>(TitleParameter titleParameter, List<T> list) {
+      SetupBase(titleParameter);
+
+      var cValue = Mathf.LerpUnclamped(0.4f, 0.6f, titleParameter.offset / 100f);
+      listTransform.GetComponent<Image>().color = new Color(cValue, cValue, cValue, 1f);
 
       this.list = list;
       listType = typeof(T);
@@ -55,13 +60,13 @@ namespace DunGenPlus.DevTools.UIElements {
       if (listType == typeof(DungeonArchetype)){
         var entry = (DungeonArchetype)list[index];
         var baseValue = DunGenPlusPanel.Instance.selectedAssetCache.archetypes.dictionary[entry];
-        DevDebugManager.Instance.CreateArchetypeOptionsUIField(copyParentTransform, "Archetype", layoutOffset + 24f, baseValue, (t) => list[index] = t);
+        DevDebugManager.Instance.CreateArchetypeOptionsUIField(copyParentTransform, new TitleParameter("Archetype", layoutOffset + 24f), baseValue, (t) => list[index] = t);
       }
 
       else if (listType == typeof(NodeArchetype)) {
         var entry = (NodeArchetype)list[index];
-        DevDebugManager.Instance.CreateStringInputField(copyParentTransform, "Label", layoutOffset + 24f, entry.label, (t) => entry.label = t);
-        DevDebugManager.Instance.CreateListUIField(copyParentTransform, "Archetypes", layoutOffset + 24f, entry.archetypes);
+        DevDebugManager.Instance.CreateStringInputField(copyParentTransform, new TitleParameter("Label", layoutOffset + 24f), entry.label, (t) => entry.label = t);
+        DevDebugManager.Instance.CreateListUIField(copyParentTransform, new TitleParameter("Archetypes", layoutOffset + 24f), entry.archetypes);
       }
 
       copy.SetActive(true);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,11 @@ namespace DunGenPlus.DevTools.UIElements {
     public LayoutElement layoutElement;
     internal float layoutOffset;
 
-    public void SetupBase(string titleText, float offset) {
-      title = titleText;
+    public void SetupBase(TitleParameter titleParameter) {
+      title = titleParameter.text;
       SetText(title);
 
-      layoutOffset = offset;
+      layoutOffset = titleParameter.offset;
       if (layoutElement) {
         layoutElement.minWidth -= layoutOffset;
       }

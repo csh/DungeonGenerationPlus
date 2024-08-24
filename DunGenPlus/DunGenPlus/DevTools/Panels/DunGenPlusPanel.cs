@@ -11,6 +11,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DunGenPlus.DevTools.UIElements;
+using DunGenPlus.DevTools.UIElements.Collections;
+using System.Collections.ObjectModel;
 
 namespace DunGenPlus.DevTools.Panels {
   internal class DunGenPlusPanel : BasePanel {
@@ -38,26 +40,28 @@ namespace DunGenPlus.DevTools.Panels {
     public class DungeonFlowCacheAssets {
       public DunGenExtenderProperties originalProperties;
 
+      // Albino said that readonly is safer
       public struct Collection<T> {
-        public List<T> list;
-        public Dictionary<T, int> dictionary;
-        public IEnumerable<string> options;
+        public ReadOnlyCollection<T> list;
+        public ReadOnlyDictionary<T, int> dictionary;
+        public ReadOnlyCollection<string> options;
 
         public Collection(List<T> list) {
-          this.list = list;
+          this.list = new ReadOnlyCollection<T>(list);
 
-          dictionary = new Dictionary<T, int>();
+          var tempDictionary = new Dictionary<T, int>();  
           for(var i = 0;  i < list.Count; i++) {
-            dictionary.Add(list[i], i);
+            tempDictionary.Add(list[i], i);
           }
+          dictionary = new ReadOnlyDictionary<T, int>(tempDictionary);
 
-          options = list.Select(l => l.ToString());
+          options = new ReadOnlyCollection<string>(list.Select(l => l.ToString()).ToList());
         }
       }
 
-      public Collection<NullObject<TileSet>> tileSets;
-      public Collection<NullObject<GameObject>> tiles;
-      public Collection<NullObject<DungeonArchetype>> archetypes;
+      public readonly Collection<NullObject<TileSet>> tileSets;
+      public readonly Collection<NullObject<GameObject>> tiles;
+      public readonly Collection<NullObject<DungeonArchetype>> archetypes;
 
       public DungeonFlowCacheAssets(DunGenExtender extender){
         originalProperties = extender.Properties.Copy();
@@ -158,35 +162,35 @@ namespace DunGenPlus.DevTools.Panels {
 
       var parentTransform = selectedGameObject.transform;
       var properties = selectedExtenderer.Properties;
-      manager.CreateBoolInputField(parentTransform, "Activate DunGenPlus", 0f, selectedExtenderer.Active, SetActivateDunGenPlus);
+      manager.CreateBoolInputField(parentTransform, "Activate DunGenPlus", selectedExtenderer.Active, SetActivateDunGenPlus);
       manager.CreateSpaceUIField(parentTransform);
 
       var mainPathTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       mainPathParentGameobject = mainPathTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Main Path", 0f);
-      manager.CreateIntSliderField(parentTransform, "Main Path Count", 0f, properties.MainPathCount, SetMainPathCount);
+      manager.CreateHeaderUIField(parentTransform, "Main Path");
+      manager.CreateIntSliderField(parentTransform, "Main Path Count", new IntParameter(properties.MainPathCount, 1, 10), SetMainPathCount);
       mainPathTransform.SetAsLastSibling();
-      manager.CreateTileOptionsUIField(mainPathTransform, "Main Room Tile Prefab", 0f, selectedAssetCache.tiles.dictionary[properties.MainRoomTilePrefab], SetMainRoom);
-      manager.CreateCopyNodeBehaviourOptionsUIField(mainPathTransform, "Copy Node Behaviour", 0f, (int)properties.MainPathCopyNodeBehaviour, SetCopyNodeBehaviour);
+      manager.CreateTileOptionsUIField(mainPathTransform, "Main Room Tile Prefab", selectedAssetCache.tiles.dictionary[properties.MainRoomTilePrefab], SetMainRoom);
+      manager.CreateCopyNodeBehaviourOptionsUIField(mainPathTransform, "Copy Node Behaviour", (int)properties.MainPathCopyNodeBehaviour, SetCopyNodeBehaviour);
       manager.CreateSpaceUIField(parentTransform);
 
       var dungeonBoundsTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       dungeonBoundsParentGameobject = dungeonBoundsTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Dungeon Bounds", 0f);
-      manager.CreateBoolInputField(parentTransform, "Use Dungeon Bounds", 0f, properties.UseDungeonBounds, SetUseDungeonBounds);
+      manager.CreateHeaderUIField(parentTransform, "Dungeon Bounds");
+      manager.CreateBoolInputField(parentTransform, "Use Dungeon Bounds", properties.UseDungeonBounds, SetUseDungeonBounds);
       dungeonBoundsTransform.SetAsLastSibling();
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Base", 0f, properties.DungeonSizeBase, SetDungeonBoundsSizeBase);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Factor", 0f, properties.DungeonSizeFactor, SetDungeonBoundsSizeFactor);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Offset", 0f, properties.DungeonPositionOffset, SetDungeonBoundsPosOffset);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Pivot", 0f, properties.DungeonPositionPivot, SetDungeonBoundsPosPivot);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Base", properties.DungeonSizeBase, SetDungeonBoundsSizeBase);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Factor", properties.DungeonSizeFactor, SetDungeonBoundsSizeFactor);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Offset", properties.DungeonPositionOffset, SetDungeonBoundsPosOffset);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Pivot", properties.DungeonPositionPivot, SetDungeonBoundsPosPivot);
       manager.CreateSpaceUIField(parentTransform);
 
       var archetypesTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       archetypesNodesParentGameobject = archetypesTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Archetypes Normal Nodes", 0f);
-      manager.CreateBoolInputField(parentTransform, "Add Archetypes", 0f, properties.AddArchetypesToNormalNodes, SetAddArchetypes);
+      manager.CreateHeaderUIField(parentTransform, "Archetypes Normal Nodes");
+      manager.CreateBoolInputField(parentTransform, "Add Archetypes", properties.AddArchetypesToNormalNodes, SetAddArchetypes);
       archetypesTransform.SetAsLastSibling();
-      manager.CreateListUIField(archetypesTransform, "Normal Node Archetypes", 0f, properties.NormalNodeArchetypes);
+      manager.CreateListUIField(archetypesTransform, "Normal Node Archetypes", properties.NormalNodeArchetypes);
       manager.CreateSpaceUIField(parentTransform);
 
       dungeonBoundsHelperGameObject.SetActive(selectedExtenderer.Properties.UseDungeonBounds);

@@ -2,6 +2,7 @@
 using DunGenPlus.Collections;
 using DunGenPlus.DevTools.Panels;
 using DunGenPlus.DevTools.UIElements;
+using DunGenPlus.DevTools.UIElements.Collections;
 using LethalLevelLoader;
 using System;
 using System.Collections.Generic;
@@ -37,17 +38,17 @@ namespace DunGenPlus.DevTools {
     public GameObject listUIPrefab;
     public GameObject optionsUIPrefab;
 
-    public TextUIElement CreateHeaderUIField(Transform parentTransform, string title, float offset) {
+    public TextUIElement CreateHeaderUIField(Transform parentTransform, TitleParameter titleParameter) {
       var gameObject = Instantiate(headerUIPrefab, parentTransform);
       var field = gameObject.GetComponent<TextUIElement>();
-      field.SetupBase(title, offset);
+      field.SetupBase(titleParameter);
       return field;
     }
 
-    public TextUIElement CreateTextUIField(Transform parentTransform, string title, float offset) {
+    public TextUIElement CreateTextUIField(Transform parentTransform, TitleParameter titleParameter) {
       var gameObject = Instantiate(textUIPrefab, parentTransform);
       var field = gameObject.GetComponent<TextUIElement>();
-      field.SetupBase(title, offset);
+      field.SetupBase(titleParameter);
       return field;
     }
 
@@ -59,81 +60,81 @@ namespace DunGenPlus.DevTools {
       return Instantiate(verticalLayoutUIPrefab, parentTransform).transform;
     }
 
-    public IntInputField CreateIntInputField(Transform parentTransform, string title, float offset, int baseValue, Action<int> setAction, int defaultValue = 0){
+    public IntInputField CreateIntInputField(Transform parentTransform, TitleParameter titleParameter, IntParameter intParameter, Action<int> setAction){
       var gameObject = Instantiate(intInputFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<IntInputField>();
-      field.SetupInputField(title, offset, baseValue, setAction, defaultValue);
+      field.SetupInputField(titleParameter, intParameter, setAction);
       return field;
     }
 
-    public FloatInputField CreateFloatInputField(Transform parentTransform, string title, float offset, float baseValue, Action<float> setAction, float defaultValue = 0f){
+    public FloatInputField CreateFloatInputField(Transform parentTransform, TitleParameter titleParameter, FloatParameter floatParameter, Action<float> setAction){
       var gameObject = Instantiate(floatInputFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<FloatInputField>();
-      field.SetupInputField(title, offset, baseValue, setAction, defaultValue);
+      field.SetupInputField(titleParameter, floatParameter, setAction);
       return field;
     }
 
-    public BoolInputField CreateBoolInputField(Transform parentTransform, string title, float offset, bool baseValue, Action<bool> setAction){
+    public BoolInputField CreateBoolInputField(Transform parentTransform, TitleParameter titleParameter, bool baseValue, Action<bool> setAction){
       var gameObject = Instantiate(boolInputFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<BoolInputField>();
-      field.SetupInputField(title, offset, baseValue, setAction, false);
+      field.SetupInputField(titleParameter, baseValue, setAction);
       return field;
     }
 
-    public StringInputField CreateStringInputField(Transform parentTransform, string title, float offset, string baseValue, Action<string> setAction){
+    public StringInputField CreateStringInputField(Transform parentTransform, TitleParameter titleParameter, string baseValue, Action<string> setAction){
       var gameObject = Instantiate(stringInputFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<StringInputField>();
-      field.SetupInputField(title, offset, baseValue, setAction, string.Empty);
+      field.SetupInputField(titleParameter, baseValue, setAction);
       return field;
     }
 
-    public Vector3InputField CreateVector3InputField(Transform parentTransform, string title, float offset, Vector3 baseValue, Action<Vector3> setAction){
+    public Vector3InputField CreateVector3InputField(Transform parentTransform, TitleParameter titleParameter, Vector3 baseValue, Action<Vector3> setAction){
       var gameObject = Instantiate(vector3InputFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<Vector3InputField>();
-      field.SetupInputField(title, offset, baseValue, setAction, Vector3.zero);
+      field.SetupInputField(titleParameter, baseValue, setAction);
       return field;
     }
 
-    public IntSliderField CreateIntSliderField(Transform parentTransform, string title, float offset, int baseValue, Action<int> setAction, int defaultValue = 0){
+    public IntSliderField CreateIntSliderField(Transform parentTransform, TitleParameter titleParameter, IntParameter intParameter, Action<int> setAction){
       var gameObject = Instantiate(intSliderFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<IntSliderField>();
-      field.SetupInputField(title, offset, baseValue, setAction, defaultValue);
+      field.SetupInputField(titleParameter, intParameter, setAction);
       return field;
     }
 
-    public ListUIElement CreateListUIField<T>(Transform parentTransform, string title, float offset, List<T> list){
+    public ListUIElement CreateListUIField<T>(Transform parentTransform, TitleParameter titleParameter, List<T> list){
       var gameObject = Instantiate(listUIPrefab, parentTransform);
       var field = gameObject.GetComponent<ListUIElement>();
-      field.SetupList(title, offset, list);
+      field.SetupList(titleParameter, list);
       return field;
     }
 
 
-    public DropdownInputField CreateOptionsUIField<T>(Transform parentTransform, string title, float offset, int baseValue, Action<T> setAction, Func<int, T> convertIndex, IEnumerable<string> options){
+    public DropdownInputField CreateOptionsUIField<T>(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<T> setAction, Func<int, T> convertIndex, IEnumerable<string> options){
       var gameObject = Instantiate(optionsUIPrefab, parentTransform);
       var field = gameObject.GetComponent<DropdownInputField>();
-      field.SetupDropdown(title, offset, baseValue, setAction, convertIndex, options);
+      field.SetupDropdown(titleParameter, baseValue, setAction, convertIndex, options);
       return field;
     }
 
-    public DropdownInputField CreateLevelOptionsUIField(Transform parentTransform, string title, float offset, int baseValue, Action<ExtendedLevel> setAction){
+    public DropdownInputField CreateLevelOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<ExtendedLevel> setAction){
       var mainPanel = MainPanel.Instance;
-      return CreateOptionsUIField(parentTransform, title, offset, baseValue, setAction, (i) => mainPanel.levels[i], mainPanel.levelOptions);
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => mainPanel.levels[i], mainPanel.levelOptions);
     }
 
-    public DropdownInputField CreateTileOptionsUIField(Transform parentTransform, string title, float offset, int baseValue, Action<GameObject> setAction){
+    public DropdownInputField CreateTileOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<GameObject> setAction){
       var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
-      return CreateOptionsUIField(parentTransform, title, offset, baseValue, setAction, (i) => assetCache.tiles.list[i].Item, assetCache.tiles.options);
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tiles.list[i].Item, assetCache.tiles.options);
     }
 
-    public DropdownInputField CreateArchetypeOptionsUIField(Transform parentTransform, string title, float offset, int baseValue, Action<DungeonArchetype> setAction){
+    public DropdownInputField CreateArchetypeOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DungeonArchetype> setAction){
       var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
-      return CreateOptionsUIField(parentTransform, title, offset, baseValue, setAction, (i) => assetCache.archetypes.list[i].Item, assetCache.archetypes.options);
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.archetypes.list[i].Item, assetCache.archetypes.options);
     }
 
-    public DropdownInputField CreateCopyNodeBehaviourOptionsUIField(Transform parentTransform, string title, float offset, int baseValue, Action<DunGenExtenderProperties.CopyNodeBehaviour> setAction){
+    public DropdownInputField CreateCopyNodeBehaviourOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DunGenExtenderProperties.CopyNodeBehaviour> setAction){
       var options = Enum.GetNames(typeof(DunGenExtenderProperties.CopyNodeBehaviour));
-      return CreateOptionsUIField(parentTransform, title, offset, baseValue, setAction, (i) => (DunGenExtenderProperties.CopyNodeBehaviour)i, options);
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (DunGenExtenderProperties.CopyNodeBehaviour)i, options);
     }
 
   }

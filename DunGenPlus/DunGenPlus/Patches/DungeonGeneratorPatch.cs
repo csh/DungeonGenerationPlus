@@ -12,9 +12,18 @@ using DunGenPlus.Utils;
 using DunGenPlus.Generation;
 using DunGenPlus.Managers;
 using DunGenPlus.Collections;
+using DunGenPlus.DevTools;
 
 namespace DunGenPlus.Patches {
   internal class DungeonGeneratorPatch {
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate")]
+    public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){
+      if (DevDebugManager.Instance && !isRetry) {
+        DevDebugManager.Instance.RecordNewSeed(__instance.ChosenSeed);
+      }
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath")]
@@ -32,6 +41,8 @@ namespace DunGenPlus.Patches {
       }
 
     }
+
+
 
 
     [HarmonyTranspiler]

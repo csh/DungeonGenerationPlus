@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,14 +13,14 @@ namespace DunGenPlus.DevTools.UIElements {
 
     public Slider inputField;
     public TextMeshProUGUI textMesh;
-    internal int defaultValue = 0;
 
-    public override void SetupInputField(string title, float offset, int baseValue, Action<int> setAction , int defaultValue) {
-      base.SetupInputField(title, offset, baseValue, setAction, defaultValue);
-      this.defaultValue = defaultValue;
+    public void SetupInputField(TitleParameter titleParameter, IntParameter intParameter, Action<int> setAction) {
+      SetupBase(titleParameter);
 
+      inputField.minValue = inputField.minValue;
+      inputField.maxValue = inputField.maxValue;
       inputField.onValueChanged.AddListener((t) => SetValue(setAction, t));
-      Set(baseValue);
+      Set(intParameter.baseValue);
     }
 
     private void SetValue(Action<int> setAction, float value) {

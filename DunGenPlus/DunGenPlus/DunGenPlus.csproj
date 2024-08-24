@@ -160,6 +160,7 @@
     <Compile Include="DevTools\UIElements\IntInputField.cs" />
     <Compile Include="DevTools\UIElements\IntSliderField.cs" />
     <Compile Include="DevTools\UIElements\ListUIElement.cs" />
+    <Compile Include="DevTools\UIElements\Collections\Parameters.cs" />
     <Compile Include="DevTools\UIElements\StringInputField.cs" />
     <Compile Include="DevTools\UIElements\TextUIElement.cs" />
     <Compile Include="DevTools\UIElements\Vector3InputField.cs" />

@@ -1,5 +1,6 @@
 ﻿using DunGen;
 using DunGenPlus.DevTools.UIElements;
+using DunGenPlus.DevTools.UIElements.Collections;
 using LethalLevelLoader;
 using System;
 using System.Collections.Generic;
@@ -29,22 +30,22 @@ namespace DunGenPlus.DevTools.Panels {
       var gen = dungeon.Generator;
       var parentTransform = mainGameObject.transform;
 
-      manager.CreateHeaderUIField(parentTransform, "Dungeon Generator", 0f);
-      seedInputField = manager.CreateIntInputField(parentTransform, "Seed", 0f, gen.Seed, SetSeed);
-      manager.CreateBoolInputField(parentTransform, "Randomize Seed", 0f, gen.ShouldRandomizeSeed, SetRandomSeed);
+      manager.CreateHeaderUIField(parentTransform, "Dungeon Generator");
+      seedInputField = manager.CreateIntInputField(parentTransform, "Seed", gen.Seed, SetSeed);
+      manager.CreateBoolInputField(parentTransform, "Randomize Seed", gen.ShouldRandomizeSeed, SetRandomSeed);
       manager.CreateSpaceUIField(parentTransform);
 
-      manager.CreateIntInputField(parentTransform, "Max Attempts", 0f, gen.MaxAttemptCount, SetMaxAttempts, 10);
+      manager.CreateIntInputField(parentTransform, "Max Attempts", new IntParameter(gen.MaxAttemptCount, 0, 500, 0), SetMaxAttempts);
       manager.CreateSpaceUIField(parentTransform);
 
-      manager.CreateBoolInputField(parentTransform, "Generate Async", 0f, gen.GenerateAsynchronously, SetGenerateAsync);
-      manager.CreateFloatInputField(parentTransform, "Max Async (ms)", 0f, gen.MaxAsyncFrameMilliseconds, SetMaxAsync);
-      manager.CreateFloatInputField(parentTransform, "Pause Betwoon Rooms", 0f, gen.PauseBetweenRooms, SetPauseBetweenRooms);
+      manager.CreateBoolInputField(parentTransform, "Generate Async", gen.GenerateAsynchronously, SetGenerateAsync);
+      manager.CreateFloatInputField(parentTransform, "Max Async (ms)", new FloatParameter(gen.MaxAsyncFrameMilliseconds, 0f, float.MaxValue), SetMaxAsync);
+      manager.CreateFloatInputField(parentTransform, "Pause Between Rooms", new FloatParameter(gen.PauseBetweenRooms, 0f, float.MaxValue), SetPauseBetweenRooms);
       manager.CreateSpaceUIField(parentTransform);
 
-      manager.CreateHeaderUIField(parentTransform, "Levels", 0f);
-      manager.CreateLevelOptionsUIField(parentTransform, "Level", 0f, 0, SetLevel);
-      lengthMultiplierField = manager.CreateTextUIField(parentTransform, "Length Multiplier", 0f);
+      manager.CreateHeaderUIField(parentTransform, "Levels");
+      manager.CreateLevelOptionsUIField(parentTransform, "Level", 0, SetLevel);
+      lengthMultiplierField = manager.CreateTextUIField(parentTransform, "Length Multiplier");
       SetLevel(levels[0]);
     }
 

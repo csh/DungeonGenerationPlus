@@ -1,28 +1,35 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine;
 
 namespace DunGenPlus.DevTools.UIElements
 {
   internal class FloatInputField : BaseInputField<float> {
 
     public TMP_InputField inputField;
-    internal float defaultValue = 0f;
+    internal float minValue;
+    internal float maxValue;
+    internal float defaultValue;
 
-    public override void SetupInputField(string title, float offset, float baseValue, Action<float> setAction , float defaultValue) {
-      base.SetupInputField(title, offset, baseValue, setAction, defaultValue);
-      this.defaultValue = defaultValue;
+    public void SetupInputField(TitleParameter titleParameter, FloatParameter floatParameter, Action<float> setAction) {
+      SetupBase(titleParameter);
+      minValue = floatParameter.minValue;
+      maxValue = floatParameter.maxValue;
+      defaultValue = floatParameter.defaultValue;
 
       inputField.onValueChanged.AddListener((t) => SetValue(setAction, t));
-      Set(baseValue);
+      Set(floatParameter.baseValue);
     }
 
     private void SetValue(Action<float> setAction, string text) {
       Plugin.logger.LogInfo($"Setting {title} to {text}");
-      setAction.Invoke(ParseTextFloat(text, defaultValue));
+      var value = ParseTextFloat(text, defaultValue);
+      setAction.Invoke(Mathf.Clamp(value, minValue, maxValue));
     }
 
     public override void Set(float value){

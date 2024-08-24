@@ -1,27 +1,34 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine;
 
 namespace DunGenPlus.DevTools.UIElements {
   internal class IntInputField : BaseInputField<int> {
 
     public TMP_InputField inputField;
-    internal int defaultValue = 0;
+    internal int minValue;
+    internal int maxValue;
+    internal int defaultValue;
 
-    public override void SetupInputField(string title, float offset, int baseValue, Action<int> setAction , int defaultValue) {
-      base.SetupInputField(title, offset, baseValue, setAction, defaultValue);
-      this.defaultValue = defaultValue;
+    public void SetupInputField(TitleParameter titleParameter, IntParameter intParameter, Action<int> setAction) {
+      SetupBase(titleParameter);
+      minValue = intParameter.minValue;
+      maxValue = intParameter.maxValue;
+      defaultValue = intParameter.defaultValue;
 
       inputField.onValueChanged.AddListener((t) => SetValue(setAction, t));
-      Set(baseValue);
+      Set(intParameter.baseValue);
     }
 
     private void SetValue(Action<int> setAction, string text) {
       Plugin.logger.LogInfo($"Setting {title} to {text}");
-      setAction.Invoke(ParseTextInt(text, defaultValue));
+      var value = ParseTextInt(text, defaultValue);
+      setAction.Invoke(Mathf.Clamp(value, minValue, maxValue));
     }
 
     public override void Set(int value){

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,8 @@ namespace DunGenPlus.DevTools.UIElements
 
     public TMP_Dropdown dropDown;
 
-    public void SetupDropdown<T>(string titleText, float offset, int baseValue, Action<T> setAction, Func<int, T> convertIndex, IEnumerable<string> options) {
-      SetupBase(titleText, offset);
+    public void SetupDropdown<T>(TitleParameter titleParameter, int baseValue, Action<T> setAction, Func<int, T> convertIndex, IEnumerable<string> options) {
+      SetupBase(titleParameter);
 
       dropDown.options = options.Select(c => {
         return new TMP_Dropdown.OptionData(c.Substring(0, Math.Min(24, c.Length)));

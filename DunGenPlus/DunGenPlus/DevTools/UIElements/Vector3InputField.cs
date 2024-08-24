@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,9 +18,9 @@ namespace DunGenPlus.DevTools.UIElements {
     public TMP_InputField zInputField;
     private Vector3 _value;
 
-    public override void SetupInputField(string titleText, float offset, Vector3 baseValue, Action<Vector3> setAction, Vector3 defaultValue) {
-      base.SetupInputField(titleText, offset, baseValue, setAction, defaultValue);
-      
+    public void SetupInputField(TitleParameter titleParameter, Vector3 baseValue, Action<Vector3> setAction) {
+      SetupBase(titleParameter);
+
       xInputField.onValueChanged.AddListener((t) => SetXValue(setAction, t));
       yInputField.onValueChanged.AddListener((t) => SetYValue(setAction, t));
       zInputField.onValueChanged.AddListener((t) => SetZValue(setAction, t));

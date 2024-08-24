@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DunGenPlus.DevTools.UIElements.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,8 @@ namespace DunGenPlus.DevTools.UIElements
 
     public TMP_InputField inputField;
 
-    public override void SetupInputField(string title, float offset, string baseValue, Action<string> setAction, string defaultValue) {
-      base.SetupInputField(title, offset, baseValue, setAction, defaultValue);
+    public void SetupInputField(TitleParameter titleParameter, string baseValue, Action<string> setAction) {
+      SetupBase(titleParameter);
 
       inputField.onValueChanged.AddListener((t) => SetValue(setAction, t));
       Set(baseValue);
