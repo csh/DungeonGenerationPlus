@@ -276,7 +276,9 @@ namespace DunGenPlus.Generation {
         Plugin.logger.LogDebug($"Branch {b}");
         RandomizeLineArchetypes(gen, false);
         gen.proxyDungeon.MainPathTiles = allMainPathTiles[b];
-        yield return gen.Wait(gen.GenerateBranchPaths());
+
+        if (Properties.UseBranchLoopBoost) yield return gen.Wait(GenerateBranchBoostedPaths(gen));
+        else yield return gen.Wait(gen.GenerateBranchPaths());
       }
 
       ActiveAlternative = true;

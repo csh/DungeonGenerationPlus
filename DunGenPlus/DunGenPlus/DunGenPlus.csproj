@@ -168,6 +168,8 @@
     <Compile Include="DunGenExtender.cs" />
     <Compile Include="Collections\DunGenExtenderProperties.cs" />
     <Compile Include="Generation\DunGenPlusGenerator.cs" />
+    <Compile Include="Generation\DunGenPlusGeneratorBranchLoop.cs" />
+    <Compile Include="Generation\DunGenPlusGeneratorMiscellaneous.cs" />
     <Compile Include="Managers\DoorwayManager.cs" />
     <Compile Include="Patches\DoorwayConnectionPatch.cs" />
     <Compile Include="Generation\DoorwaySistersRule.cs" />

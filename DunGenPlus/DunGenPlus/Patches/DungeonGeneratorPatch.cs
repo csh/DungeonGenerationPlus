@@ -78,6 +78,7 @@ namespace DunGenPlus.Patches {
       archSequence.ReportComplete();
     }
 
+    /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(DungeonGenerator), "AddTile")]
     public static IEnumerable<CodeInstruction> AddTilePatch(IEnumerable<CodeInstruction> instructions, ILGenerator generator) {
@@ -144,6 +145,8 @@ namespace DunGenPlus.Patches {
       whileLoopSequence.ReportComplete();
 
     }
+
+    */
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RoundManager), "FinishGeneratingLevel")]
