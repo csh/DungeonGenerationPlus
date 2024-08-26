@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 
@@ -9,8 +10,22 @@ namespace DunGenPlus.Generation
 {
   internal partial class DunGenPlusGenerator {
 
+    public static Stopwatch GenerateBranchBoostedPathsStopWatch = new Stopwatch();
+    public static float GenerateBranchBoostedPathsTime = 0f;
+
+    public static Stopwatch GetTileResultStopwatch = new Stopwatch();
+    public static float GetTileResultTime = 0f;
+
+    public static Stopwatch DoorwayPairStopwatch = new Stopwatch();
+    public static float DoorwayPairTime = 0f;
+
+    public static Stopwatch CalculateWeightStopwatch = new Stopwatch();
+    public static float CalculateWeightTime = 0f;
+
     private class BranchPathProxy {
-      public TileProxy attachTileProxy;
+      public TileProxy mainPathTile;
+      public int mainPathIndex;
+
       public List<TilePlacementResultProxy> list;
       public float weight;
 
@@ -18,7 +33,9 @@ namespace DunGenPlus.Generation
       public List<InjectedTile> tilesPendingInjection;
 
       public BranchPathProxy(DungeonGenerator gen, TileProxy attachTileProxy){
-        this.attachTileProxy = attachTileProxy;
+        mainPathTile = attachTileProxy;
+        mainPathIndex = GetMainPathIndexFromTileProxy(attachTileProxy);
+
         list = new List<TilePlacementResultProxy>();
         weight = 0f;
 
@@ -27,21 +44,48 @@ namespace DunGenPlus.Generation
       }
 
       public void CalculateWeight(DungeonGenerator gen){
-        weight = list.Count * 0.25f;
+        var count = list.Count;
+        if (count == 0) return;
+
+        var lengthWeightScale = Properties.BranchPathMultiSimulationProperties.LengthWeightScale;
+        var normalizedWeightScale = Properties.BranchPathMultiSimulationProperties.NormalizedLengthWeightScale;
+
+        var samePathWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathBaseWeightScale;
+        var diffPathWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathBaseWeightScale;
+
+        var samePathDepthWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathDepthWeightScale;
+        var diffPathDepthWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathDepthWeightScale;
+
+        var samePathNormalizedDepthWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathNormalizedDepthWeightScale;
+        var diffPathNormalizedDepthWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathNormalizedDepthWeightScale;
+
+        var lastNode = list[count - 1];
+        weight += lastNode.tileProxy.Placement.BranchDepth * lengthWeightScale;
+        weight += lastNode.tileProxy.Placement.NormalizedBranchDepth * normalizedWeightScale;
         var allDungeonDoorways = gen.proxyDungeon.AllTiles.SelectMany(t => t.Doorways);
         foreach(var t in list) {
           foreach(var d in allDungeonDoorways) {
+            if (d.TileProxy == mainPathTile) continue;
+            var dIndex = GetMainPathIndexFromTileProxy(d.TileProxy);
+
             foreach(var l in t.tileProxy.doorways) {
-              if (d.TileProxy == t.previousDoorway.TileProxy || d.TileProxy == attachTileProxy) continue;
+              if (d.TileProxy == t.previousDoorway.TileProxy) continue;
 
               // favor paths that connect to other depths
               if (gen.DungeonFlow.CanDoorwaysConnect(d.TileProxy.PrefabTile, l.TileProxy.PrefabTile, d.DoorwayComponent, l.DoorwayComponent) && Vector3.SqrMagnitude(d.Position - l.Position) < 1E-05){
                 var diff = Mathf.Abs(d.TileProxy.Placement.PathDepth - l.TileProxy.Placement.PathDepth);
-                weight += diff;
+                var normalDiff = Mathf.Abs(d.TileProxy.Placement.NormalizedPathDepth - l.TileProxy.Placement.NormalizedPathDepth);
+                var samePath = mainPathIndex == dIndex;
+
+                weight += samePath ? samePathWeightScale : diffPathWeightScale;
+                weight += diff * (samePath ? samePathDepthWeightScale : diffPathDepthWeightScale);
+                weight += normalDiff * (samePath ? samePathNormalizedDepthWeightScale : diffPathNormalizedDepthWeightScale);
               }
             }
           }
         }
+
+        //Plugin.logger.LogInfo($"Path({lastNode.tileProxy.Placement.NormalizedBranchDepth}): {weight}");
       }
 
     }
@@ -68,7 +112,7 @@ namespace DunGenPlus.Generation
 
     }
 
-    public static IEnumerator GenerateBranchBoostedPaths(DungeonGenerator gen){
+    public static IEnumerator GenerateMultiBranchPaths(DungeonGenerator gen){
       gen.ChangeStatus(GenerationStatus.Branching);
       var mainPathBranches = new int[gen.proxyDungeon.MainPathTiles.Count];
       BranchCountHelper.ComputeBranchCounts(gen.DungeonFlow, gen.RandomStream, gen.proxyDungeon, ref mainPathBranches);
@@ -88,7 +132,8 @@ namespace DunGenPlus.Generation
           // create a bunch of proxy paths
           // we evaulate later on the best one
           var pathProxys = new List<BranchPathProxy>();
-          for(var x = 0; x < 5; ++x){
+          //Plugin.logger.LogInfo("New Path");
+          for(var x = 0; x < Properties.BranchPathMultiSimulationProperties.SimulationCount; ++x){
             var currentPathProxy = new BranchPathProxy(gen, tile);
             var previousTile = tile;
             var branchDepth = tile.Placement.Archetype.BranchingDepth.GetRandom(gen.RandomStream);
@@ -108,7 +153,13 @@ namespace DunGenPlus.Generation
 
               // get potential tile to add
               var normalizedDepth = (branchDepth <= 1) ? 1f : (float)depth / (branchDepth - 1);
+
+              GetTileResultStopwatch.Reset();
+              GetTileResultStopwatch.Start();
               var tileResult = GetTileResult(gen, currentPathProxy, previousTile, useableTileSets, normalizedDepth, tile.Placement.Archetype);
+              GetTileResultStopwatch.Stop();
+              GetTileResultTime += (float)GetTileResultStopwatch.Elapsed.TotalMilliseconds;
+
               var tileProxy = tileResult.tileProxy;
               if (tileProxy == null) {
                 // it's over, we done
@@ -126,13 +177,20 @@ namespace DunGenPlus.Generation
             if (currentPathProxy.list.Count == 0) break;
 
             // record path
+            CalculateWeightStopwatch.Reset();
+            CalculateWeightStopwatch.Start();
             currentPathProxy.CalculateWeight(gen);
+            CalculateWeightStopwatch.Stop();
+            CalculateWeightTime += (float)CalculateWeightStopwatch.Elapsed.TotalMilliseconds;
+
             pathProxys.Add(currentPathProxy);
           }
 
           // time to evaulate best path then add
           var bestPath = pathProxys.OrderByDescending(p => p.weight).FirstOrDefault();
           if (bestPath != null) {
+            //Plugin.logger.LogInfo($"Best path: {bestPath.weight}");
+            //Plugin.logger.LogInfo("");
             foreach(var item in bestPath.list){
               MakeTileProxyConnection(gen, item);
 
@@ -142,6 +200,8 @@ namespace DunGenPlus.Generation
 
             gen.injectedTiles = bestPath.injectedTiles;
             gen.tilesPendingInjection = bestPath.tilesPendingInjection;
+
+            AddTileProxyToMainPathDictionary(bestPath.list.Select(x => x.tileProxy), bestPath.mainPathIndex);
 
             if (gen.ShouldSkipFrame(true)){
               yield return gen.GetRoomPause();
@@ -225,7 +285,13 @@ namespace DunGenPlus.Generation
       };
 
       var maxCount = gen.UseMaximumPairingAttempts ? new int?(gen.MaxPairingAttempts) : null;
+
+      DoorwayPairStopwatch.Reset();
+      DoorwayPairStopwatch.Start();
       var doorwayPairs = doorwayPairFinder.GetDoorwayPairs(maxCount);
+      DoorwayPairStopwatch.Stop();
+      DoorwayPairTime += (float)DoorwayPairStopwatch.Elapsed.TotalMilliseconds;
+
       var tilePlacementResult = new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
       while(doorwayPairs.Count > 0) {
         var pair = doorwayPairs.Dequeue();
@@ -270,6 +336,7 @@ namespace DunGenPlus.Generation
       if (tile == null) return new TilePlacementResultProxy(TilePlacementResult.NewTileIsNull);
 
       tile.Placement.PathDepth = pair.PreviousTile.Placement.PathDepth;
+      tile.Placement.NormalizedPathDepth = pair.PreviousTile.Placement.NormalizedPathDepth;
       tile.Placement.BranchDepth = pair.PreviousTile.Placement.IsOnMainPath ? 0 : (pair.PreviousTile.Placement.BranchDepth + 1);
 
       return new TilePlacementResultProxy(TilePlacementResult.None, tile, previousDoorway, tile.Doorways[index]);

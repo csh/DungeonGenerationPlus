@@ -22,6 +22,7 @@ namespace DunGenPlus.Generation {
   internal partial class DunGenPlusGenerator {
     public static DunGenExtender Instance { get; internal set; }
     public static DunGenExtenderProperties Properties { get; internal set; }
+
     public static bool Active { get; internal set; }
     public static bool ActiveAlternative { get; internal set; }
 
@@ -36,25 +37,25 @@ namespace DunGenPlus.Generation {
       var props = extender.Properties.Copy();
       var callback = new EventCallbackScenario(DevDebugManager.Instance);
       Instance.Events.OnModifyDunGenExtenderProperties.Invoke(props, callback);
-      props.SetupProperties(generator);
+      props.NormalNodeArchetypesProperties.SetupProperties(generator);
       Properties = props;
 
-      if (Properties.UseDungeonBounds) {
+      if (Properties.DungeonBoundsProperties.UseDungeonBounds) {
         generator.DebugRender = true;
-        generator.RestrictDungeonToBounds = Properties.UseDungeonBounds;
-        var bounds = Properties.GetDungeonBounds(generator.LengthMultiplier);
+        generator.RestrictDungeonToBounds = true;
+        var bounds = Properties.DungeonBoundsProperties.GetDungeonBounds(generator.LengthMultiplier);
         generator.TilePlacementBounds = bounds;
         Plugin.logger.LogDebug($"Dungeon Bounds: {bounds}");
       }
 
-      if (Properties.UseMaxShadowsRequestUpdate) {
-        Plugin.logger.LogDebug($"Updating HDRP asset: setting max shadows request to {Properties.MaxShadowsRequestAmount}");
+      if (Properties.MiscellaneousProperties.UseMaxShadowsRequestUpdate) {
+        Plugin.logger.LogDebug($"Updating HDRP asset: setting max shadows request to {Properties.MiscellaneousProperties.MaxShadowsRequestCount}");
         try {
           previousHDRPAsset = QualitySettings.renderPipeline as HDRenderPipelineAsset;
           newHDRPAsset = ScriptableObject.Instantiate(previousHDRPAsset);
       
           var settings = newHDRPAsset.currentPlatformRenderPipelineSettings;
-          settings.hdShadowInitParams.maxScreenSpaceShadowSlots = Properties.MaxShadowsRequestAmount;
+          settings.hdShadowInitParams.maxScreenSpaceShadowSlots = Properties.MiscellaneousProperties.MaxShadowsRequestCount;
           newHDRPAsset.currentPlatformRenderPipelineSettings = settings;
 
           QualitySettings.renderPipeline = newHDRPAsset;
@@ -83,9 +84,27 @@ namespace DunGenPlus.Generation {
       }
     }
 
+    private static Dictionary<TileProxy, int> tileProxyMainPath = new Dictionary<TileProxy, int>();
+
+    public static int GetMainPathIndexFromTileProxy(TileProxy tileProxy){
+      return tileProxyMainPath[tileProxy];
+    }
+
+    private static void AddTileProxyToMainPathDictionary(IEnumerable<TileProxy> tileProxies, int index) {  
+      var totalLength = (float)tileProxies.Last().Placement.PathDepth;
+      foreach(var t in tileProxies) {
+        tileProxyMainPath.Add(t, index);
+        t.Placement.NormalizedPathDepth = t.Placement.PathDepth / totalLength;
+      }
+    }
+
     public static IEnumerator GenerateAlternativeMainPaths(DungeonGenerator gen) {
         
-      var altCount = Properties.MainPathCount - 1;
+      var altCount = Properties.MainPathProperties.MainPathCount - 1;
+      tileProxyMainPath.Clear();
+
+      var mainRoomTilePrefab = Properties.MainPathProperties.MainRoomTilePrefab;
+      var copyNodeBehaviour = Properties.MainPathProperties.CopyNodeBehaviour;
 
       // default behaviour in case the multiple main paths are not considered
       if (!Active) {
@@ -103,7 +122,7 @@ namespace DunGenPlus.Generation {
         yield break;
       }
 
-      if (Properties.MainRoomTilePrefab == null) {
+      if (mainRoomTilePrefab == null) {
         Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to MainRoomTilePrefab being null");
         ActiveAlternative = false;
         yield return gen.Wait(gen.GenerateBranchPaths());
@@ -112,11 +131,13 @@ namespace DunGenPlus.Generation {
       }
 
       var allMainPathTiles = new List<List<TileProxy>>();
-      allMainPathTiles.Add(gen.proxyDungeon.MainPathTiles.ToList());
+      var firstMainPathTiles = gen.proxyDungeon.MainPathTiles.ToList();
+      allMainPathTiles.Add(firstMainPathTiles);
+      AddTileProxyToMainPathDictionary(firstMainPathTiles, 0);
 
       // main room is the true main room and not the fake room
       // this MUST have multiple doorways as you can imagine
-      var mainRoom = gen.proxyDungeon.MainPathTiles.FirstOrDefault(t => t.Prefab == Properties.MainRoomTilePrefab);
+      var mainRoom = gen.proxyDungeon.MainPathTiles.FirstOrDefault(t => t.Prefab == mainRoomTilePrefab);
       if (mainRoom == null) {
         Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to MainRoomTilePrefab not spawning on the main path");
         ActiveAlternative = false;
@@ -133,8 +154,8 @@ namespace DunGenPlus.Generation {
       // nodes
       var nodesSorted = gen.DungeonFlow.Nodes.OrderBy(n => n.Position).ToList();
       var startingNodeIndexCache = -1;
-      if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
-        startingNodeIndexCache = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == Properties.MainRoomTilePrefab));
+      if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
+        startingNodeIndexCache = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == mainRoomTilePrefab));
 
         if (startingNodeIndexCache == -1) {
           Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets");
@@ -158,16 +179,17 @@ namespace DunGenPlus.Generation {
         var archetypes = new List<DungeonArchetype>(targetLength);
 
         var newMainPathTiles = new List<TileProxy>();
-        newMainPathTiles.Add(mainRoom);
+        // this causes the main room to create three sets of branch paths
+        // newMainPathTiles.Add(mainRoom);
 
         int startingNodeIndex;
-        if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromMainPathPosition) {
+        if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromMainPathPosition) {
           var lineDepthRatio = Mathf.Clamp01(1f / (targetLength - 1));
           startingNodeIndex = nodesSorted.FindIndex(n => n.Position >= lineDepthRatio);
-        } else if (Properties.MainPathCopyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
+        } else if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
           startingNodeIndex = startingNodeIndexCache;
         } else {
-          Plugin.logger.LogError($"{Properties.MainPathCopyNodeBehaviour} is not yet defined. How did this happen?");
+          Plugin.logger.LogError($"{copyNodeBehaviour} is not yet defined. How did this happen?");
           startingNodeIndex = -1;
         }
 
@@ -189,9 +211,6 @@ namespace DunGenPlus.Generation {
             gen.previousLineSegment = lineAtDepth;
           }
 
-          // terrible solution but FUCK it
-          // and yet it worked
-          // this is how my last node cannot be a target of pruning
           GraphNode graphNode = null;
           DungeonArchetype archetype = null;
           foreach(var g in nodes) {
@@ -256,8 +275,8 @@ namespace DunGenPlus.Generation {
 					if (gen.ShouldSkipFrame(true)) yield return gen.GetRoomPause();
         }
 
+        AddTileProxyToMainPathDictionary(newMainPathTiles, b + 1);
         allMainPathTiles.Add(newMainPathTiles);
-
 			}
 
       // okay lets fix the fakes
@@ -277,7 +296,13 @@ namespace DunGenPlus.Generation {
         RandomizeLineArchetypes(gen, false);
         gen.proxyDungeon.MainPathTiles = allMainPathTiles[b];
 
-        if (Properties.UseBranchLoopBoost) yield return gen.Wait(GenerateBranchBoostedPaths(gen));
+        if (Properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim) {
+          GenerateBranchBoostedPathsStopWatch.Reset();
+          GenerateBranchBoostedPathsStopWatch.Start();
+          yield return gen.Wait(GenerateMultiBranchPaths(gen));
+          GenerateBranchBoostedPathsStopWatch.Stop();
+          GenerateBranchBoostedPathsTime += (float)GenerateBranchBoostedPathsStopWatch.Elapsed.TotalMilliseconds;
+        }
         else yield return gen.Wait(gen.GenerateBranchPaths());
       }
 

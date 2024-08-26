@@ -24,7 +24,7 @@ namespace DunGenPlus.Patches {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(RoundManager), "waitForScrapToSpawnToSync")]
     public static void waitForScrapToSpawnToSyncPatch (ref RoundManager __instance, ref NetworkObjectReference[] spawnedScrap, ref int[] scrapValues) {
-      if (DunGenPlusGenerator.Active && DunGenPlusGenerator.Properties.UseRandomGuaranteedScrapSpawn) {
+      if (DunGenPlusGenerator.Active && DunGenPlusGenerator.Properties.MiscellaneousProperties.UseRandomGuaranteedScrapSpawn) {
         var spawnedScrapList = spawnedScrap.ToList();
         var scrapValuesList = scrapValues.ToList();
 

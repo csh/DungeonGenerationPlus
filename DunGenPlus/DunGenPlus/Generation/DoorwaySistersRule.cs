@@ -20,7 +20,7 @@ namespace DunGenPlus.Generation {
     public static Dictionary<DoorwayProxy, Data> doorwayProxyDictionary;
 
     public static void UpdateCache(IEnumerable<DoorwayProxy> list){
-      if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.UseDoorwaySisters) return;
+      if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.MiscellaneousProperties.UseDoorwaySisters) return;
 
       Plugin.logger.LogDebug("Updating DoorwayProxy cache for DoorwaySistersRule");
       doorwayDictionary = new Dictionary<Doorway, Data>();
@@ -55,7 +55,7 @@ namespace DunGenPlus.Generation {
       //Plugin.logger.LogInfo($"{tileA.Prefab.name} <-> {tileB.Prefab.name}: {(doorwayA.Position - doorwayB.Position).sqrMagnitude}");
 
       if (!result) return false; 
-      if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.UseDoorwaySisters) return true;
+      if (!DunGenPlusGenerator.Active || !DunGenPlusGenerator.Properties.MiscellaneousProperties.UseDoorwaySisters) return true;
 
       var infoA = doorwayProxyDictionary[doorwayA].info;
       var infoB = doorwayProxyDictionary[doorwayB].info;

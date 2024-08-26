@@ -98,63 +98,73 @@ namespace DunGenPlus.DevTools.Panels {
       var mainPathTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       mainPathParentGameobject = mainPathTransform.gameObject;
       manager.CreateHeaderUIField(parentTransform, "Main Path");
-      manager.CreateIntSliderField(parentTransform, "Main Path Count", new IntParameter(properties.MainPathCount, 1, 10), SetMainPathCount);
+      manager.CreateIntSliderField(parentTransform, "Main Path Count", new IntParameter(properties.MainPathProperties.MainPathCount, 1, 10), SetMainPathCount);
       mainPathTransform.SetAsLastSibling();
-      manager.CreateTileOptionsUIField(mainPathTransform, "Main Room Tile Prefab", selectedAssetCache.tiles.dictionary[properties.MainRoomTilePrefab], SetMainRoom);
-      manager.CreateCopyNodeBehaviourOptionsUIField(mainPathTransform, "Copy Node Behaviour", (int)properties.MainPathCopyNodeBehaviour, SetCopyNodeBehaviour);
+      manager.CreateTileOptionsUIField(mainPathTransform, "Main Room Tile Prefab", selectedAssetCache.tiles.dictionary[properties.MainPathProperties.MainRoomTilePrefab], SetMainRoom);
+      manager.CreateCopyNodeBehaviourOptionsUIField(mainPathTransform, "Copy Node Behaviour", (int)properties.MainPathProperties.CopyNodeBehaviour, SetCopyNodeBehaviour);
       manager.CreateSpaceUIField(parentTransform);
 
       var dungeonBoundsTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       dungeonBoundsParentGameobject = dungeonBoundsTransform.gameObject;
       manager.CreateHeaderUIField(parentTransform, "Dungeon Bounds");
-      manager.CreateBoolInputField(parentTransform, "Use Dungeon Bounds", properties.UseDungeonBounds, SetUseDungeonBounds);
+      manager.CreateBoolInputField(parentTransform, "Use Dungeon Bounds", properties.DungeonBoundsProperties.UseDungeonBounds, SetUseDungeonBounds);
       dungeonBoundsTransform.SetAsLastSibling();
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Base", properties.DungeonSizeBase, SetDungeonBoundsSizeBase);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Factor", properties.DungeonSizeFactor, SetDungeonBoundsSizeFactor);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Offset", properties.DungeonPositionOffset, SetDungeonBoundsPosOffset);
-      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Pivot", properties.DungeonPositionPivot, SetDungeonBoundsPosPivot);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Base", properties.DungeonBoundsProperties.SizeBase, SetDungeonBoundsSizeBase);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Size Factor", properties.DungeonBoundsProperties.SizeFactor, SetDungeonBoundsSizeFactor);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Offset", properties.DungeonBoundsProperties.PositionOffset, SetDungeonBoundsPosOffset);
+      manager.CreateVector3InputField(dungeonBoundsTransform, "Position Pivot", properties.DungeonBoundsProperties.PositionPivot, SetDungeonBoundsPosPivot);
       manager.CreateSpaceUIField(parentTransform);
 
       var archetypesTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       archetypesNodesParentGameobject = archetypesTransform.gameObject;
       manager.CreateHeaderUIField(parentTransform, "Archetypes Normal Nodes");
-      manager.CreateBoolInputField(parentTransform, "Add Archetypes", properties.AddArchetypesToNormalNodes, SetAddArchetypes);
+      manager.CreateBoolInputField(parentTransform, "Add Archetypes", properties.NormalNodeArchetypesProperties.AddArchetypesToNormalNodes, SetAddArchetypes);
       archetypesTransform.SetAsLastSibling();
-      manager.CreateListUIField(archetypesTransform, "Normal Node Archetypes", properties.NormalNodeArchetypes);
+      manager.CreateListUIField(archetypesTransform, "Normal Node Archetypes", properties.NormalNodeArchetypesProperties.NormalNodeArchetypes);
       manager.CreateSpaceUIField(parentTransform);
 
       var forcedTilesTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       forcedTilesParentGameobject = forcedTilesTransform.gameObject;
       manager.CreateHeaderUIField(parentTransform, "Forced Tiles");
-      manager.CreateBoolInputField(parentTransform, "Use Forced Tiles", properties.UseForcedTiles, SetUseForcedTiles);
+      manager.CreateBoolInputField(parentTransform, "Use Forced Tiles", properties.ForcedTilesProperties.UseForcedTiles, SetUseForcedTiles);
       forcedTilesTransform.SetAsLastSibling();
-      manager.CreateListUIField(forcedTilesTransform, "Forced Tile Sets", properties.ForcedTileSets);
+      manager.CreateListUIField(forcedTilesTransform, "Forced Tile Sets", properties.ForcedTilesProperties.ForcedTileSets);
       manager.CreateSpaceUIField(parentTransform);
 
       var branchLoopTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       branchLoopBoostParentGameobject = branchLoopTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Branch Loop Boost");
-      manager.CreateBoolInputField(parentTransform, "Use Branch Loop Boost", properties.UseBranchLoopBoost, SetUseBranchLoopBoost);
+      manager.CreateHeaderUIField(parentTransform, "Branch Path Multi Sim");
+      manager.CreateBoolInputField(parentTransform, "Use Branch Path Multi Sim", properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim, SetUseBranchPathMultiSim);
       branchLoopTransform.SetAsLastSibling();
-      manager.CreateIntInputField(branchLoopTransform, "Tile Search Count", new IntParameter(properties.BranchLoopBoostTileSearch, 1, 100, 1), SetTileBoostSearch);
-      manager.CreateFloatInputField(branchLoopTransform, "Tile Boost Search", new FloatParameter(properties.BranchLoopBoostTileScale, 0f, 2f, 0f), SetTileBoostScale);
+      manager.CreateIntInputField(branchLoopTransform, "Simulation Count", new IntParameter(properties.BranchPathMultiSimulationProperties.SimulationCount, 1, 10, 1), SetSimulationCount);
+      manager.CreateFloatInputField(branchLoopTransform, "Length Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.LengthWeightScale, 0f, 2f, 0f), SetLengthScale);
+      manager.CreateFloatInputField(branchLoopTransform, "Norm. Length Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.NormalizedLengthWeightScale, 0f, 2f, 0f), SetNormalizedLengthScale);
       manager.CreateSpaceUIField(parentTransform);
 
-      var maxShadowsTransform = manager.CreateVerticalLayoutUIField(parentTransform);
-      maxShadowsParentGameobject = maxShadowsTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Max Shadows Request");
-      manager.CreateBoolInputField(parentTransform, "Use Max Shadows Request", properties.UseMaxShadowsRequestUpdate, SetUseMaxShadows);
-      maxShadowsTransform.SetAsLastSibling();
-      manager.CreateIntInputField(maxShadowsTransform, "Shadows Request Amount", new IntParameter(properties.MaxShadowsRequestAmount, 4, 20, 4), SetMaxShadowsAmount);
+      manager.CreateTextUIField(branchLoopTransform, "Same Path Connect");
+      manager.CreateFloatInputField(branchLoopTransform, "Base Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathBaseWeightScale, 0f, 2f, 0f), SamePathBaseConnectScale);
+      manager.CreateFloatInputField(branchLoopTransform, "Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathDepthWeightScale, 0f, 2f, 0f), SamePathConnectDepthScale);
+      manager.CreateFloatInputField(branchLoopTransform, "Norm. Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathNormalizedDepthWeightScale, 0f, 2f, 0f), SamePathConnectNormalizedDepthScale);
       manager.CreateSpaceUIField(parentTransform);
 
-      // miss
+      manager.CreateTextUIField(branchLoopTransform, "Diff Path Connect");
+      manager.CreateFloatInputField(branchLoopTransform, "Base Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathBaseWeightScale, 0f, 2f, 0f), DiffPathBaseConnectScale);
+      manager.CreateFloatInputField(branchLoopTransform, "Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathDepthWeightScale, 0f, 2f, 0f), DiffPathConnectDepthScale);
+      manager.CreateFloatInputField(branchLoopTransform, "Norm. Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathNormalizedDepthWeightScale, 0f, 2f, 0f), DiffPathConnectNormalizedDepthScale);
+      manager.CreateSpaceUIField(parentTransform);
+
       manager.CreateHeaderUIField(parentTransform, "Miscellaneous");
-      manager.CreateBoolInputField(parentTransform, "Use Doorway Sisters", properties.UseDoorwaySisters, SetUseDoorwaySisters);
-      manager.CreateBoolInputField(parentTransform, "Use Random Guaranteed Scrap", properties.UseRandomGuaranteedScrapSpawn, SetUseRandomGuaranteedScrap);
+      var maxShadowTransform = manager.CreateVerticalLayoutUIField(parentTransform);
+      maxShadowsParentGameobject = maxShadowTransform.gameObject;
+      manager.CreateBoolInputField(parentTransform, "Use Max Shadows Request", properties.MiscellaneousProperties.UseMaxShadowsRequestUpdate, SetUseMaxShadows);
+      manager.CreateIntInputField(maxShadowTransform, "Shadows Request Amount", new IntParameter(properties.MiscellaneousProperties.MaxShadowsRequestCount, 4, 20, 4), SetMaxShadowsCount);
+      maxShadowTransform.SetAsLastSibling();
+
+      manager.CreateBoolInputField(parentTransform, "Use Doorway Sisters", properties.MiscellaneousProperties.UseDoorwaySisters, SetUseDoorwaySisters);
+      manager.CreateBoolInputField(parentTransform, "Use Random Guaranteed Scrap", properties.MiscellaneousProperties.UseRandomGuaranteedScrapSpawn, SetUseRandomGuaranteedScrap);
       manager.CreateSpaceUIField(parentTransform);
 
-      dungeonBoundsHelperGameObject.SetActive(selectedExtenderer.Properties.UseDungeonBounds);
+      dungeonBoundsHelperGameObject.SetActive(selectedExtenderer.Properties.DungeonBoundsProperties.UseDungeonBounds);
       UpdateDungeonBoundsHelper();
     }
 
@@ -167,20 +177,20 @@ namespace DunGenPlus.DevTools.Panels {
     }
 
     public void SetMainPathCount(int value) {
-      selectedExtenderer.Properties.MainPathCount = value;
+      selectedExtenderer.Properties.MainPathProperties.MainPathCount = value;
       mainPathParentGameobject.SetActive(value > 1);
     }
 
     public void SetMainRoom(GameObject value) {
-      selectedExtenderer.Properties.MainRoomTilePrefab = value;
+      selectedExtenderer.Properties.MainPathProperties.MainRoomTilePrefab = value;
     }
 
     public void SetCopyNodeBehaviour(DunGenExtenderProperties.CopyNodeBehaviour value) {
-      selectedExtenderer.Properties.MainPathCopyNodeBehaviour = value;
+      selectedExtenderer.Properties.MainPathProperties.CopyNodeBehaviour = value;
     }
 
     public void SetUseDungeonBounds(bool state){
-      selectedExtenderer.Properties.UseDungeonBounds = state;
+      selectedExtenderer.Properties.DungeonBoundsProperties.UseDungeonBounds = state;
       dungeonBoundsHelperGameObject.SetActive(state);
       dungeonBoundsParentGameobject.SetActive(state);
     }
@@ -189,69 +199,98 @@ namespace DunGenPlus.DevTools.Panels {
       if (selectedExtenderer == null) return;
 
       var t = dungeonBoundsHelperGameObject.transform;
-      var result = selectedExtenderer.Properties.GetDungeonBounds(dungeon.Generator.LengthMultiplier);
+      var result = selectedExtenderer.Properties.DungeonBoundsProperties.GetDungeonBounds(dungeon.Generator.LengthMultiplier);
       t.localPosition = result.center;
       t.localScale = result.size;
     }
 
     public void SetDungeonBoundsSizeBase(Vector3 value) {
-      selectedExtenderer.Properties.DungeonSizeBase = value;
+      selectedExtenderer.Properties.DungeonBoundsProperties.SizeBase = value;
       UpdateDungeonBoundsHelper();
     }
 
     public void SetDungeonBoundsSizeFactor(Vector3 value) {
-      selectedExtenderer.Properties.DungeonSizeFactor = value;
+      selectedExtenderer.Properties.DungeonBoundsProperties.SizeFactor = value;
       UpdateDungeonBoundsHelper();
     }
 
     public void SetDungeonBoundsPosOffset(Vector3 value) {
-      selectedExtenderer.Properties.DungeonPositionOffset = value;
+      selectedExtenderer.Properties.DungeonBoundsProperties.PositionOffset = value;
       UpdateDungeonBoundsHelper();
     }
 
     public void SetDungeonBoundsPosPivot(Vector3 value) {
-      selectedExtenderer.Properties.DungeonPositionPivot = value;
+      selectedExtenderer.Properties.DungeonBoundsProperties.PositionPivot = value;
       UpdateDungeonBoundsHelper();
     }
 
     public void SetAddArchetypes(bool state){
-      selectedExtenderer.Properties.AddArchetypesToNormalNodes = state;
+      selectedExtenderer.Properties.NormalNodeArchetypesProperties.AddArchetypesToNormalNodes = state;
       archetypesNodesParentGameobject.SetActive(state);
     }
 
     public void SetUseForcedTiles(bool state){
-      selectedExtenderer.Properties.UseForcedTiles = state;
+      selectedExtenderer.Properties.ForcedTilesProperties.UseForcedTiles = state;
       forcedTilesParentGameobject.SetActive(state);
     }
 
-    public void SetUseBranchLoopBoost(bool state){
-      selectedExtenderer.Properties.UseBranchLoopBoost = state;
+    public void SetUseBranchPathMultiSim(bool state){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim = state;
       branchLoopBoostParentGameobject.SetActive(state);
     }
 
-    public void SetTileBoostSearch(int value){
-      selectedExtenderer.Properties.BranchLoopBoostTileSearch = value;
+    public void SetSimulationCount(int value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.SimulationCount = value;
     }
 
-    public void SetTileBoostScale(float value){
-      selectedExtenderer.Properties.BranchLoopBoostTileScale = value;
+    public void SetLengthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.LengthWeightScale = value;
     }
+
+    public void SetNormalizedLengthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.NormalizedLengthWeightScale = value;
+    }
+
+    public void SamePathBaseConnectScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.SamePathBaseWeightScale = value;
+    }
+
+    public void DiffPathBaseConnectScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.DiffPathBaseWeightScale = value;
+    }
+
+    public void SamePathConnectDepthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.SamePathDepthWeightScale = value;
+    }
+
+    public void DiffPathConnectDepthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.DiffPathDepthWeightScale = value;
+    }
+
+    public void SamePathConnectNormalizedDepthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.SamePathNormalizedDepthWeightScale = value;
+    }
+
+    public void DiffPathConnectNormalizedDepthScale(float value){
+      selectedExtenderer.Properties.BranchPathMultiSimulationProperties.DiffPathNormalizedDepthWeightScale = value;
+    }
+
 
     public void SetUseMaxShadows(bool state){
-      selectedExtenderer.Properties.UseMaxShadowsRequestUpdate = state;
+      selectedExtenderer.Properties.MiscellaneousProperties.UseMaxShadowsRequestUpdate = state;
       maxShadowsParentGameobject.SetActive(state);
     }
 
-    public void SetMaxShadowsAmount(int value){
-      selectedExtenderer.Properties.MaxShadowsRequestAmount = value;
+    public void SetMaxShadowsCount(int value){
+      selectedExtenderer.Properties.MiscellaneousProperties.MaxShadowsRequestCount = value;
     }
 
     public void SetUseDoorwaySisters(bool state){
-      selectedExtenderer.Properties.UseDoorwaySisters = state;
+      selectedExtenderer.Properties.MiscellaneousProperties.UseDoorwaySisters = state;
     }
 
     public void SetUseRandomGuaranteedScrap(bool state){
-      selectedExtenderer.Properties.UseRandomGuaranteedScrapSpawn = state;
+      selectedExtenderer.Properties.MiscellaneousProperties.UseRandomGuaranteedScrapSpawn = state;
     }
 
     public void RestoreOriginalState(){

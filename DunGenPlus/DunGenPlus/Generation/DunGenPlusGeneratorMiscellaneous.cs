@@ -10,9 +10,9 @@ namespace DunGenPlus.Generation {
   internal partial class DunGenPlusGenerator {
 
     public static void AddForcedTiles(DungeonGenerator gen){
-      if (!Properties.UseForcedTiles) return;
+      if (!Properties.ForcedTilesProperties.UseForcedTiles) return;
 
-      var forcedTileSetLists = Properties.ForcedTileSets.ToList();
+      var forcedTileSetLists = Properties.ForcedTilesProperties.ForcedTileSets.ToList();
       while(forcedTileSetLists.Count > 0){
         var item = forcedTileSetLists[forcedTileSetLists.Count - 1];
         
@@ -48,16 +48,16 @@ namespace DunGenPlus.Generation {
     }
 
     public static void RandomizeLineArchetypes(DungeonGenerator gen, bool randomizeMainPath){
-      if (!Properties.UseLineRandomizer) return;  
+      if (!Properties.LineRandomizerProperties.UseLineRandomizer) return;  
 
       var flow = Instance.DungeonFlow;
       var lines = flow.Lines;
       var tilesetsUsed = new Dictionary<TileSet, int>();
-      foreach(var t in Properties.LineRandomizerTileSets){
+      foreach(var t in Properties.LineRandomizerProperties.TileSets){
         tilesetsUsed.Add(t, 0);
       }
 
-      foreach(var a in Properties.LineRandomizerArchetypes) {
+      foreach(var a in Properties.LineRandomizerProperties.Archetypes) {
         var tiles = randomizeMainPath ? a.TileSets : a.BranchCapTileSets;
         RandomizeArchetype(gen, tiles, tilesetsUsed);
       }
@@ -65,9 +65,9 @@ namespace DunGenPlus.Generation {
 
     public static void RandomizeArchetype(DungeonGenerator gen, List<TileSet> targetTileSet, Dictionary<TileSet, int> tilesetsUsed){
       // get 3 random
-      var newTiles = Properties.LineRandomizerTileSets
+      var newTiles = Properties.LineRandomizerProperties.TileSets
         .OrderBy(t => tilesetsUsed[t] + gen.RandomStream.NextDouble())
-        .Take(Properties.LineRandomizerTakeCount);
+        .Take(Properties.LineRandomizerProperties.TileSetsTakeCount);
 
       var i = targetTileSet.Count - 1;
       foreach(var n in newTiles){
@@ -81,8 +81,8 @@ namespace DunGenPlus.Generation {
     public static DungeonArchetype ModifyMainBranchNodeArchetype(DungeonArchetype archetype, GraphNode node, RandomStream randomStream){
       if (!DunGenPlusGenerator.Active) return archetype;
       
-      if (Properties.AddArchetypesToNormalNodes && node.NodeType == NodeType.Normal) {
-        return Properties.GetRandomArchetype(node.Label, randomStream);;
+      if (Properties.NormalNodeArchetypesProperties.AddArchetypesToNormalNodes && node.NodeType == NodeType.Normal) {
+        return Properties.NormalNodeArchetypesProperties.GetRandomArchetype(node.Label, randomStream);;
       }
       return archetype;
     }

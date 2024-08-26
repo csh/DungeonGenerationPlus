@@ -12,6 +12,7 @@ using LethalLevelLoader;
 using UnityEngine.InputSystem;
 using DunGenPlus.DevTools.Panels;
 using DunGenPlus.DevTools.UIElements;
+using DunGenPlus.Generation;
 
 namespace DunGenPlus.DevTools {
   internal partial class DevDebugManager : MonoBehaviour {
@@ -101,6 +102,10 @@ namespace DunGenPlus.DevTools {
       selectedDungeonFlow.DungeonEvents.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
       DungeonManager.GlobalDungeonEvents?.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
       
+      DunGenPlusGenerator.GenerateBranchBoostedPathsTime = 0f;
+      DunGenPlusGenerator.GetTileResultTime = 0f;
+      DunGenPlusGenerator.DoorwayPairTime = 0f;
+      DunGenPlusGenerator.CalculateWeightTime = 0f;
       dungeon.Generate();
     }
 
@@ -155,6 +160,12 @@ namespace DunGenPlus.DevTools {
       textList.AppendLine($"Branch Path Time: {stats.BranchPathGenerationTime:F2} ms");
       textList.AppendLine($"Post Process Time: {stats.PostProcessTime:F2} ms");
       textList.AppendLine($"Total Time: {stats.TotalTime:F2} ms");
+
+      textList.AppendLine("");
+      textList.AppendLine($"GenerateBranch Time: {DunGenPlusGenerator.GenerateBranchBoostedPathsTime:F2} ms");
+      textList.AppendLine($"GetTileResult Time: {DunGenPlusGenerator.GetTileResultTime:F2} ms");
+      textList.AppendLine($"DoorwayPair Time: {DunGenPlusGenerator.DoorwayPairTime:F2} ms");
+      textList.AppendLine($"CalculateWeight Time: {DunGenPlusGenerator.CalculateWeightTime:F2} ms");
 
       statsTextMesh.text = textList.ToString();
     }

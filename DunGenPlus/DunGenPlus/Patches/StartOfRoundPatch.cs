@@ -46,8 +46,8 @@ namespace DunGenPlus.Patches {
           if (validStartTileTargets.TryGetValue(t.name, out var paths)) {
             var extender = API.CreateDunGenExtender(d);
             var props = extender.Properties;
-            props.MainPathCount = paths;
-            props.MainRoomTilePrefab = t;
+            props.MainPathProperties.MainPathCount = paths;
+            props.MainPathProperties.MainRoomTilePrefab = t;
 
             d.Length = new DunGen.IntRange(d.Length.Min / 2, d.Length.Max / 2);
             Plugin.logger.LogInfo($"New length: {d.Length}");
