@@ -1,4 +1,5 @@
 ﻿using DunGen;
+using DunGen.Graph;
 using DunGenPlus.Collections;
 using System;
 using System.Collections.Generic;
@@ -35,14 +36,16 @@ namespace DunGenPlus.DevTools.Panels.Collections {
     public readonly Collection<NullObject<GameObject>> tiles;
     public readonly Collection<NullObject<DungeonArchetype>> archetypes;
 
-    public DungeonFlowCacheAssets(DunGenExtender extender){
-      originalProperties = extender.Properties.Copy();
-        
+    public DungeonFlowCacheAssets(DungeonFlow dungeonFlow, DunGenExtender extender){
+      if (extender){
+        originalProperties = extender.Properties.Copy();
+      }
+      
       var tileSetsHashSet = new HashSet<NullObject<TileSet>>() { new NullObject<TileSet>(null) };
       var tilesHashSet = new HashSet<NullObject<GameObject>>() { new NullObject<GameObject>(null) };
       var archetypesHashSet = new HashSet<NullObject<DungeonArchetype>>() { new NullObject<DungeonArchetype>(null) };
 
-      foreach(var t in extender.DungeonFlow.Nodes) {
+      foreach(var t in dungeonFlow.Nodes) {
         var label = t.Label.ToLowerInvariant();
         if (label == "lchc gate" || label == "goal"){
           foreach(var n in t.TileSets.SelectMany(x => x.TileWeights.Weights)) {
@@ -78,14 +81,18 @@ namespace DunGenPlus.DevTools.Panels.Collections {
         }
       }
 
-      AddTileSets(extender.DungeonFlow.Nodes.SelectMany(n => n.TileSets));
-      AddArchetypes(extender.DungeonFlow.Lines.SelectMany(l => l.DungeonArchetypes));
-      AddArchetypes(extender.Properties.NormalNodeArchetypesProperties.NormalNodeArchetypes.SelectMany(l => l.archetypes));
-      AddTileSets(extender.Properties.ForcedTilesProperties.ForcedTileSets.SelectMany(l => l.Tilesets));
+      AddTileSets(dungeonFlow.Nodes.SelectMany(n => n.TileSets));
+      AddArchetypes(dungeonFlow.Lines.SelectMany(l => l.DungeonArchetypes));
+      AddTileSets(dungeonFlow.TileInjectionRules.Select(n => n.TileSet));
 
-      AddTiles(extender.Properties.AssetCacheTileList);
-      AddTileSets(extender.Properties.AssetCacheTileSetList);
-      AddArchetypes(extender.Properties.AssetCacheArchetypeList);
+      if (extender) {
+        AddArchetypes(extender.Properties.NormalNodeArchetypesProperties.NormalNodeArchetypes.SelectMany(l => l.archetypes));
+        AddTileSets(extender.Properties.ForcedTilesProperties.ForcedTileSets.SelectMany(l => l.Tilesets));
+
+        AddTiles(extender.Properties.AssetCacheTileList);
+        AddTileSets(extender.Properties.AssetCacheTileSetList);
+        AddArchetypes(extender.Properties.AssetCacheArchetypeList);
+      }
 
       tileSets = new Collection<NullObject<TileSet>>(tileSetsHashSet.ToList());
       tiles = new Collection<NullObject<GameObject>>(tilesHashSet.ToList());

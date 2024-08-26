@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DunGenPlus.Collections {
 
   // https://stackoverflow.com/questions/4632945/why-doesnt-dictionarytkey-tvalue-support-null-key
-  internal struct NullObject<T> where T: class{
+  internal struct NullObject<T> where T: UnityEngine.Object {
     public T Item;
     private bool isNull;
 
@@ -31,7 +31,7 @@ namespace DunGenPlus.Collections {
     }
 
     public override string ToString() {
-      return (Item != null) ? Item.ToString() : "NULL";
+      return (Item != null) ? Item.name : "NULL";
     }
 
     public override bool Equals(object obj) {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace DunGenPlus.DevTools.UIElements
@@ -16,8 +17,9 @@ namespace DunGenPlus.DevTools.UIElements
     public void SetupDropdown<T>(TitleParameter titleParameter, int baseValue, Action<T> setAction, Func<int, T> convertIndex, IEnumerable<string> options) {
       SetupBase(titleParameter);
 
+      var maxLength = (int)Mathf.LerpUnclamped(24f, 20f, layoutOffset / 24f);
       dropDown.options = options.Select(c => {
-        return new TMP_Dropdown.OptionData(c.Substring(0, Math.Min(24, c.Length)));
+        return new TMP_Dropdown.OptionData(c.Substring(0, Math.Min(maxLength, c.Length)));
       }).ToList();
 
       dropDown.onValueChanged.AddListener((t) => SetValue(setAction, convertIndex, t));

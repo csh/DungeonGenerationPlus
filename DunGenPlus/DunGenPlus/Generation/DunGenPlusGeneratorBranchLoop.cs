@@ -1,4 +1,5 @@
 ﻿using DunGen;
+using DunGenPlus.Collections;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,21 +48,12 @@ namespace DunGenPlus.Generation
         var count = list.Count;
         if (count == 0) return;
 
-        var lengthWeightScale = Properties.BranchPathMultiSimulationProperties.LengthWeightScale;
-        var normalizedWeightScale = Properties.BranchPathMultiSimulationProperties.NormalizedLengthWeightScale;
-
-        var samePathWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathBaseWeightScale;
-        var diffPathWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathBaseWeightScale;
-
-        var samePathDepthWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathDepthWeightScale;
-        var diffPathDepthWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathDepthWeightScale;
-
-        var samePathNormalizedDepthWeightScale = Properties.BranchPathMultiSimulationProperties.SamePathNormalizedDepthWeightScale;
-        var diffPathNormalizedDepthWeightScale = Properties.BranchPathMultiSimulationProperties.DiffPathNormalizedDepthWeightScale;
-
         var lastNode = list[count - 1];
-        weight += lastNode.tileProxy.Placement.BranchDepth * lengthWeightScale;
-        weight += lastNode.tileProxy.Placement.NormalizedBranchDepth * normalizedWeightScale;
+        var simProp = Properties.BranchPathMultiSimulationProperties;
+        var depth = lastNode.tileProxy.Placement.BranchDepth;
+        var normalizedDepth = lastNode.tileProxy.Placement.NormalizedBranchDepth;
+
+        weight += simProp.GetWeightBase(depth, normalizedDepth);
         var allDungeonDoorways = gen.proxyDungeon.AllTiles.SelectMany(t => t.Doorways);
         foreach(var t in list) {
           foreach(var d in allDungeonDoorways) {
@@ -77,9 +69,7 @@ namespace DunGenPlus.Generation
                 var normalDiff = Mathf.Abs(d.TileProxy.Placement.NormalizedPathDepth - l.TileProxy.Placement.NormalizedPathDepth);
                 var samePath = mainPathIndex == dIndex;
 
-                weight += samePath ? samePathWeightScale : diffPathWeightScale;
-                weight += diff * (samePath ? samePathDepthWeightScale : diffPathDepthWeightScale);
-                weight += normalDiff * (samePath ? samePathNormalizedDepthWeightScale : diffPathNormalizedDepthWeightScale);
+                weight += simProp.GetWeightPathConnection(samePath, diff, normalDiff);
               }
             }
           }

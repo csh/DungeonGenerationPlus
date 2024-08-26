@@ -17,11 +17,9 @@ using DunGenPlus.DevTools.Panels.Collections;
 namespace DunGenPlus.DevTools.Panels {
   internal class DunGenPlusPanel : BasePanel {
 
-    public static DunGenPlusPanel Instance { get; private set; }
+    public static DunGenPlusPanel Instance { get; internal set; }
 
-    internal DungeonFlow previousDungeonFlow;
     internal DunGenExtender selectedExtenderer;
-    internal DungeonFlowCacheAssets selectedAssetCache;
 
     [Header("Panel References")]
     public GameObject createGameObject;
@@ -38,8 +36,6 @@ namespace DunGenPlus.DevTools.Panels {
     private GameObject branchLoopBoostParentGameobject;
     private GameObject maxShadowsParentGameobject;
 
-    public Dictionary<DungeonFlow, DungeonFlowCacheAssets> cacheDictionary = new Dictionary<DungeonFlow, DungeonFlowCacheAssets>();
-
     public override void AwakeCall() {
       Instance = this;
 
@@ -48,47 +44,36 @@ namespace DunGenPlus.DevTools.Panels {
 
     public override void SetPanelVisibility(bool visible) {
       base.SetPanelVisibility(visible);
-
-      if (visible) UpdatePanel();
+      if (visible) UpdatePanel(false);
     }
 
     public void CreateDunGenPlusExtenderer(){
       var asset = API.CreateDunGenExtender(selectedDungeonFlow);
       selectedDungeonFlow.TileInjectionRules = new List<TileInjectionRule>();
       API.AddDunGenExtender(asset);
-      SetPanelVisibility(true);
-      UpdatePanel();
+
+      UpdatePanel(true);
     }
 
-    public void UpdatePanel(){
-      if (previousDungeonFlow == selectedDungeonFlow) return;
-
+    public void UpdatePanel(bool refreshPanel){
       var hasAsset = API.ContainsDungeonFlow(selectedDungeonFlow);
       selectedGameObject.SetActive(hasAsset);
       createGameObject.SetActive(!hasAsset);
 
-      ClearPanel();
-      if (hasAsset) {
-        SetupPanel(); 
-      } else {
-        previousDungeonFlow = null;
-        selectedExtenderer = null;
-        selectedAssetCache = null;
-        dungeonBoundsHelperGameObject.SetActive(false);
+      if (refreshPanel) {
+        ClearPanel();
+        if (hasAsset) {
+          SetupPanel(); 
+        } else {
+          selectedExtenderer = null;
+          dungeonBoundsHelperGameObject.SetActive(false);
+        }
       }
+      
     }
 
     public void SetupPanel() {
-      var dungeonFlow = selectedDungeonFlow;
-      var extender = API.GetDunGenExtender(dungeonFlow);
-      if (!cacheDictionary.TryGetValue(dungeonFlow, out var cache)) {
-        cache = new DungeonFlowCacheAssets(extender);
-        cacheDictionary.Add(dungeonFlow, cache);
-      }
-
-      previousDungeonFlow = dungeonFlow;
-      selectedExtenderer = extender;
-      selectedAssetCache = cache;
+      selectedExtenderer = API.GetDunGenExtender(selectedDungeonFlow);
 
       var parentTransform = selectedListGameObject.transform;
       var properties = selectedExtenderer.Properties;
@@ -101,7 +86,7 @@ namespace DunGenPlus.DevTools.Panels {
       manager.CreateIntSliderField(parentTransform, "Main Path Count", new IntParameter(properties.MainPathProperties.MainPathCount, 1, 10), SetMainPathCount);
       mainPathTransform.SetAsLastSibling();
       manager.CreateTileOptionsUIField(mainPathTransform, "Main Room Tile Prefab", selectedAssetCache.tiles.dictionary[properties.MainPathProperties.MainRoomTilePrefab], SetMainRoom);
-      manager.CreateCopyNodeBehaviourOptionsUIField(mainPathTransform, "Copy Node Behaviour", (int)properties.MainPathProperties.CopyNodeBehaviour, SetCopyNodeBehaviour);
+      manager.CreateEnumOptionsUIField<DunGenExtenderProperties.CopyNodeBehaviour>(mainPathTransform, "Copy Node Behaviour", (int)properties.MainPathProperties.CopyNodeBehaviour, SetCopyNodeBehaviour);
       manager.CreateSpaceUIField(parentTransform);
 
       var dungeonBoundsTransform = manager.CreateVerticalLayoutUIField(parentTransform);
@@ -139,19 +124,19 @@ namespace DunGenPlus.DevTools.Panels {
       manager.CreateIntInputField(branchLoopTransform, "Simulation Count", new IntParameter(properties.BranchPathMultiSimulationProperties.SimulationCount, 1, 10, 1), SetSimulationCount);
       manager.CreateFloatInputField(branchLoopTransform, "Length Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.LengthWeightScale, 0f, 2f, 0f), SetLengthScale);
       manager.CreateFloatInputField(branchLoopTransform, "Norm. Length Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.NormalizedLengthWeightScale, 0f, 2f, 0f), SetNormalizedLengthScale);
-      manager.CreateSpaceUIField(parentTransform);
+      manager.CreateSpaceUIField(branchLoopTransform);
 
       manager.CreateTextUIField(branchLoopTransform, "Same Path Connect");
       manager.CreateFloatInputField(branchLoopTransform, "Base Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathBaseWeightScale, 0f, 2f, 0f), SamePathBaseConnectScale);
       manager.CreateFloatInputField(branchLoopTransform, "Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathDepthWeightScale, 0f, 2f, 0f), SamePathConnectDepthScale);
       manager.CreateFloatInputField(branchLoopTransform, "Norm. Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.SamePathNormalizedDepthWeightScale, 0f, 2f, 0f), SamePathConnectNormalizedDepthScale);
-      manager.CreateSpaceUIField(parentTransform);
+      manager.CreateSpaceUIField(branchLoopTransform);
 
       manager.CreateTextUIField(branchLoopTransform, "Diff Path Connect");
       manager.CreateFloatInputField(branchLoopTransform, "Base Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathBaseWeightScale, 0f, 2f, 0f), DiffPathBaseConnectScale);
       manager.CreateFloatInputField(branchLoopTransform, "Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathDepthWeightScale, 0f, 2f, 0f), DiffPathConnectDepthScale);
       manager.CreateFloatInputField(branchLoopTransform, "Norm. Depth Weight Scale", new FloatParameter(properties.BranchPathMultiSimulationProperties.DiffPathNormalizedDepthWeightScale, 0f, 2f, 0f), DiffPathConnectNormalizedDepthScale);
-      manager.CreateSpaceUIField(parentTransform);
+      manager.CreateSpaceUIField(branchLoopTransform);
 
       manager.CreateHeaderUIField(parentTransform, "Miscellaneous");
       var maxShadowTransform = manager.CreateVerticalLayoutUIField(parentTransform);

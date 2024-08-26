@@ -179,6 +179,27 @@ namespace DunGenPlus.Collections {
     [Tooltip("The weight scale for the branch path's number of connections to other main paths. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to other main paths.")]
     public float DiffPathNormalizedDepthWeightScale = 2f;
 
+    public float GetWeightBase(float length, float normalizedLength){
+      var weight = 0f;
+      weight += length * LengthWeightScale;
+      weight += normalizedLength * NormalizedLengthWeightScale;
+      return weight;
+    }
+
+    public float GetWeightPathConnection(bool samePath, float depthDifference, float normalizedDepthDifference){
+      var weight = 0f;
+      if (samePath) {
+        weight += SamePathBaseWeightScale;
+        weight += depthDifference * SamePathDepthWeightScale;
+        weight += normalizedDepthDifference * SamePathNormalizedDepthWeightScale;
+      } else {
+        weight += DiffPathBaseWeightScale;
+        weight += depthDifference * DiffPathDepthWeightScale;
+        weight += normalizedDepthDifference * DiffPathNormalizedDepthWeightScale;
+      }
+      return weight;
+    }
+
     internal void CopyFrom(BranchPathMultiSimulationProperties props) {
       UseBranchPathMultiSim = props.UseBranchPathMultiSim;
       SimulationCount = props.SimulationCount;

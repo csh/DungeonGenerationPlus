@@ -52,7 +52,5 @@ namespace DunGenPlus.DevTools.UIElements {
       yInputField.text = value.y.ToString();
       zInputField.text = value.z.ToString();
     }
-
-
   }
 }

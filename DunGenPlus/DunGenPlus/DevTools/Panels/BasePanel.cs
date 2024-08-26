@@ -1,5 +1,6 @@
 ﻿using DunGen;
 using DunGen.Graph;
+using DunGenPlus.DevTools.Panels.Collections;
 using LethalLevelLoader;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,11 @@ namespace DunGenPlus.DevTools.Panels {
   internal abstract class BasePanel : MonoBehaviour {
 
     public DevDebugManager manager => DevDebugManager.Instance;
-    public RuntimeDungeon dungeon => manager.dungeon;
-    public ExtendedDungeonFlow selectedExtendedDungeonFlow => manager.selectedDungeonFlow;
-    public DungeonFlow selectedDungeonFlow => selectedExtendedDungeonFlow.DungeonFlow;
-    
+    protected RuntimeDungeon dungeon => manager.dungeon;
+    protected ExtendedDungeonFlow selectedExtendedDungeonFlow => manager.selectedExtendedDungeonFlow;
+    protected DungeonFlow selectedDungeonFlow => manager.selectedDungeonFlow;
+    protected DungeonFlowCacheAssets selectedAssetCache => manager.selectedAssetCache;
+
     [Header("Renders")]  
     public GameObject mainGameObject;
     public PanelTab tab;

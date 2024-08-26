@@ -14,7 +14,7 @@ using UnityEngine.UI;
 namespace DunGenPlus.DevTools.Panels {
   internal class MainPanel : BasePanel {
 
-    public static MainPanel Instance { get; private set; }
+    public static MainPanel Instance { get; internal set; }
 
     internal IntInputField seedInputField;
     internal TextUIElement lengthMultiplierField;

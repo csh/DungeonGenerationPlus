@@ -13,6 +13,7 @@ using UnityEngine.InputSystem;
 using DunGenPlus.DevTools.Panels;
 using DunGenPlus.DevTools.UIElements;
 using DunGenPlus.Generation;
+using DunGenPlus.DevTools.Panels.Collections;
 
 namespace DunGenPlus.DevTools {
   internal partial class DevDebugManager : MonoBehaviour {
@@ -25,7 +26,12 @@ namespace DunGenPlus.DevTools {
 
     public TMP_Dropdown dungeonFlowSelectionDropDown;
     private ExtendedDungeonFlow[] dungeonFlows;
-    internal ExtendedDungeonFlow selectedDungeonFlow;
+
+    internal ExtendedDungeonFlow selectedExtendedDungeonFlow;
+    internal DungeonFlow selectedDungeonFlow;
+    internal DungeonFlowCacheAssets selectedAssetCache;
+
+    internal Dictionary<DungeonFlow, DungeonFlowCacheAssets> cacheDictionary = new Dictionary<DungeonFlow, DungeonFlowCacheAssets>();
 
     public TextMeshProUGUI statusTextMesh;
     public TextMeshProUGUI statsTextMesh;
@@ -51,6 +57,7 @@ namespace DunGenPlus.DevTools {
       
       foreach(var p in panels) p.AwakeCall();
       OpenPanel(0);
+      UpdatePanels();
 
       dungeon.Generator.OnGenerationStatusChanged += OnDungeonFinished;
 
@@ -61,6 +68,12 @@ namespace DunGenPlus.DevTools {
 
     void OnDestroy(){
       Instance = null;
+      MainPanel.Instance = null;
+      DunFlowPanel.Instance = null;
+      DunGenPlusPanel.Instance = null;
+
+      Cursor.lockState = CursorLockMode.Locked;
+      Cursor.visible = false;
 
       EndDevCamera();
     }
@@ -86,10 +99,19 @@ namespace DunGenPlus.DevTools {
     }
 
     public void SelectDungeonFlow(int index){
-      selectedDungeonFlow = dungeonFlows[index];
-      dungeon.Generator.DungeonFlow = selectedDungeonFlow.DungeonFlow;
-      UpdatePlusPanel();
-      Plugin.logger.LogInfo($"Selecting {selectedDungeonFlow.DungeonName}");
+      selectedExtendedDungeonFlow = dungeonFlows[index];
+      selectedDungeonFlow = selectedExtendedDungeonFlow.DungeonFlow;
+      dungeon.Generator.DungeonFlow = selectedDungeonFlow;
+
+      if (!cacheDictionary.TryGetValue(selectedDungeonFlow, out var cache)) {
+        var extender = API.GetDunGenExtender(selectedDungeonFlow);
+        cache = new DungeonFlowCacheAssets(selectedDungeonFlow, extender);
+        cacheDictionary.Add(selectedDungeonFlow, cache);
+      }
+      selectedAssetCache = cache;
+
+      UpdatePanels();
+      Plugin.logger.LogInfo($"Selecting {selectedExtendedDungeonFlow.DungeonName}");
     }
 
     public void GenerateDungeon(){
@@ -99,7 +121,7 @@ namespace DunGenPlus.DevTools {
       fakeRoundManager = disabledGameObject.AddComponent<RoundManager>();
       fakeRoundManager.dungeonGenerator = dungeon;
 
-      selectedDungeonFlow.DungeonEvents.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
+      selectedExtendedDungeonFlow.DungeonEvents.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
       DungeonManager.GlobalDungeonEvents?.onBeforeDungeonGenerate?.Invoke(fakeRoundManager);
       
       DunGenPlusGenerator.GenerateBranchBoostedPathsTime = 0f;
@@ -171,21 +193,16 @@ namespace DunGenPlus.DevTools {
     }
 
     public void RecordNewSeed(int seed){
-      MainPanel.Instance.seedInputField.Set(seed);
+      MainPanel.Instance?.seedInputField.Set(seed);
     }
 
-    private void UpdatePlusPanel() {
-      foreach(var p in panels) {
-        var plusPanel = p as DunGenPlusPanel;
-        if (plusPanel) plusPanel.UpdatePanel();
-      }
+    private void UpdatePanels() {
+      DunFlowPanel.Instance?.UpdatePanel(true);
+      DunGenPlusPanel.Instance?.UpdatePanel(true);
     }
 
     public void UpdateDungeonBounds(){
-      foreach(var p in panels) {
-        var plusPanel = p as DunGenPlusPanel;
-        if (plusPanel) plusPanel.UpdateDungeonBoundsHelper();
-      }
+      DunGenPlusPanel.Instance?.UpdateDungeonBoundsHelper();
     }
 
     private void GetAllDungeonFlows(){

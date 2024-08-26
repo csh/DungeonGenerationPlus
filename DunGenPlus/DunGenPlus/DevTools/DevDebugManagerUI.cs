@@ -32,6 +32,8 @@ namespace DunGenPlus.DevTools {
     public GameObject boolInputFieldPrefab;
     public GameObject stringInputFieldPrefab;
     public GameObject vector3InputFieldPrefab;
+    public GameObject intRangeInputFieldPrefab;
+    public GameObject floatRangeInputFieldPrefab;
     public GameObject intSliderFieldPrefab;
 
     [Header("Special Fields")]
@@ -95,6 +97,20 @@ namespace DunGenPlus.DevTools {
       return field;
     }
 
+    public IntRangeInputField CreateIntRangeInputField(Transform parentTransform, TitleParameter titleParameter, IntRange baseValue, Action<IntRange> setAction){
+      var gameObject = Instantiate(intRangeInputFieldPrefab, parentTransform);
+      var field = gameObject.GetComponent<IntRangeInputField>();
+      field.SetupInputField(titleParameter, baseValue, setAction);
+      return field;
+    }
+
+    public FloatRangeInputField CreateFloatRangeInputField(Transform parentTransform, TitleParameter titleParameter, FloatRange baseValue, Action<FloatRange> setAction){
+      var gameObject = Instantiate(floatRangeInputFieldPrefab, parentTransform);
+      var field = gameObject.GetComponent<FloatRangeInputField>();
+      field.SetupInputField(titleParameter, baseValue, setAction);
+      return field;
+    }
+
     public IntSliderField CreateIntSliderField(Transform parentTransform, TitleParameter titleParameter, IntParameter intParameter, Action<int> setAction){
       var gameObject = Instantiate(intSliderFieldPrefab, parentTransform);
       var field = gameObject.GetComponent<IntSliderField>();
@@ -123,23 +139,23 @@ namespace DunGenPlus.DevTools {
     }
 
     public DropdownInputField CreateTileOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<GameObject> setAction){
-      var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
+      var assetCache = DevDebugManager.Instance.selectedAssetCache;
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tiles.list[i].Item, assetCache.tiles.options);
     }
 
     public DropdownInputField CreateTileSetsOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<TileSet> setAction){
-      var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
+      var assetCache = DevDebugManager.Instance.selectedAssetCache;
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tileSets.list[i].Item, assetCache.tileSets.options);
     }
 
     public DropdownInputField CreateArchetypeOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DungeonArchetype> setAction){
-      var assetCache = DunGenPlusPanel.Instance.selectedAssetCache;
+      var assetCache = DevDebugManager.Instance.selectedAssetCache;
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.archetypes.list[i].Item, assetCache.archetypes.options);
     }
 
-    public DropdownInputField CreateCopyNodeBehaviourOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<DunGenExtenderProperties.CopyNodeBehaviour> setAction){
-      var options = Enum.GetNames(typeof(DunGenExtenderProperties.CopyNodeBehaviour));
-      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (DunGenExtenderProperties.CopyNodeBehaviour)i, options);
+    public DropdownInputField CreateEnumOptionsUIField<T>(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<T> setAction) where T: Enum{
+      var options = Enum.GetNames(typeof(T));
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (T)(object)i, options);
     }
 
     public DropdownInputField CreateAnimationCurveOptionsUIField(Transform parentTransform, TitleParameter titleParameter, AnimationCurve baseValue, Action<AnimationCurve> setAction){
