@@ -146,6 +146,7 @@
     <Compile Include="Components\MainRoomDoorwayGroups.cs" />
     <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
     <Compile Include="Components\Scrap\RandomGuaranteedScrapSpawn.cs" />
+    <Compile Include="PluginConfig.cs" />
     <Compile Include="DevTools\DevDebugManager.cs" />
     <Compile Include="DevTools\DevDebugManagerUI.cs" />
     <Compile Include="DevTools\DevDebugOpen.cs" />

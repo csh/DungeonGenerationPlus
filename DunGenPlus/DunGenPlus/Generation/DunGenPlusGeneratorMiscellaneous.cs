@@ -29,7 +29,7 @@ namespace DunGenPlus.Generation {
         // try every tile, if we somehow fail than man that sucks
         foreach(var pair in allTiles){
           var t = pair.t;
-          var tileProxy = gen.AddTile(t, item.Tilesets, t.Placement.NormalizedDepth, null, TilePlacementResult.None);
+          var tileProxy = gen.AddTile(t, item.TileSets, t.Placement.NormalizedDepth, null, TilePlacementResult.None);
           if (tileProxy == null) continue;
 
           tileProxy.Placement.BranchDepth = t.Placement.BranchDepth;

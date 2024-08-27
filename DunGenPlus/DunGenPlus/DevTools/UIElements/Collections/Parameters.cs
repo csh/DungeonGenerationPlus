@@ -23,7 +23,7 @@ namespace DunGenPlus.DevTools.UIElements.Collections {
     }
 
     public static implicit operator TitleParameter(string text) => new TitleParameter(text);
-
+    public static implicit operator TitleParameter((string text, string hoverText) pair) => new TitleParameter(pair.text, pair.hoverText);
   }
 
   internal struct IntParameter {

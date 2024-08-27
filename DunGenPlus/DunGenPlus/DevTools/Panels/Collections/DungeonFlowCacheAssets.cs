@@ -86,8 +86,8 @@ namespace DunGenPlus.DevTools.Panels.Collections {
       AddTileSets(dungeonFlow.TileInjectionRules.Select(n => n.TileSet));
 
       if (extender) {
-        AddArchetypes(extender.Properties.NormalNodeArchetypesProperties.NormalNodeArchetypes.SelectMany(l => l.archetypes));
-        AddTileSets(extender.Properties.ForcedTilesProperties.ForcedTileSets.SelectMany(l => l.Tilesets));
+        AddArchetypes(extender.Properties.NormalNodeArchetypesProperties.NormalNodeArchetypes.SelectMany(l => l.Archetypes));
+        AddTileSets(extender.Properties.ForcedTilesProperties.ForcedTileSets.SelectMany(l => l.TileSets));
 
         AddTiles(extender.Properties.AssetCacheTileList);
         AddTileSets(extender.Properties.AssetCacheTileSetList);

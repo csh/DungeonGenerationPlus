@@ -22,6 +22,8 @@ namespace DunGenPlus.DevTools.Panels {
     internal ExtendedLevel[] levels;
     internal IEnumerable<string> levelOptions;
 
+    private GameObject asyncParentGameobject;
+
     public override void AwakeCall(){
       Instance = this;
 
@@ -32,21 +34,26 @@ namespace DunGenPlus.DevTools.Panels {
 
       manager.CreateHeaderUIField(parentTransform, "Dungeon Generator");
       seedInputField = manager.CreateIntInputField(parentTransform, "Seed", gen.Seed, SetSeed);
-      manager.CreateBoolInputField(parentTransform, "Randomize Seed", gen.ShouldRandomizeSeed, SetRandomSeed);
+      manager.CreateBoolInputField(parentTransform, ("Randomize Seed", "If true, creates and saves a new seed when generating the dungeon."), gen.ShouldRandomizeSeed, SetRandomSeed);
       manager.CreateSpaceUIField(parentTransform);
 
-      manager.CreateIntInputField(parentTransform, "Max Attempts", new IntParameter(gen.MaxAttemptCount, 0, 500, 0), SetMaxAttempts);
+      manager.CreateIntInputField(parentTransform, ("Max Attempts", "Maximum number of dungeon generation attempts before giving up."), new IntParameter(gen.MaxAttemptCount, 0, 500, 0), SetMaxAttempts);
       manager.CreateSpaceUIField(parentTransform);
 
-      manager.CreateBoolInputField(parentTransform, "Generate Async", gen.GenerateAsynchronously, SetGenerateAsync);
-      manager.CreateFloatInputField(parentTransform, "Max Async (ms)", new FloatParameter(gen.MaxAsyncFrameMilliseconds, 0f, float.MaxValue), SetMaxAsync);
-      manager.CreateFloatInputField(parentTransform, "Pause Between Rooms", new FloatParameter(gen.PauseBetweenRooms, 0f, float.MaxValue), SetPauseBetweenRooms);
+      var asyncTransform = manager.CreateVerticalLayoutUIField(parentTransform);
+      asyncParentGameobject = asyncTransform.gameObject;
+      manager.CreateBoolInputField(parentTransform, ("Generate Async", "If true, visually generates the dungeon tile by tile."), gen.GenerateAsynchronously, SetGenerateAsync);
+      manager.CreateFloatInputField(asyncTransform, "Max Async (ms)", new FloatParameter(gen.MaxAsyncFrameMilliseconds, 0f, float.MaxValue), SetMaxAsync);
+      manager.CreateFloatInputField(asyncTransform, "Pause Between Rooms", new FloatParameter(gen.PauseBetweenRooms, 0f, float.MaxValue), SetPauseBetweenRooms);
+      asyncTransform.SetAsLastSibling();
       manager.CreateSpaceUIField(parentTransform);
 
       manager.CreateHeaderUIField(parentTransform, "Levels");
       manager.CreateLevelOptionsUIField(parentTransform, "Level", 0, SetLevel);
-      lengthMultiplierField = manager.CreateTextUIField(parentTransform, "Length Multiplier");
+      lengthMultiplierField = manager.CreateTextUIField(parentTransform, ("Length Multiplier", "Dungeon size multiplier based on the level."));
       SetLevel(levels[0]);
+
+      asyncParentGameobject.SetActive(gen.GenerateAsynchronously);
     }
 
     public void SetSeed(int value) {
@@ -63,6 +70,7 @@ namespace DunGenPlus.DevTools.Panels {
 
     public void SetGenerateAsync(bool state) {
       dungeon.Generator.GenerateAsynchronously = state;
+      asyncParentGameobject.SetActive(state);
     }
 
     public void SetMaxAsync(float value) {

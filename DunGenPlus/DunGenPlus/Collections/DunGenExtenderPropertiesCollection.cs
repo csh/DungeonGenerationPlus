@@ -12,12 +12,16 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class MainPathProperties {
 
-    [Tooltip("The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.")]
+    internal const string MainPathCountTooltip = "The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.";
+    internal const string MainRoomTilePrefabTooltip = "The Tile prefab where the additional main paths will start from.\n\nCannot be null if MainPathCount is more than 1.";
+    internal const string CopyNodeBehaviourTooltip = "Defines how the nodes list is copied onto the additional main paths.\n\nCopyFromMainPathPosition: nodes will copy based on the MainRoomTilePrefab's position in the main path.\nCopyFromNodeList: nodes will copy based on the MainRoomTilePrefab's position in the node list + 1.";
+
+    [Tooltip(MainPathCountTooltip)]
     [Range(1, 9)]
     public int MainPathCount = 1;
-    [Tooltip("The Tile Prefab where the additional main paths will start from. Cannot be null if MainPathCount is more than 1.")]
+    [Tooltip(MainRoomTilePrefabTooltip)]
     public GameObject MainRoomTilePrefab;
-    [Tooltip("CopyFromMainPathPosition means that nodes will copy from the MainRoomTilePrefab's position in the main path.\n\nCopyFromNodeList means that nodes will copy from the MainRoomTilePrefab's location from the node list + 1.")]
+    [Tooltip(CopyNodeBehaviourTooltip)]
     public CopyNodeBehaviour CopyNodeBehaviour = CopyNodeBehaviour.CopyFromMainPathPosition;
 
     internal void CopyFrom(MainPathProperties props) {
@@ -36,15 +40,21 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class DungeonBoundsProperties {
 
-    [Tooltip("If enabled, restricts the dungeon's generation to the bounds described below.\n\nThis will help in condensing the dungeon, but it will increase the chance of dungeon generation failure (potentially guarantees failure if the bounds is too small).")]
+    internal const string UseDungeonBoundsTooltip = "If enabled, restricts the dungeon's generation to the bounds described below.\n\nThis will help in condensing the dungeon, but it will increase the chance of dungeon generation failure (potentially guarantees failure if the bounds is too small).";
+    internal const string SizeBaseTooltip = "The base size of the bounds.";
+    internal const string SizeFactorTooltip = "The factor that's multiplied with the base size AND the dungeon's size. The resulting value is added to the base size of the bounds.\n\n0 means that the bound size is not influenced by the dungeon's size and is therefore a constant.";
+    internal const string PositionOffsetTooltip = "The base positional offset of the bounds.";
+    internal const string PositionPivotTooltip = "The pivot of the bounds.";
+
+    [Tooltip(UseDungeonBoundsTooltip)]
     public bool UseDungeonBounds = false;
-    [Tooltip("The base size of the bounds.")]
+    [Tooltip(SizeBaseTooltip)]
     public Vector3 SizeBase = new Vector3(120f, 40f, 80f);
-    [Tooltip("The factor that's multiplied with the base size AND the dungeon's size. The resulting value is added to the base size of the bounds.\n\n0 means that the bound size is not influenced by the dungeon's size and is therefore a constant.")]
+    [Tooltip(SizeFactorTooltip)]
     public Vector3 SizeFactor = new Vector3(1f, 0.5f, 1f);
-    [Tooltip("The base positional offset of the bounds.")]
+    [Tooltip(PositionOffsetTooltip)]
     public Vector3 PositionOffset = Vector3.zero;
-    [Tooltip("The pivot of the bounds.")]
+    [Tooltip(PositionPivotTooltip)]
     public Vector3 PositionPivot = new Vector3(0.5f, 0.5f, 0.5f);
 
     internal void CopyFrom(DungeonBoundsProperties props) {
@@ -72,7 +82,9 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class NormalNodeArchetypesProperties {
 
-    [Tooltip("If enabled, adds archetypes to the normal nodes in the DungeonFlow.\n\nBy default, nodes cannot have branching paths since they don't have archetype references. This allows nodes to have branching paths.")]
+    internal const string AddArchetypesToNormalNodesTooltip = "If enabled, adds archetypes to the normal nodes in the DungeonFlow.\n\nBy default, nodes cannot have branching paths since they don't have archetype references. This allows nodes to have branching paths.";
+
+    [Tooltip(AddArchetypesToNormalNodesTooltip)]
     public bool AddArchetypesToNormalNodes = false;
     public List<NodeArchetype> NormalNodeArchetypes = new List<NodeArchetype>();
     internal Dictionary<string, NodeArchetype> _normalNodeArchetypesDictioanry;
@@ -98,22 +110,21 @@ namespace DunGenPlus.Collections {
 
       foreach (var n in NormalNodeArchetypes)
       {
-        if (_normalNodeArchetypesDictioanry.ContainsKey(n.label))
+        if (_normalNodeArchetypesDictioanry.ContainsKey(n.Label))
         {
-          Plugin.logger.LogError($"Label {n.label} already exists. Ignoring latest entry.");
+          Plugin.logger.LogError($"Label {n.Label} already exists. Ignoring latest entry.");
           continue;
         }
-        _normalNodeArchetypesDictioanry.Add(n.label, n);
+        _normalNodeArchetypesDictioanry.Add(n.Label, n);
 
-        if (string.IsNullOrWhiteSpace(n.label))
+        if (string.IsNullOrWhiteSpace(n.Label))
         {
           _defaultNodeArchetype = n;
         }
       }
     }
 
-    internal DungeonArchetype GetRandomArchetype(string label, RandomStream randomStream)
-    {
+    internal DungeonArchetype GetRandomArchetype(string label, RandomStream randomStream) {
       NodeArchetype node;
       if (!_normalNodeArchetypesDictioanry.TryGetValue(label, out node))
       {
@@ -122,7 +133,7 @@ namespace DunGenPlus.Collections {
 
       if (node != null)
       {
-        var archetypes = node.archetypes;
+        var archetypes = node.Archetypes;
         var count = archetypes.Count;
         if (count == 0) return null;
 
@@ -138,9 +149,12 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class ForcedTilesProperties {
 
-    [Tooltip("If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.\n\nCan only be used if MainPathCount > 1.")]
+    internal const string UseForcedTilesTooltip = "If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.\n\nCan only be used if MainPathCount > 1.";
+    internal const string ForcedTileSetsTooltip = "The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.";
+
+    [Tooltip(UseForcedTilesTooltip)]
     public bool UseForcedTiles = false;
-    [Tooltip("The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.")]
+    [Tooltip(ForcedTileSetsTooltip)]
     public List<ForcedTileSetList> ForcedTileSets = new List<ForcedTileSetList>();
 
     internal void CopyFrom(ForcedTilesProperties props) {
@@ -158,25 +172,46 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class BranchPathMultiSimulationProperties {
 
-    [Tooltip("If enabled, dungeon generation will simulate a number of branch paths for each branch path, then choose the best branch path based on its weight. The weight is decided by the following criteria. Slows down Branch Path Times by a second or two.")]
+    internal const string UseBranchPathMultiSimTooltip = "If enabled, dungeon generation will simulate a number of branch paths for each branch path, then choose the best branch path based on its weight. The weight is decided by the following criteria.\n\nCan slow down Branch Path Generation Times by a second or two.";
+    internal const string SimulationCountTooltip = "The number pf simulations per branch path.\n\nIncreasing this value can increase your chances of finding your best path, but will increase Branch Path Times and vice versa.";
+    internal const string LengthWeightScaleTooltip = "The weight scale for the branch path's length. The length of the branch path is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize very long branch paths.";
+    internal const string NormalizedLengthWeightScaleTooltip = "The weight scale for the branch path's normalized length. The normalized length (0 -> 1) of the branch path (PathLength / MaxPathLength) is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who meet their maximum path length.";
+
+    [Tooltip(UseBranchPathMultiSimTooltip)]
     public bool UseBranchPathMultiSim = false;
-    [Tooltip("The number pf simulations per branch path.\n\nIncreasing this value can increase your chances of finding your best path, but will increase Branch Path Times and vice versa.")]
+    [Tooltip(SimulationCountTooltip)]
     public int SimulationCount = 5;
-    [Tooltip("The weight scale for the branch path's length. The length of the branch path is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize very long branch paths.")]
+
+    [Space()]
+    [Tooltip(LengthWeightScaleTooltip)]
     public float LengthWeightScale = 0.125f;
-    [Tooltip("The weight scale for the branch path's normalized length. The normalized length (0 -> 1) of the branch path (PathLength / MaxPathLength) is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who meet their maximum path length.")]
+    [Tooltip(NormalizedLengthWeightScaleTooltip)]
     public float NormalizedLengthWeightScale = 1f;
-    [Tooltip("The weight scale for the branch path's number of connections to the same main path. The number of possible connections is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make path loops in their main path in general.")]
+
+    internal const string SamePathBaseWeightScaleTooltip = "The weight scale for the branch path's number of connections to the same main path. The number of possible connections is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make path loops in their main path in general.";
+    internal const string SamePathDepthWeightScaleTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to their main paths";
+    internal const string SamePathNormalizedDepthWeightTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to their main paths";
+
+    [Space()]
+    [Header("Same Path")]
+    [Tooltip(SamePathBaseWeightScaleTooltip)]
     public float SamePathBaseWeightScale = 0.125f;
-    [Tooltip("The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to their main paths")]
+    [Tooltip(SamePathDepthWeightScaleTooltip)]
     public float SamePathDepthWeightScale = 0.125f;
-    [Tooltip("The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to their main paths")]
+    [Tooltip(SamePathNormalizedDepthWeightTooltip)]
     public float SamePathNormalizedDepthWeightScale = 1f;
-    [Tooltip("The weight scale for the branch path's number of connections to other main paths. The number of possible connections is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make path loops to other main paths in general.")]
+
+    internal const string DiffPathBaseWeightScaleTooltip = "The weight scale for the branch path's number of connections to other main paths. The number of possible connections is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make path loops to other main paths in general.";
+    internal const string DiffPathDepthWeightScaleTooltip = "The weight scale for the branch path's number of connections to other main paths. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to other main paths.";
+    internal const string DiffPathNormalizedDepthWeightTooltip = "The weight scale for the branch path's number of connections to other main paths. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to other main paths.";
+
+    [Space()]
+    [Header("Different Path")]
+    [Tooltip(DiffPathBaseWeightScaleTooltip)]
     public float DiffPathBaseWeightScale = 0.25f;
-    [Tooltip("The weight scale for the branch path's number of connections to other main paths. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to other main paths.")]
+    [Tooltip(DiffPathDepthWeightScaleTooltip)]
     public float DiffPathDepthWeightScale = 0.25f;
-    [Tooltip("The weight scale for the branch path's number of connections to other main paths. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to other main paths.")]
+    [Tooltip(DiffPathNormalizedDepthWeightTooltip)]
     public float DiffPathNormalizedDepthWeightScale = 2f;
 
     public float GetWeightBase(float length, float normalizedLength){
@@ -223,13 +258,18 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class LineRandomizerProperties {
 
-    [Tooltip("If enabled, every archetype in LineRandomizerArchetypes will have the last LineRandomizerTakeCount tilesets replaced by a randomly selected set of tilesets from LineRandomizerTileSets. This applies for both archetype's TileSets and BranchCapTileSets.\n\nThis is designed for the scenario where dungeon generation takes a long time due to the combination of too many tiles and/or doorways in those tiles. This can reduce dungeon generation time while keeping some of the randomness of dungeon generation.\n\nAs stated previously, this WILL replace the last LineRandomizerTakeCount tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
+    internal const string UseLineRandomizerTooltip = "If enabled, every archetype in LineRandomizerArchetypes will have the last LineRandomizerTakeCount tilesets replaced by a randomly selected set of tilesets from LineRandomizerTileSets. This applies for both archetype's TileSets and BranchCapTileSets.\n\nThis is designed for the scenario where dungeon generation takes a long time due to the combination of too many tiles and/or doorways in those tiles. This can reduce dungeon generation time while keeping some of the randomness of dungeon generation.\n\nAs stated previously, this WILL replace the last LineRandomizerTakeCount tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.";
+    internal const string ArchetypesTooltip = "The archetypes whose tilesets will be replaced.\n\nThese archetypes should ideally used in the Lines section of DungeonFlow, but it's a free country.";
+    internal const string TileSetsTooltip = "The tilesets that will be used for replacement.";
+    internal const string TileSetsTakeCountTooltip = "The amount of tilesets that will be replaced from the archetypes, starting from the last element to the first element.\n\nAs stated previously, this WILL replace the tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.";
+
+    [Tooltip(UseLineRandomizerTooltip)]
     public bool UseLineRandomizer = false;
-    [Tooltip("The archetypes whose tilesets will be replaced.\n\nThese archetypes should ideally used in the Lines section of DungeonFlow, but it's a free country.")]
+    [Tooltip(ArchetypesTooltip)]
     public List<DungeonArchetype> Archetypes = new List<DungeonArchetype>();
-    [Tooltip("The tilesets that will be used for replacement.")]
+    [Tooltip(TileSetsTooltip)]
     public List<TileSet> TileSets = new List<TileSet>();
-    [Tooltip("The amount of tilesets that will be replaced from the archetypes, starting from the last element to the first element.\n\nAs stated previously, this WILL replace the tilesets in the archetype's TileSets and BranchCapTileSets. As such you must guarantee that those elements can be replaced.")]
+    [Tooltip(TileSetsTakeCountTooltip)]
     public int TileSetsTakeCount = 3;
 
     internal void CopyFrom(LineRandomizerProperties props) {
@@ -249,13 +289,18 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class MiscellaneousProperties {
 
-    [Tooltip("If enabled, updates the MaxShadowsRequest to MaxShadowsRequestAmount when your dungeon loads.\n\nThis is designed for the scenario where your dungeon, for whatever reason, has too many lights nearby and causes the annoying 'Max shadow requests count reached' warning to spam the logs.")]
+    internal const string UseMaxShadowsRequestUpdateTooltip = "If enabled, updates the MaxShadowsRequest to MaxShadowsRequestAmount when your dungeon loads.\n\nThis is designed for the scenario where your dungeon, for whatever reason, has too many lights nearby and causes the annoying 'Max shadow requests count reached' warning to spam the logs.";
+    internal const string MaxShadowsRequestCountTooltip = "The amount of MaxShadowsRequest.\n\n4 is the game's default value. I find 8 to be more than acceptable.";
+    internal const string UseDoorwaySistersTooltip = "If enabled, the DoorwaySisters component will become active.\n\nThe component prevents an intersecting doorway from generating if it's 'sister' doorway already generated and both doorways would lead to the same neighboring tile.\n\nThis is designed for the scenario where, two neighboring doorways would lead to the same tile, one doorway is a locked door and the other is an open doorway. This would defeat the purpose of the locked door, and such as, this feature exists if needed.\n\nThis feature slows down dungeon generation slightly when enabled.";
+    internal const string UseRandomGuaranteedScrapSpawnTooltip = "If enabled, the RandomGuaranteedScrapSpawn component will be come active.\n\nThe component allows random scrap of a specified minimum value to always be spawned on a specific point.";
+
+    [Tooltip(UseMaxShadowsRequestUpdateTooltip)]
     public bool UseMaxShadowsRequestUpdate = false;
-    [Tooltip("The amount of MaxShadowsRequest.\n\n4 is the game's default value. I find 8 to be more than acceptable.")]
+    [Tooltip(MaxShadowsRequestCountTooltip)]
     public int MaxShadowsRequestCount = 8;
-    [Tooltip("If enabled, the DoorwaySisters component will become active.\n\nThe component prevents an intersecting doorway from generating if it's 'sister' doorway already generated and both doorways would lead to the same neighboring tile.\n\nThis is designed for the scenario where, two neighboring doorways would lead to the same tile, one doorway is a locked door and the other is an open doorway. This would defeat the purpose of the locked door, and such as, this feature exists if needed.\n\nThis feature slows down dungeon generation slightly when enabled.")]
+    [Tooltip(UseDoorwaySistersTooltip)]
     public bool UseDoorwaySisters = false;
-    [Tooltip("If enabled, the RandomGuaranteedScrapSpawn component will be come active.\n\nThe component allows random scrap of a specified minimum value to always be spawned on a specific point.")]
+    [Tooltip(UseRandomGuaranteedScrapSpawnTooltip)]
     public bool UseRandomGuaranteedScrapSpawn = false;
 
     internal void CopyFrom(MiscellaneousProperties props) {

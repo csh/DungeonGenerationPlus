@@ -18,7 +18,9 @@ namespace DunGenPlus.Patches {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RoundManager), "Awake")]
     public static void AwakePatch(){
-      var devDebug = new GameObject("DevDebugOpen", typeof(DevDebugOpen));
+      if (PluginConfig.EnableDevDebugTools.Value){
+        var devDebug = new GameObject("DevDebugOpen", typeof(DevDebugOpen));
+      }
     }
 
     [HarmonyPrefix]
