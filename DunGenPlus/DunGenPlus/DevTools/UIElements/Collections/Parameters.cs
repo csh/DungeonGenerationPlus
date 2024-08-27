@@ -8,10 +8,18 @@ namespace DunGenPlus.DevTools.UIElements.Collections {
   internal struct TitleParameter {
     public string text;
     public float offset;
+    public string hoverText;
 
     public TitleParameter(string text, float offset = 0f) {
       this.text = text;
       this.offset = offset;
+      this.hoverText = null;
+    }
+
+    public TitleParameter(string text, string hoverText, float offset = 0f){
+      this.text = text;
+      this.offset = offset;
+      this.hoverText = hoverText;
     }
 
     public static implicit operator TitleParameter(string text) => new TitleParameter(text);

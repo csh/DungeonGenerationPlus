@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace DunGenPlus.DevTools.Panels {
   internal class DunFlowPanel : BasePanel {
@@ -49,6 +50,8 @@ namespace DunGenPlus.DevTools.Panels {
       manager.CreateSpaceUIField(parentTransform);
       manager.CreateListUIField(parentTransform, "Lines", selectedDungeonFlow.Lines);
       manager.CreateSpaceUIField(parentTransform);
+
+      branchPathParentGameobject.SetActive(selectedDungeonFlow.BranchMode == BranchMode.Global);
     }
 
     public void ClearPanel(){

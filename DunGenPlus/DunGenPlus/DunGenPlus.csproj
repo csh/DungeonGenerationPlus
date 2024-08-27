@@ -149,6 +149,8 @@
     <Compile Include="DevTools\DevDebugManager.cs" />
     <Compile Include="DevTools\DevDebugManagerUI.cs" />
     <Compile Include="DevTools\DevDebugOpen.cs" />
+    <Compile Include="DevTools\HoverUI\HoverUIChild.cs" />
+    <Compile Include="DevTools\HoverUI\HoverUIManager.cs" />
     <Compile Include="DevTools\Panels\BasePanel.cs" />
     <Compile Include="DevTools\Panels\Collections\DungeonFlowCacheAssets.cs" />
     <Compile Include="DevTools\Panels\DunFlowPanel.cs" />

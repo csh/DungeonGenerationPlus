@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using DunGenPlus.DevTools.UIElements;
 using DunGenPlus.DevTools.UIElements.Collections;
 using DunGenPlus.DevTools.Panels.Collections;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace DunGenPlus.DevTools.Panels {
   internal class DunGenPlusPanel : BasePanel {
@@ -149,7 +150,14 @@ namespace DunGenPlus.DevTools.Panels {
       manager.CreateBoolInputField(parentTransform, "Use Random Guaranteed Scrap", properties.MiscellaneousProperties.UseRandomGuaranteedScrapSpawn, SetUseRandomGuaranteedScrap);
       manager.CreateSpaceUIField(parentTransform);
 
-      dungeonBoundsHelperGameObject.SetActive(selectedExtenderer.Properties.DungeonBoundsProperties.UseDungeonBounds);
+      mainPathParentGameobject.SetActive(properties.MainPathProperties.MainPathCount > 1);
+      dungeonBoundsParentGameobject.SetActive(properties.DungeonBoundsProperties.UseDungeonBounds);
+      dungeonBoundsHelperGameObject.SetActive(properties.DungeonBoundsProperties.UseDungeonBounds);
+      archetypesNodesParentGameobject.SetActive(properties.NormalNodeArchetypesProperties.AddArchetypesToNormalNodes);
+      forcedTilesParentGameobject.SetActive(properties.ForcedTilesProperties.UseForcedTiles);
+      branchLoopBoostParentGameobject.SetActive(properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim);
+      maxShadowsParentGameobject.SetActive(properties.MiscellaneousProperties.UseMaxShadowsRequestUpdate);
+
       UpdateDungeonBoundsHelper();
     }
 

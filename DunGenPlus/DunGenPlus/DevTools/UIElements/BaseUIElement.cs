@@ -1,4 +1,5 @@
-﻿using DunGenPlus.DevTools.UIElements.Collections;
+﻿using DunGenPlus.DevTools.HoverUI;
+using DunGenPlus.DevTools.UIElements.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace DunGenPlus.DevTools.UIElements {
     public void SetupBase(TitleParameter titleParameter) {
       title = titleParameter.text;
       SetText(title);
+      SetHoverText(titleParameter.hoverText);
 
       layoutOffset = titleParameter.offset;
       if (layoutElement) {
@@ -32,6 +34,12 @@ namespace DunGenPlus.DevTools.UIElements {
       titleTextMesh.text = value;
     }
 
+    public void SetHoverText(string value){
+      var hoverChild = GetComponentInChildren<HoverUIChild>();
+      if (hoverChild) {
+        hoverChild.hoverText = value;
+      }
+    }
 
   }
 }
