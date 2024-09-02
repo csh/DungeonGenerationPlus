@@ -67,6 +67,7 @@ namespace DunGenPlus.Generation {
 
 
       DoorwayManager.ResetList();
+      DoorwayManager.onMainEntranceTeleportSpawnedEvent.ClearTemporaryActionList();
     }
 
     public static void Deactivate(){
@@ -99,14 +100,7 @@ namespace DunGenPlus.Generation {
     }
 
     public static IEnumerator GenerateAlternativeMainPaths(DungeonGenerator gen) {
-        
-      var altCount = Properties.MainPathProperties.MainPathCount - 1;
-      tileProxyMainPath.Clear();
-
-      var mainRoomTilePrefab = Properties.MainPathProperties.MainRoomTilePrefab;
-      var copyNodeBehaviour = Properties.MainPathProperties.CopyNodeBehaviour;
-
-      // default behaviour in case the multiple main paths are not considered
+      // default behaviour
       if (!Active) {
         ActiveAlternative = false;
         yield return gen.Wait(gen.GenerateBranchPaths());
@@ -114,19 +108,19 @@ namespace DunGenPlus.Generation {
         yield break;
       }
 
+      var altCount = Properties.MainPathProperties.MainPathCount - 1;
+      tileProxyMainPath.Clear();
+
+      var mainRoomTilePrefab = Properties.MainPathProperties.MainRoomTilePrefab;
+      var copyNodeBehaviour = Properties.MainPathProperties.CopyNodeBehaviour;
+
       if (altCount <= 0) {
-        Plugin.logger.LogInfo($"Switching to default dungeon branch generation due to MainPathCount being {altCount + 1}");
-        ActiveAlternative = false;
-        yield return gen.Wait(gen.GenerateBranchPaths());
-        ActiveAlternative = true;
+        yield return gen.Wait(GenerateBranchPaths(gen, $"MainPathCount being {altCount + 1}", LogLevel.Info));
         yield break;
       }
 
       if (mainRoomTilePrefab == null) {
-        Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to MainRoomTilePrefab being null");
-        ActiveAlternative = false;
-        yield return gen.Wait(gen.GenerateBranchPaths());
-        ActiveAlternative = true;
+        yield return gen.Wait(GenerateBranchPaths(gen, $"MainRoomTilePrefab being null", LogLevel.Warning));
         yield break;
       }
 
@@ -139,10 +133,7 @@ namespace DunGenPlus.Generation {
       // this MUST have multiple doorways as you can imagine
       var mainRoom = gen.proxyDungeon.MainPathTiles.FirstOrDefault(t => t.Prefab == mainRoomTilePrefab);
       if (mainRoom == null) {
-        Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to MainRoomTilePrefab not spawning on the main path");
-        ActiveAlternative = false;
-        yield return gen.Wait(gen.GenerateBranchPaths());
-        ActiveAlternative = true;
+        yield return gen.Wait(GenerateBranchPaths(gen, $"MainRoomTilePrefab not spawning on the main path", LogLevel.Warning));
         yield break;
       }
 
@@ -158,10 +149,7 @@ namespace DunGenPlus.Generation {
         startingNodeIndexCache = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == mainRoomTilePrefab));
 
         if (startingNodeIndexCache == -1) {
-          Plugin.logger.LogWarning($"Switching to default dungeon branch generation due to CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets");
-          ActiveAlternative = false;
-          yield return gen.Wait(gen.GenerateBranchPaths());
-          ActiveAlternative = true;
+          yield return gen.Wait(GenerateBranchPaths(gen, $"CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets", LogLevel.Warning));
           yield break;
         }
 
@@ -312,6 +300,16 @@ namespace DunGenPlus.Generation {
 
       AddForcedTiles(gen);
 		}
+
+    private static IEnumerator GenerateBranchPaths(DungeonGenerator gen, string message, LogLevel logLevel){
+      Plugin.logger.Log(logLevel, $"Switching to default dungeon branch generation: {message}");
+
+      ActiveAlternative = false;
+      yield return gen.Wait(gen.GenerateBranchPaths());
+      ActiveAlternative = true;
+
+      AddForcedTiles(gen);
+    }
 
     public static void FixDoorwaysToAllFloors(TileProxy mainRoom, MainRoomDoorwayGroups doorwayGroups) {
       var first = doorwayGroups.doorwayListFirst;

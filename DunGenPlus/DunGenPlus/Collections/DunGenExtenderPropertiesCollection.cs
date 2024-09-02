@@ -149,7 +149,7 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class ForcedTilesProperties {
 
-    internal const string UseForcedTilesTooltip = "If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.\n\nCan only be used if MainPathCount > 1.";
+    internal const string UseForcedTilesTooltip = "If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.";
     internal const string ForcedTileSetsTooltip = "The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.";
 
     [Tooltip(UseForcedTilesTooltip)]

@@ -45,16 +45,6 @@ namespace DunGenPlus.DevTools.Panels.Collections {
       var tilesHashSet = new HashSet<NullObject<GameObject>>() { new NullObject<GameObject>(null) };
       var archetypesHashSet = new HashSet<NullObject<DungeonArchetype>>() { new NullObject<DungeonArchetype>(null) };
 
-      foreach(var t in dungeonFlow.Nodes) {
-        var label = t.Label.ToLowerInvariant();
-        if (label == "lchc gate" || label == "goal"){
-          foreach(var n in t.TileSets.SelectMany(x => x.TileWeights.Weights)) {
-            n.Value.GetComponent<Tile>().RepeatMode = TileRepeatMode.Allow;
-          }
-        }
-
-      }
-
       void AddTiles(IEnumerable<GameObject> tiles){
         foreach(var x in tiles) {
           tilesHashSet.Add(x);
