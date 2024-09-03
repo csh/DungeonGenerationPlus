@@ -172,8 +172,8 @@ namespace DunGenPlus.Collections {
   [System.Serializable]
   public class BranchPathMultiSimulationProperties {
 
-    internal const string UseBranchPathMultiSimTooltip = "If enabled, dungeon generation will simulate a number of branch paths for each branch path, then choose the best branch path based on its weight. The weight is decided by the following criteria.\n\nCan slow down Branch Path Generation Times by a second or two.";
-    internal const string SimulationCountTooltip = "The number pf simulations per branch path.\n\nIncreasing this value can increase your chances of finding your best path, but will increase Branch Path Times and vice versa.";
+    internal const string UseBranchPathMultiSimTooltip = "If enabled, dungeon generation will simulate a number of paths for each branch path, then choose the path based on the highest weight and generate it. The weight is decided by the following criteria below.\n\nCan slow down Branch Path Generation Times by a second or two.";
+    internal const string SimulationCountTooltip = "The number of simulations per branch path.\n\nIncreasing this value can increase your chances of finding your desired path, but will increase Branch Path Times and vice versa.";
     internal const string LengthWeightScaleTooltip = "The weight scale for the branch path's length. The length of the branch path is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize very long branch paths.";
     internal const string NormalizedLengthWeightScaleTooltip = "The weight scale for the branch path's normalized length. The normalized length (0 -> 1) of the branch path (PathLength / MaxPathLength) is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who meet their maximum path length.";
 
@@ -189,8 +189,8 @@ namespace DunGenPlus.Collections {
     public float NormalizedLengthWeightScale = 1f;
 
     internal const string SamePathBaseWeightScaleTooltip = "The weight scale for the branch path's number of connections to the same main path. The number of possible connections is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make path loops in their main path in general.";
-    internal const string SamePathDepthWeightScaleTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to their main paths";
-    internal const string SamePathNormalizedDepthWeightTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to their main paths";
+    internal const string SamePathDepthWeightScaleTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make deep path loops to their main paths.";
+    internal const string SamePathNormalizedDepthWeightTooltip = "The weight scale for the branch path's number of connections to the same main path. For each possible connection, the main path normalized depth difference is multiplied by the scale and is added to the branch path's weight.\n\nIncreasing this value will prioritize branch paths who make generally deep path loops to their main paths.";
 
     [Space()]
     [Header("Same Path")]
