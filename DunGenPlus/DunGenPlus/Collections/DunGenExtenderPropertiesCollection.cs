@@ -15,6 +15,8 @@ namespace DunGenPlus.Collections {
     internal const string MainPathCountTooltip = "The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.";
     internal const string MainRoomTilePrefabTooltip = "The Tile prefab where the additional main paths will start from.\n\nCannot be null if MainPathCount is more than 1.";
     internal const string CopyNodeBehaviourTooltip = "Defines how the nodes list is copied onto the additional main paths.\n\nCopyFromMainPathPosition: nodes will copy based on the MainRoomTilePrefab's position in the main path.\nCopyFromNodeList: nodes will copy based on the MainRoomTilePrefab's position in the node list + 1.";
+    internal const string MainPathDetailsTooltip = "Tooltip";
+
 
     [Tooltip(MainPathCountTooltip)]
     [Range(1, 9)]
@@ -23,11 +25,21 @@ namespace DunGenPlus.Collections {
     public GameObject MainRoomTilePrefab;
     [Tooltip(CopyNodeBehaviourTooltip)]
     public CopyNodeBehaviour CopyNodeBehaviour = CopyNodeBehaviour.CopyFromMainPathPosition;
+    [Tooltip(MainPathDetailsTooltip)]
+    public List<MainPathExtender> MainPathDetails = new List<MainPathExtender>();
+
+    public MainPathExtender GetMainPathDetails(int index) {
+      var count = MainPathDetails.Count;
+      if (count == 0) return null;
+      if (index < count) return MainPathDetails[index];
+      return MainPathDetails[count - 1];
+    }
 
     internal void CopyFrom(MainPathProperties props) {
       MainPathCount = props.MainPathCount;
       MainRoomTilePrefab = props.MainRoomTilePrefab;
       CopyNodeBehaviour = props.CopyNodeBehaviour;
+      MainPathDetails = props.MainPathDetails;
     }
 
     internal MainPathProperties Copy() {

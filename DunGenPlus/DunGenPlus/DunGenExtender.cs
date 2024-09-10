@@ -10,7 +10,7 @@ using DunGenPlus.Collections;
 
 namespace DunGenPlus {
   
-  [CreateAssetMenu(fileName = "DunGenExtender", menuName = "DunGenExtender", order = 1)]
+  [CreateAssetMenu(fileName = "DunGen Extender", menuName = "DunGenExtender/DunGen Extender", order = 1)]
   public class DunGenExtender : ScriptableObject {
 
     [Tooltip("DunGenExtender will only influence this DungeonFlow")]

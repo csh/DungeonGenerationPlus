@@ -13,6 +13,8 @@ using DunGenPlus.Generation;
 using DunGenPlus.Managers;
 using DunGenPlus.Collections;
 using DunGenPlus.DevTools;
+using DunGen.Graph;
+using UnityEngine;
 
 namespace DunGenPlus.Patches {
   internal class DungeonGeneratorPatch {
@@ -22,6 +24,10 @@ namespace DunGenPlus.Patches {
     public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){
       if (DevDebugManager.Instance && !isRetry) {
         DevDebugManager.Instance.RecordNewSeed(__instance.ChosenSeed);
+      }
+
+      if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
+        DunGenPlusGenerator.SetCurrentMainPathExtender(0);
       }
     }
 
@@ -41,9 +47,6 @@ namespace DunGenPlus.Patches {
       }
 
     }
-
-
-
 
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]
@@ -76,6 +79,116 @@ namespace DunGenPlus.Patches {
       }
 
       archSequence.ReportComplete();
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]
+    public static IEnumerable<CodeInstruction> GenerateMainPathGetLineAtDepthPatch(IEnumerable<CodeInstruction> instructions){
+
+      var getLineFunction = typeof(DungeonFlow).GetMethod("GetLineAtDepth", BindingFlags.Instance | BindingFlags.Public);
+      var nodesField = typeof(DungeonFlow).GetField("Nodes", BindingFlags.Instance | BindingFlags.Public);
+
+      var lineSequence = new InstructionSequenceStandard("GetLineAtDepth");
+      lineSequence.AddBasic(OpCodes.Callvirt, getLineFunction);
+
+      var nodesSequence = new InstructionSequenceStandard("Nodes", false);
+      nodesSequence.AddBasic(OpCodes.Ldfld, nodesField);
+
+      foreach(var instruction in instructions){
+        if (lineSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("GetLineAtDepth", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+        if (nodesSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("GetNodes", BindingFlags.Static | BindingFlags.Public); 
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+
+        yield return instruction;
+      }
+
+      lineSequence.ReportComplete();
+      nodesSequence.ReportComplete();
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(BranchCountHelper), "ComputeBranchCounts")]
+    public static IEnumerable<CodeInstruction> ComputeBranchCountsPatch(IEnumerable<CodeInstruction> instructions){
+
+      var branchModeField = typeof(DungeonFlow).GetField("BranchMode", BindingFlags.Instance | BindingFlags.Public);
+
+      var branchSequence = new InstructionSequenceStandard("BranchMode", false);
+      branchSequence.AddBasic(OpCodes.Ldfld, branchModeField);
+
+      foreach(var instruction in instructions){
+        if (branchSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("GetBranchMode", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+        yield return instruction;
+      }
+
+      branchSequence.ReportComplete();
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(BranchCountHelper), "ComputeBranchCountsGlobal")]
+    public static IEnumerable<CodeInstruction> ComputeBranchCountsGlobalPatch(IEnumerable<CodeInstruction> instructions){
+
+      var branchCountField = typeof(DungeonFlow).GetField("BranchCount", BindingFlags.Instance | BindingFlags.Public);
+
+      var branchSequence = new InstructionSequenceStandard("BranchCount");
+      branchSequence.AddBasic(OpCodes.Ldfld, branchCountField);
+
+      foreach(var instruction in instructions){
+        if (branchSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("GetBranchCount", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+        yield return instruction;
+      }
+
+      branchSequence.ReportComplete();
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate", MethodType.Enumerator)]
+    public static IEnumerable<CodeInstruction> InnerGenerateLengthPatch(IEnumerable<CodeInstruction> instructions){
+
+      var lengthField = typeof(DungeonFlow).GetField("Length", BindingFlags.Instance | BindingFlags.Public);
+
+      var lengthSequence = new InstructionSequenceStandard("Length");
+      lengthSequence.AddBasic(OpCodes.Ldfld, lengthField);
+
+      foreach(var instruction in instructions){
+        if (lengthSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("GetLength", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+        yield return instruction;
+      }
+
+      lengthSequence.ReportComplete();
     }
 
     /*

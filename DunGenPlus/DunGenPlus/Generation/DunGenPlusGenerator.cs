@@ -142,42 +142,39 @@ namespace DunGenPlus.Generation {
       // index of MaxValue is how we tell which doorway proxy is fake
       var fakeDoorwayProxy = new DoorwayProxy(mainRoom, int.MaxValue, mainRoom.doorways[0].DoorwayComponent, Vector3.zero, Quaternion.identity);
 
-      // nodes
-      var nodesSorted = gen.DungeonFlow.Nodes.OrderBy(n => n.Position).ToList();
-      var startingNodeIndexCache = -1;
-      if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
-        startingNodeIndexCache = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == mainRoomTilePrefab));
-
-        if (startingNodeIndexCache == -1) {
-          yield return gen.Wait(GenerateBranchPaths(gen, $"CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets", LogLevel.Warning));
-          yield break;
-        }
-
-        startingNodeIndexCache++;
-      }
-
       //FixDoorwaysToAllFloors(mainRoom, doorwayGroups);
 
       gen.ChangeStatus(GenerationStatus.MainPath);
 
 			for (var b = 0; b < altCount; ++b) {
+        SetCurrentMainPathExtender(b + 1);
         RandomizeLineArchetypes(gen, true);
+
         var previousTile = mainRoom;
-        var targetLength = Mathf.RoundToInt(gen.DungeonFlow.Length.GetRandom(gen.RandomStream) * gen.LengthMultiplier);
+        var targetLength = Mathf.RoundToInt(GetLength(gen.DungeonFlow).GetRandom(gen.RandomStream) * gen.LengthMultiplier);
         var archetypes = new List<DungeonArchetype>(targetLength);
 
         var newMainPathTiles = new List<TileProxy>();
         // this causes the main room to create three sets of branch paths
         // newMainPathTiles.Add(mainRoom);
 
+        // nodes
+        var nodesSorted = GetNodes(gen.DungeonFlow).OrderBy(n => n.Position).ToList();
         int startingNodeIndex;
-        if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromMainPathPosition) {
+        if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
+          var index = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == mainRoomTilePrefab));
+
+          if (index == -1) {
+            yield return gen.Wait(GenerateBranchPaths(gen, $"CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets", LogLevel.Warning));
+            yield break;
+          }
+
+          startingNodeIndex = index + 1;
+        } else if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromMainPathPosition) {
           var lineDepthRatio = Mathf.Clamp01(1f / (targetLength - 1));
           startingNodeIndex = nodesSorted.FindIndex(n => n.Position >= lineDepthRatio);
-        } else if (copyNodeBehaviour == DunGenExtenderProperties.CopyNodeBehaviour.CopyFromNodeList) {
-          startingNodeIndex = startingNodeIndexCache;
         } else {
-          Plugin.logger.LogError($"{copyNodeBehaviour} is not yet defined. How did this happen?");
+          Plugin.logger.LogFatal($"{copyNodeBehaviour} is not yet defined. Really really bad");
           startingNodeIndex = -1;
         }
 
@@ -188,7 +185,7 @@ namespace DunGenPlus.Generation {
         // and GenerateBranch() code
         for(var t = 1; t < targetLength; ++t){
           var lineDepthRatio = Mathf.Clamp01((float)t / (targetLength - 1));
-          var lineAtDepth = gen.DungeonFlow.GetLineAtDepth(lineDepthRatio);
+          var lineAtDepth = GetLineAtDepth(gen.DungeonFlow, lineDepthRatio);
           if (lineAtDepth == null){
             yield return gen.Wait(gen.InnerGenerate(true));
             yield break;
@@ -281,6 +278,7 @@ namespace DunGenPlus.Generation {
       // this is major trickery and it works still
       for(var b = 0; b < altCount + 1; ++b){
         Plugin.logger.LogDebug($"Branch {b}");
+        SetCurrentMainPathExtender(b);
         RandomizeLineArchetypes(gen, false);
         gen.proxyDungeon.MainPathTiles = allMainPathTiles[b];
 
@@ -305,6 +303,7 @@ namespace DunGenPlus.Generation {
       Plugin.logger.Log(logLevel, $"Switching to default dungeon branch generation: {message}");
 
       ActiveAlternative = false;
+      SetCurrentMainPathExtender(0);
       yield return gen.Wait(gen.GenerateBranchPaths());
       ActiveAlternative = true;
 
