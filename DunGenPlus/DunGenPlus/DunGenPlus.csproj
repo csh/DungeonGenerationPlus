@@ -201,7 +201,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "C:\Users\Jose Garcia\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\SDM Debug\BepInEx\plugins\Alice-DungeonGenerationPlus\$(TargetName).dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "C:\Users\Jose Garcia\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\SDM Debug\BepInEx\plugins\Alice-DungeonGenerationPlus\$(TargetName).dll"
+copy "$(TargetPath)" "D:\Previous Computer\Desktop\LethalCompany Modding\Libraries\$(TargetName).dll"
+copy "$(TargetPath)" "D:\Previous Computer\Desktop\LethalCompany Modding\DunGenPlus\DunGenPlus\DunGenPlus\DunGenPlus\$(TargetName).dll"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>copy "D:\Previous Computer\Desktop\LethalCompany Modding\Unity Template\Assets\AssetBundles\dungen" "$(ProjectDir)\dungen"</PreBuildEvent>
