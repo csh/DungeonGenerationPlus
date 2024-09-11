@@ -129,6 +129,7 @@
   <ItemGroup>
     <Compile Include="API.cs" />
     <Compile Include="Assets.cs" />
+    <Compile Include="Attributes\ReadOnlyAttribute.cs" />
     <Compile Include="Collections\DunGenExtenderEvents.cs" />
     <Compile Include="Collections\DunGenExtenderPropertiesCollection.cs" />
     <Compile Include="Collections\ExtenderEvent.cs" />

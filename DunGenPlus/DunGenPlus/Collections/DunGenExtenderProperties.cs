@@ -23,25 +23,18 @@ namespace DunGenPlus.Collections {
       CopyFromNodeList
     }
 
-    [Header("Main Path")]
     public MainPathProperties MainPathProperties = new MainPathProperties();
     
-    [Header("Dungeon Bounds")]
     public DungeonBoundsProperties DungeonBoundsProperties = new DungeonBoundsProperties();
 
-    [Header("Normal Nodes Archetypes")]
     public NormalNodeArchetypesProperties NormalNodeArchetypesProperties = new NormalNodeArchetypesProperties();
 
-    [Header("Forced Tiles")]
     public ForcedTilesProperties ForcedTilesProperties = new ForcedTilesProperties();
 
-    [Header("Branch Path Multi Simulation")]
     public BranchPathMultiSimulationProperties BranchPathMultiSimulationProperties = new BranchPathMultiSimulationProperties();
 
-    [Header("Line Randomizer")]
     public LineRandomizerProperties LineRandomizerProperties = new LineRandomizerProperties();
 
-    [Header("Miscellaneous")]
     public MiscellaneousProperties MiscellaneousProperties = new MiscellaneousProperties();
 
     [Header("Asset Cache (FOR DEV DEBUG PURPOSES ONLY)")]

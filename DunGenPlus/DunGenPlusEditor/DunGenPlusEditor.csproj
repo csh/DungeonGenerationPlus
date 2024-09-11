@@ -72,8 +72,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DunGenExtenderPropertyDrawer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyDrawerUtility.cs" />
     <Compile Include="PropertyOverridePropertyDrawer.cs" />
+    <Compile Include="ReadOnlyPropertyDrawer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -33,6 +33,7 @@ namespace DunGenPlus {
     public PropertyOverride<List<GraphLine>> Lines = new PropertyOverride<List<GraphLine>>(false, new List<GraphLine>());
 
     [Header("DEV ONLY: DON'T TOUCH")]
+    [Attributes.ReadOnly]
     public string Version = "0";
 
     public static IntRange GetLength(MainPathExtender extender, DungeonFlow flow) {

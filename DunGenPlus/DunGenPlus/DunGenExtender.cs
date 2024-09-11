@@ -19,6 +19,7 @@ namespace DunGenPlus {
     public DunGenExtenderEvents Events = new DunGenExtenderEvents();
 
     [Header("DEV ONLY: DON'T TOUCH")]
+    [Attributes.ReadOnly]
     public string Version = "0";
     internal bool Active = true;
 
