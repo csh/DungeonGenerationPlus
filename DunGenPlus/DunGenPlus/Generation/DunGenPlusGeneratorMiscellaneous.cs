@@ -1,5 +1,6 @@
 ﻿using DunGen;
 using DunGen.Graph;
+using DunGenPlus.DevTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace DunGenPlus.Generation {
   internal partial class DunGenPlusGenerator {
 
     public static void AddForcedTiles(DungeonGenerator gen){
-      if (!Properties.ForcedTilesProperties.UseForcedTiles) return;
+      if (!Properties.AdditionalTilesProperties.UseAdditionalTiles) return;
 
-      var forcedTileSetLists = Properties.ForcedTilesProperties.ForcedTileSets.ToList();
+      var forcedTileSetLists = Properties.AdditionalTilesProperties.AdditionalTileSets.ToList();
       while(forcedTileSetLists.Count > 0){
         var item = forcedTileSetLists[forcedTileSetLists.Count - 1];
         
@@ -85,6 +86,10 @@ namespace DunGenPlus.Generation {
         return Properties.NormalNodeArchetypesProperties.GetRandomArchetype(node.Label, randomStream);;
       }
       return archetype;
+    }
+
+    public static bool AllowRetryStop(bool defaultState){
+      return defaultState || DevDebugManager.IsActive;
     }
 
   }

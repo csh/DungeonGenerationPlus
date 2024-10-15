@@ -29,6 +29,10 @@ namespace DunGenPlus.Collections {
 
     public NormalNodeArchetypesProperties NormalNodeArchetypesProperties = new NormalNodeArchetypesProperties();
 
+    public AdditionalTilesProperties AdditionalTilesProperties = new AdditionalTilesProperties();
+
+    [HideInInspector]
+    [Obsolete("Variable field renamed to AdditionalTilesProperties. This field will be removed in future updates.")]
     public ForcedTilesProperties ForcedTilesProperties = new ForcedTilesProperties();
 
     public BranchPathMultiSimulationProperties BranchPathMultiSimulationProperties = new BranchPathMultiSimulationProperties();
@@ -42,19 +46,26 @@ namespace DunGenPlus.Collections {
     public List<TileSet> AssetCacheTileSetList = new List<TileSet>();
     public List<DungeonArchetype> AssetCacheArchetypeList = new List<DungeonArchetype>();
 
-    internal void CopyFrom(DunGenExtenderProperties props) {
+    internal void CopyFrom(DunGenExtenderProperties props, string version) {
       MainPathProperties = props.MainPathProperties.Copy();
       DungeonBoundsProperties = props.DungeonBoundsProperties.Copy();
       NormalNodeArchetypesProperties = props.NormalNodeArchetypesProperties.Copy();
+
+      // for backwards support
       ForcedTilesProperties = props.ForcedTilesProperties.Copy();
+      AdditionalTilesProperties = props.AdditionalTilesProperties.Copy();
+      if (version == "0") {
+        AdditionalTilesProperties.CopyFrom(ForcedTilesProperties);
+      }
+
       BranchPathMultiSimulationProperties = props.BranchPathMultiSimulationProperties.Copy();
       LineRandomizerProperties = props.LineRandomizerProperties.Copy();
       MiscellaneousProperties = props.MiscellaneousProperties.Copy();
     }
 
-    internal DunGenExtenderProperties Copy() {
+    internal DunGenExtenderProperties Copy(string version) {
       var copy = new DunGenExtenderProperties();
-      copy.CopyFrom(this);
+      copy.CopyFrom(this, version);
       return copy;
     }
 

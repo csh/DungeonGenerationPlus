@@ -20,8 +20,17 @@ namespace DunGenPlus {
 
     [Header("DEV ONLY: DON'T TOUCH")]
     [Attributes.ReadOnly]
-    public string Version = "0";
+    public string Version = CURRENT_VERSION;
     internal bool Active = true;
+
+    public static readonly string CURRENT_VERSION = "1";
+
+    public void OnValidate(){
+      if (Version == "0"){
+        Properties.AdditionalTilesProperties.CopyFrom(Properties.ForcedTilesProperties);
+        Version = "1";
+      }
+    }
 
   }
 }

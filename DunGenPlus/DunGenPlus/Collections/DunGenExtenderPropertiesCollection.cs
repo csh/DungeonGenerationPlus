@@ -181,6 +181,34 @@ namespace DunGenPlus.Collections {
     }
   }
 
+    [System.Serializable]
+  public class AdditionalTilesProperties {
+
+    internal const string UseAdditionalTilesTooltip = "If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.";
+    internal const string AdditionalTileSetsTooltip = "The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.";
+
+    [Tooltip(UseAdditionalTilesTooltip)]
+    public bool UseAdditionalTiles = false;
+    [Tooltip(AdditionalTileSetsTooltip)]
+    public List<AdditionalTileSetList> AdditionalTileSets = new List<AdditionalTileSetList>();
+
+    internal void CopyFrom(AdditionalTilesProperties props) {
+      UseAdditionalTiles = props.UseAdditionalTiles;
+      AdditionalTileSets = props.AdditionalTileSets;
+    }
+
+    internal void CopyFrom(ForcedTilesProperties props) {
+      UseAdditionalTiles = props.UseForcedTiles;
+      AdditionalTileSets = props.ForcedTileSets.Select(t => (AdditionalTileSetList)t).ToList();
+    }
+
+    internal AdditionalTilesProperties Copy() {
+      var copy = new AdditionalTilesProperties();
+      copy.CopyFrom(this);
+      return copy;
+    }
+  }
+
   [System.Serializable]
   public class BranchPathMultiSimulationProperties {
 

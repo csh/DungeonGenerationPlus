@@ -15,6 +15,7 @@ using DunGenPlus.Collections;
 using DunGenPlus.DevTools;
 using DunGen.Graph;
 using UnityEngine;
+using DunGenPlus.Components;
 
 namespace DunGenPlus.Patches {
   internal class DungeonGeneratorPatch {
@@ -22,18 +23,21 @@ namespace DunGenPlus.Patches {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate")]
     public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){
-      if (DevDebugManager.Instance && !isRetry) {
+      //Plugin.logger.LogWarning($"InnerGenerate: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
+      if (DevDebugManager.IsActive && !isRetry) {
         DevDebugManager.Instance.RecordNewSeed(__instance.ChosenSeed);
       }
 
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
         DunGenPlusGenerator.SetCurrentMainPathExtender(0);
+        MainRoomDoorwayGroups.ModifyGroupBasedOnBehaviourSimpleOnce = false;
       }
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath")]
     public static void GenerateMainPathPatch(ref DungeonGenerator __instance, ref IEnumerator __result){
+      //Plugin.logger.LogWarning($"GenerateMainPath: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
         DunGenPlusGenerator.RandomizeLineArchetypes(__instance, true);
       }
@@ -42,6 +46,7 @@ namespace DunGenPlus.Patches {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateBranchPaths")]
     public static void GenerateBranchPathsPatch(ref DungeonGenerator __instance, ref IEnumerator __result){
+      //Plugin.logger.LogWarning($"GenerateBranchPaths: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
         __result = DunGenPlusGenerator.GenerateAlternativeMainPaths(__instance); 
       }
@@ -59,6 +64,9 @@ namespace DunGenPlus.Patches {
       archSequence.AddBasic(OpCodes.Ldnull);
       archSequence.AddBasic(OpCodes.Callvirt, addArchFunction);
 
+      var attachToSequence = new InstructionSequenceStandard("attach to");
+      attachToSequence.AddBasicLocal(OpCodes.Stloc_S, 13);
+
       foreach(var instruction in instructions){
 
         if (archSequence.VerifyStage(instruction)){
@@ -75,10 +83,22 @@ namespace DunGenPlus.Patches {
           continue;
         }
 
+        if (attachToSequence.VerifyStage(instruction)){
+          yield return instruction;
+
+          var modifyMethod = typeof(MainRoomDoorwayGroups).GetMethod("ModifyGroupBasedOnBehaviourSimple", BindingFlags.Public | BindingFlags.Static);
+
+          yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
+          yield return new CodeInstruction(OpCodes.Call, modifyMethod);
+
+          continue;
+        }
+
         yield return instruction;
       }
 
       archSequence.ReportComplete();
+      attachToSequence.ReportComplete();
     }
 
     [HarmonyTranspiler]
@@ -172,9 +192,13 @@ namespace DunGenPlus.Patches {
     public static IEnumerable<CodeInstruction> InnerGenerateLengthPatch(IEnumerable<CodeInstruction> instructions){
 
       var lengthField = typeof(DungeonFlow).GetField("Length", BindingFlags.Instance | BindingFlags.Public);
+      var getIsEditor = typeof(Application).GetMethod("get_isEditor", BindingFlags.Static | BindingFlags.Public);
 
       var lengthSequence = new InstructionSequenceStandard("Length");
       lengthSequence.AddBasic(OpCodes.Ldfld, lengthField);
+
+      var editorCheck = new InstructionSequenceStandard("Editor");
+      editorCheck.AddBasic(OpCodes.Call, getIsEditor);
 
       foreach(var instruction in instructions){
         if (lengthSequence.VerifyStage(instruction)) {
@@ -185,10 +209,20 @@ namespace DunGenPlus.Patches {
           continue;
         }
 
+        if (editorCheck.VerifyStage(instruction)){
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("AllowRetryStop", BindingFlags.Static | BindingFlags.Public);
+          
+          yield return instruction;
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
         yield return instruction;
       }
 
       lengthSequence.ReportComplete();
+      editorCheck.ReportComplete();
     }
 
     /*

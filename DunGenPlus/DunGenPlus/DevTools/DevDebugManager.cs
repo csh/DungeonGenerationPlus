@@ -19,6 +19,8 @@ namespace DunGenPlus.DevTools {
   internal partial class DevDebugManager : MonoBehaviour {
     public static DevDebugManager Instance { get; private set; }
 
+    public static bool IsActive => Instance != null;
+
     [Header("References")]
     public RuntimeDungeon dungeon;
     public GameObject devCamera;

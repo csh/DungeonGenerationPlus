@@ -27,7 +27,7 @@ namespace DunGenPlus.DevTools.UIElements {
       { typeof(DungeonArchetype), new ListEntryDungeonArchetype() },
       { typeof(TileSet), new ListEntryTileSet() },
       { typeof(NodeArchetype), new ListEntryNodeArchetype() },
-      { typeof(ForcedTileSetList), new ListEntryForcedTileSetList() },
+      { typeof(AdditionalTileSetList), new ListEntryAdditionalTileSetList() },
       { typeof(TileInjectionRule), new ListEntryTileInjectionRule() },
       { typeof(GraphNode), new ListEntryGraphNode() },
       { typeof(GraphLine), new ListEntryGraphLine() }

@@ -46,21 +46,21 @@ namespace DunGenPlus.DevTools.UIElements.Collections {
     }
   }
 
-  internal class ListEntryForcedTileSetList : ListEntryType {
+  internal class ListEntryAdditionalTileSetList : ListEntryType {
     public override object CreateEmptyObject() {
-      var forcedTileset = new ForcedTileSetList(); 
+      var forcedTileset = new AdditionalTileSetList(); 
       forcedTileset.DepthWeightScale = null;
       return forcedTileset;
     }
 
     public override void CreateEntry(IList list, int index, Transform parentTransform, float layoutOffset) {
-      var entry = (ForcedTileSetList)list[index];
-      DevDebugManager.Instance.CreateFloatInputField(parentTransform, new TitleParameter("Main Path Weight", ForcedTileSetList.MainPathWeightTooltip, layoutOffset), entry.MainPathWeight, (t) => entry.MainPathWeight = t);
-      DevDebugManager.Instance.CreateFloatInputField(parentTransform, new TitleParameter("Branch Path Weight", ForcedTileSetList.BranchPathWeightTooltip, layoutOffset), entry.BranchPathWeight, (t) => entry.BranchPathWeight = t);
+      var entry = (AdditionalTileSetList)list[index];
+      DevDebugManager.Instance.CreateFloatInputField(parentTransform, new TitleParameter("Main Path Weight", AdditionalTileSetList.MainPathWeightTooltip, layoutOffset), entry.MainPathWeight, (t) => entry.MainPathWeight = t);
+      DevDebugManager.Instance.CreateFloatInputField(parentTransform, new TitleParameter("Branch Path Weight", AdditionalTileSetList.BranchPathWeightTooltip, layoutOffset), entry.BranchPathWeight, (t) => entry.BranchPathWeight = t);
 
       // depth is weird cause we have to account for every entry's unique depth curve, even if they don't have one
-      DevDebugManager.Instance.CreateAnimationCurveOptionsUIField(parentTransform, new TitleParameter("Depth Weight Scale", ForcedTileSetList.DepthWeightScaleTooltip, layoutOffset), entry.DepthWeightScale, (t) => entry.DepthWeightScale = t);
-      DevDebugManager.Instance.CreateListUIField(parentTransform, new TitleParameter("Tile Sets", ForcedTileSetList.TileSetsTooltip, layoutOffset), entry.TileSets);
+      DevDebugManager.Instance.CreateAnimationCurveOptionsUIField(parentTransform, new TitleParameter("Depth Weight Scale", AdditionalTileSetList.DepthWeightScaleTooltip, layoutOffset), entry.DepthWeightScale, (t) => entry.DepthWeightScale = t);
+      DevDebugManager.Instance.CreateListUIField(parentTransform, new TitleParameter("Tile Sets", AdditionalTileSetList.TileSetsTooltip, layoutOffset), entry.TileSets);
     }
   }
 

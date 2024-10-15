@@ -18,11 +18,12 @@ namespace DunGenPlus.Generation {
 
     public static GraphLine GetLineAtDepth(DungeonFlow flow, float depth) {
       if (!DunGenPlusGenerator.Active) {
-				//Plugin.logger.LogInfo("Default");
+				//Plugin.logger.LogInfo("LineDepth: Default");
 				return flow.GetLineAtDepth(depth);
 			}
 
-			//Plugin.logger.LogInfo(currentMainPathExtender == null ? "NULL" : "ITEM");
+			//var comment = currentMainPathExtender == null ? "NULL" : "ITEM";
+			//Plugin.logger.LogInfo($"LineDepth: {comment}");
 			var lines = MainPathExtender.GetLines(currentMainPathExtender, flow);
 			return GetLineAtDepthHelper(lines, depth);
     }
@@ -42,41 +43,45 @@ namespace DunGenPlus.Generation {
 
 		public static List<GraphNode> GetNodes(DungeonFlow flow){
 			if (!DunGenPlusGenerator.Active) {
-				//Plugin.logger.LogInfo("Default");
+				//Plugin.logger.LogInfo("Nodes: Default");
 				return flow.Nodes;
 			}
 
-			//Plugin.logger.LogInfo(currentMainPathExtender == null ? "NULL" : "ITEM");
+			//var comment = currentMainPathExtender == null ? "NULL" : "ITEM";
+			//Plugin.logger.LogInfo($"Nodes: {comment}");
 			return MainPathExtender.GetNodes(currentMainPathExtender, flow);
 		}
 
 		public static BranchMode GetBranchMode(DungeonFlow flow) {
 			if (!DunGenPlusGenerator.Active) {
-				//Plugin.logger.LogInfo("Default M");
+				//Plugin.logger.LogInfo("Branch Mode: Default");
 				return flow.BranchMode;
 			}
 
-			//Plugin.logger.LogInfo(currentMainPathExtender == null ? "NULL" : "ITEM M");
+			//var comment = currentMainPathExtender == null ? "NULL" : "ITEM";
+			//Plugin.logger.LogInfo($"Branch Mode: {comment}");
 			return MainPathExtender.GetBranchMode(currentMainPathExtender, flow);
 		}
 
 		public static IntRange GetBranchCount(DungeonFlow flow) {
 			if (!DunGenPlusGenerator.Active) {
-				//Plugin.logger.LogInfo("Default C");
+				//Plugin.logger.LogInfo("Branch Count: Default");
 				return flow.BranchCount;
 			}
 
-			//Plugin.logger.LogInfo(currentMainPathExtender == null ? "NULL" : "ITEM C");
+			//var comment = currentMainPathExtender == null ? "NULL" : "ITEM";
+			//Plugin.logger.LogInfo($"Branch Count: {comment}");
 			return MainPathExtender.GetBranchCount(currentMainPathExtender, flow);
 		}
 
 		public static IntRange GetLength(DungeonFlow flow) {
 			if (!DunGenPlusGenerator.Active) {
-				Plugin.logger.LogInfo("Default");
+				//Plugin.logger.LogInfo("Length: Default");
 				return flow.Length;
 			}
 
-			Plugin.logger.LogInfo(currentMainPathExtender == null ? "NULL" : "ITEM");
+			//var comment = currentMainPathExtender == null ? "NULL" : "ITEM";
+			//Plugin.logger.LogInfo($"Length: {comment}");
 			return MainPathExtender.GetLength(currentMainPathExtender, flow);
 		}
 

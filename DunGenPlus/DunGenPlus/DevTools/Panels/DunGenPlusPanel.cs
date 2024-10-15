@@ -113,10 +113,10 @@ namespace DunGenPlus.DevTools.Panels {
 
       var forcedTilesTransform = manager.CreateVerticalLayoutUIField(parentTransform);
       forcedTilesParentGameobject = forcedTilesTransform.gameObject;
-      manager.CreateHeaderUIField(parentTransform, "Forced Tiles");
-      manager.CreateBoolInputField(parentTransform, ("Use Forced Tiles", ForcedTilesProperties.UseForcedTilesTooltip), properties.ForcedTilesProperties.UseForcedTiles, SetUseForcedTiles);
+      manager.CreateHeaderUIField(parentTransform, "Additional Tiles");
+      manager.CreateBoolInputField(parentTransform, ("Use Additional Tiles", AdditionalTilesProperties.UseAdditionalTilesTooltip), properties.AdditionalTilesProperties.UseAdditionalTiles, SetUseForcedTiles);
       forcedTilesTransform.SetAsLastSibling();
-      manager.CreateListUIField(forcedTilesTransform, ("Forced Tile Sets", ForcedTilesProperties.ForcedTileSetsTooltip), properties.ForcedTilesProperties.ForcedTileSets);
+      manager.CreateListUIField(forcedTilesTransform, ("Additional Tile Sets", AdditionalTilesProperties.AdditionalTileSetsTooltip), properties.AdditionalTilesProperties.AdditionalTileSets);
       manager.CreateSpaceUIField(parentTransform);
 
       var branchLoopTransform = manager.CreateVerticalLayoutUIField(parentTransform);
@@ -156,7 +156,7 @@ namespace DunGenPlus.DevTools.Panels {
       dungeonBoundsParentGameobject.SetActive(properties.DungeonBoundsProperties.UseDungeonBounds);
       dungeonBoundsHelperGameObject.SetActive(properties.DungeonBoundsProperties.UseDungeonBounds);
       archetypesNodesParentGameobject.SetActive(properties.NormalNodeArchetypesProperties.AddArchetypesToNormalNodes);
-      forcedTilesParentGameobject.SetActive(properties.ForcedTilesProperties.UseForcedTiles);
+      forcedTilesParentGameobject.SetActive(properties.AdditionalTilesProperties.UseAdditionalTiles);
       branchLoopBoostParentGameobject.SetActive(properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim);
       maxShadowsParentGameobject.SetActive(properties.MiscellaneousProperties.UseMaxShadowsRequestUpdate);
 
@@ -225,7 +225,7 @@ namespace DunGenPlus.DevTools.Panels {
     }
 
     public void SetUseForcedTiles(bool state){
-      selectedExtenderer.Properties.ForcedTilesProperties.UseForcedTiles = state;
+      selectedExtenderer.Properties.AdditionalTilesProperties.UseAdditionalTiles = state;
       forcedTilesParentGameobject.SetActive(state);
     }
 
@@ -289,7 +289,7 @@ namespace DunGenPlus.DevTools.Panels {
     }
 
     public void RestoreOriginalState(){
-      selectedExtenderer.Properties.CopyFrom(selectedAssetCache.originalProperties);
+      selectedExtenderer.Properties.CopyFrom(selectedAssetCache.originalProperties, DunGenExtender.CURRENT_VERSION);
       ClearPanel();
       SetupPanel();
     }

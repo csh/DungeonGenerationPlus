@@ -34,7 +34,7 @@ namespace DunGenPlus.Generation {
       Active = true;
       ActiveAlternative = true;
 
-      var props = extender.Properties.Copy();
+      var props = extender.Properties.Copy(extender.Version);
       var callback = new EventCallbackScenario(DevDebugManager.Instance);
       Instance.Events.OnModifyDunGenExtenderProperties.Invoke(props, callback);
       props.NormalNodeArchetypesProperties.SetupProperties(generator);
@@ -100,6 +100,7 @@ namespace DunGenPlus.Generation {
     }
 
     public static IEnumerator GenerateAlternativeMainPaths(DungeonGenerator gen) {
+
       // default behaviour
       if (!Active) {
         ActiveAlternative = false;
@@ -115,12 +116,12 @@ namespace DunGenPlus.Generation {
       var copyNodeBehaviour = Properties.MainPathProperties.CopyNodeBehaviour;
 
       if (altCount <= 0) {
-        yield return gen.Wait(GenerateBranchPaths(gen, $"MainPathCount being {altCount + 1}", LogLevel.Info));
+        yield return gen.Wait(GenerateBranchPaths(gen, null, $"MainPathCount being {altCount + 1}", LogLevel.Info));
         yield break;
       }
 
       if (mainRoomTilePrefab == null) {
-        yield return gen.Wait(GenerateBranchPaths(gen, $"MainRoomTilePrefab being null", LogLevel.Warning));
+        yield return gen.Wait(GenerateBranchPaths(gen, null, $"MainRoomTilePrefab being null", LogLevel.Warning));
         yield break;
       }
 
@@ -133,14 +134,11 @@ namespace DunGenPlus.Generation {
       // this MUST have multiple doorways as you can imagine
       var mainRoom = gen.proxyDungeon.MainPathTiles.FirstOrDefault(t => t.Prefab == mainRoomTilePrefab);
       if (mainRoom == null) {
-        yield return gen.Wait(GenerateBranchPaths(gen, $"MainRoomTilePrefab not spawning on the main path", LogLevel.Warning));
+        yield return gen.Wait(GenerateBranchPaths(gen, null, $"MainRoomTilePrefab not spawning on the main path", LogLevel.Warning));
         yield break;
       }
-
-      var doorwayGroups = mainRoom.Prefab.GetComponentInChildren<MainRoomDoorwayGroups>();
-
-      // index of MaxValue is how we tell which doorway proxy is fake
-      var fakeDoorwayProxy = new DoorwayProxy(mainRoom, int.MaxValue, mainRoom.doorways[0].DoorwayComponent, Vector3.zero, Quaternion.identity);
+      var mainRoomStartingLengthIndex = mainRoom.Placement.Depth + 1;
+      Plugin.logger.LogDebug($"Length Index: {mainRoomStartingLengthIndex}");
 
       //FixDoorwaysToAllFloors(mainRoom, doorwayGroups);
 
@@ -165,7 +163,7 @@ namespace DunGenPlus.Generation {
           var index = nodesSorted.FindIndex(n => n.TileSets.SelectMany(t => t.TileWeights.Weights).Any(t => t.Value == mainRoomTilePrefab));
 
           if (index == -1) {
-            yield return gen.Wait(GenerateBranchPaths(gen, $"CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets", LogLevel.Warning));
+            yield return gen.Wait(GenerateBranchPaths(gen, mainRoom, $"CopyNodeBehaviour being CopyFromNodeList AND MainRoomTilePrefab not existing in the Nodes' tilesets", LogLevel.Warning));
             yield break;
           }
 
@@ -181,9 +179,12 @@ namespace DunGenPlus.Generation {
         var nodes = nodesSorted.Skip(startingNodeIndex);
         var nodesVisited = new List<GraphNode>(nodes.Count());
 
+        // places fake doorways at the first node
+        MainRoomDoorwayGroups.ModifyGroupBasedOnBehaviour(mainRoom, b + 1);
+
         // most of this code is a mix of the GenerateMainPath()
         // and GenerateBranch() code
-        for(var t = 1; t < targetLength; ++t){
+        for(var t = mainRoomStartingLengthIndex; t < targetLength; ++t){
           var lineDepthRatio = Mathf.Clamp01((float)t / (targetLength - 1));
           var lineAtDepth = GetLineAtDepth(gen.DungeonFlow, lineDepthRatio);
           if (lineAtDepth == null){
@@ -213,22 +214,6 @@ namespace DunGenPlus.Generation {
           } else {
             archetype = gen.currentArchetype;
             useableTileSets = archetype.TileSets;
-          }
-
-          // places fake doorways at the first node
-          if (doorwayGroups && t == 1){
-            foreach(var d in mainRoom.UsedDoorways) {
-              if (d.ConnectedDoorway.Index != int.MaxValue) {
-                var groups = doorwayGroups.GrabDoorwayGroup(d.DoorwayComponent);
-                if (groups == null) continue;
-
-                foreach(var doorway in mainRoom.UnusedDoorways){
-                  if (groups.Contains(doorway.DoorwayComponent)){
-                    doorway.ConnectedDoorway = fakeDoorwayProxy;
-                  }
-                }
-              }
-            }
           }
 
           var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, archetype, TilePlacementResult.None);
@@ -265,11 +250,7 @@ namespace DunGenPlus.Generation {
 			}
 
       // okay lets fix the fakes
-      foreach(var doorway in mainRoom.UsedDoorways){
-        if (doorway.ConnectedDoorway.Index == int.MaxValue) {
-          doorway.ConnectedDoorway = null;
-        }
-      }
+      MainRoomDoorwayGroups.RemoveFakeDoorwayProxies(mainRoom);
 
       ActiveAlternative = false;
       Plugin.logger.LogDebug($"Created {altCount} alt. paths, creating branches now");
@@ -299,11 +280,13 @@ namespace DunGenPlus.Generation {
       AddForcedTiles(gen);
 		}
 
-    private static IEnumerator GenerateBranchPaths(DungeonGenerator gen, string message, LogLevel logLevel){
+    private static IEnumerator GenerateBranchPaths(DungeonGenerator gen, TileProxy mainRoom, string message, LogLevel logLevel){
       Plugin.logger.Log(logLevel, $"Switching to default dungeon branch generation: {message}");
 
       ActiveAlternative = false;
       SetCurrentMainPathExtender(0);
+      if (mainRoom != null) MainRoomDoorwayGroups.RemoveFakeDoorwayProxies(mainRoom);
+
       yield return gen.Wait(gen.GenerateBranchPaths());
       ActiveAlternative = true;
 

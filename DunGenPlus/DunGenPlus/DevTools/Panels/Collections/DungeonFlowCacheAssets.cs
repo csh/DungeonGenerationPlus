@@ -38,7 +38,8 @@ namespace DunGenPlus.DevTools.Panels.Collections {
 
     public DungeonFlowCacheAssets(DungeonFlow dungeonFlow, DunGenExtender extender){
       if (extender){
-        originalProperties = extender.Properties.Copy();
+        extender.Properties = extender.Properties.Copy(extender.Version);
+        originalProperties = extender.Properties.Copy(extender.Version);
       }
       
       var tileSetsHashSet = new HashSet<NullObject<TileSet>>() { new NullObject<TileSet>(null) };
@@ -77,7 +78,7 @@ namespace DunGenPlus.DevTools.Panels.Collections {
 
       if (extender) {
         AddArchetypes(extender.Properties.NormalNodeArchetypesProperties.NormalNodeArchetypes.SelectMany(l => l.Archetypes));
-        AddTileSets(extender.Properties.ForcedTilesProperties.ForcedTileSets.SelectMany(l => l.TileSets));
+        AddTileSets(extender.Properties.AdditionalTilesProperties.AdditionalTileSets.SelectMany(l => l.TileSets));
 
         AddTiles(extender.Properties.AssetCacheTileList);
         AddTileSets(extender.Properties.AssetCacheTileSetList);
