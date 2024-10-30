@@ -15,7 +15,7 @@ namespace DunGenPlus.Collections {
     internal const string MainPathCountTooltip = "The number of main paths.\n\n1 means no additional main paths\n3 means two additional main paths\netc.";
     internal const string MainRoomTilePrefabTooltip = "The Tile prefab where the additional main paths will start from.\n\nCannot be null if MainPathCount is more than 1.";
     internal const string CopyNodeBehaviourTooltip = "Defines how the nodes list is copied onto the additional main paths.\n\nCopyFromMainPathPosition: nodes will copy based on the MainRoomTilePrefab's position in the main path.\nCopyFromNodeList: nodes will copy based on the MainRoomTilePrefab's position in the node list + 1.";
-    internal const string MainPathDetailsTooltip = "Tooltip";
+    internal const string MainPathDetailsTooltip = "Overrides certain DungeonFlow values during the main path generation.\n\nThe order of items in this list correspond to the order of the main paths being generated.\nThe first item in this list will activate for the first main path, the second item for the second main path, and so on. If there are more main paths than items in this list, the last item is used instead.";
 
 
     [Tooltip(MainPathCountTooltip)]
@@ -184,8 +184,8 @@ namespace DunGenPlus.Collections {
     [System.Serializable]
   public class AdditionalTilesProperties {
 
-    internal const string UseAdditionalTilesTooltip = "If enabled, attempts to forcefully spawn tiles from ForcedTileSets after branching paths are generated.";
-    internal const string AdditionalTileSetsTooltip = "The list of tiles that will be attempted to forcefully spawn. Each entry will spawn only one tile from it's list.\n\nIf the tile cannot be forcefully spawned, the dungeon generation will not restart.";
+    internal const string UseAdditionalTilesTooltip = "If enabled, attempts to generate additional tiles from AdditionalTileSets after main and branching paths are generated.";
+    internal const string AdditionalTileSetsTooltip = "The list of tiles that will be attempted to generate. Each entry will spawn only one tile from it's list.\n\nEven if the tile cannot be generated, the dungeon generation will not restart.";
 
     [Tooltip(UseAdditionalTilesTooltip)]
     public bool UseAdditionalTiles = false;

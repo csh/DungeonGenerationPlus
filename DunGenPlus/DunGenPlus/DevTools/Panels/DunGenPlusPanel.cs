@@ -90,6 +90,7 @@ namespace DunGenPlus.DevTools.Panels {
       mainPathTransform.SetAsLastSibling();
       manager.CreateTileOptionsUIField(mainPathTransform, ("Main Room Tile Prefab", MainPathProperties.MainRoomTilePrefabTooltip), selectedAssetCache.tiles.dictionary[properties.MainPathProperties.MainRoomTilePrefab], SetMainRoom);
       manager.CreateEnumOptionsUIField<DunGenExtenderProperties.CopyNodeBehaviour>(mainPathTransform, ("Copy Node Behaviour", MainPathProperties.CopyNodeBehaviourTooltip), (int)properties.MainPathProperties.CopyNodeBehaviour, SetCopyNodeBehaviour);
+      manager.CreateListUIField(mainPathTransform, ("Main Path Details", MainPathProperties.MainPathDetailsTooltip), properties.MainPathProperties.MainPathDetails);
       manager.CreateSpaceUIField(parentTransform);
 
       var dungeonBoundsTransform = manager.CreateVerticalLayoutUIField(parentTransform);

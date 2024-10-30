@@ -30,7 +30,8 @@ namespace DunGenPlus.DevTools.UIElements {
       { typeof(AdditionalTileSetList), new ListEntryAdditionalTileSetList() },
       { typeof(TileInjectionRule), new ListEntryTileInjectionRule() },
       { typeof(GraphNode), new ListEntryGraphNode() },
-      { typeof(GraphLine), new ListEntryGraphLine() }
+      { typeof(GraphLine), new ListEntryGraphLine() },
+      { typeof(MainPathExtender), new ListEntryMainPathExtender() }
     };
 
     public void SetupList<T>(TitleParameter titleParameter, List<T> list) {

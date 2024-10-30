@@ -29,7 +29,7 @@ namespace DunGenPlus.Collections {
     [System.Serializable]
   public class AdditionalTileSetList {
 
-    internal const string TileSetsTooltip = "List of tiles to be forcefully spawned.";
+    internal const string TileSetsTooltip = "List of tiles to be generated.";
     internal const string DepthWeightScaleTooltip = "The weight based on the path's depth.";
     internal const string MainPathWeightTooltip = "The weight for the tile spawning on the main path.";
     internal const string BranchPathWeightTooltip = "The weight for the tile spawning on the branch path.";

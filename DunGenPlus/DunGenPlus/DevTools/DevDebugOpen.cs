@@ -20,15 +20,13 @@ namespace DunGenPlus.DevTools {
     }
 
     public void Update(){
-      if (IfKeyPress(Keyboard.current.mKey) && DevDebugManager.Instance == null && IsSinglePlayerInShip()){
+      if (IfKeyPress(Keyboard.current.mKey, Keyboard.current.leftAltKey) && DevDebugManager.Instance == null && IsSinglePlayerInShip()){
         Instantiate(Assets.DevDebugPrefab);
       }
     }
 
-    bool IfKeyPress(params KeyControl[] keys){
-      foreach(var k in keys){
-        if (k.wasPressedThisFrame) return true;
-      }
+    bool IfKeyPress(KeyControl key, KeyControl hold){
+      if (hold.isPressed && key.wasPressedThisFrame) return true;
       return false;
     }
 

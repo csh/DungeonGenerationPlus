@@ -138,6 +138,11 @@ namespace DunGenPlus.DevTools {
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => mainPanel.levels[i], mainPanel.levelOptions);
     }
 
+    public DropdownInputField CreateMainPathExtenderUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<MainPathExtender> setAction){
+      var assetCache = DevDebugManager.Instance.selectedAssetCache;
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.mainPathExtenders.list[i].Item, assetCache.mainPathExtenders.options);
+    }
+
     public DropdownInputField CreateTileOptionsUIField(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<GameObject> setAction){
       var assetCache = DevDebugManager.Instance.selectedAssetCache;
       return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => assetCache.tiles.list[i].Item, assetCache.tiles.options);

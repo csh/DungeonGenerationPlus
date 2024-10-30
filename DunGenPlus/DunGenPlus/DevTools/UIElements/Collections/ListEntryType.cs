@@ -36,6 +36,16 @@ namespace DunGenPlus.DevTools.UIElements.Collections {
     }
   }
 
+  internal class ListEntryMainPathExtender : ListEntryType {
+    public override object CreateEmptyObject() => null;
+
+    public override void CreateEntry(IList list, int index, Transform parentTransform, float layoutOffset) {
+      var entry = (MainPathExtender)list[index];
+      var baseValue = DevDebugManager.Instance.selectedAssetCache.mainPathExtenders.dictionary[entry];
+      DevDebugManager.Instance.CreateMainPathExtenderUIField(parentTransform, new TitleParameter("Main Path Extender", layoutOffset), baseValue, (t) => list[index] = t);
+    }
+  }
+
   internal class ListEntryNodeArchetype : ListEntryType {
     public override object CreateEmptyObject() => new NodeArchetype();
 

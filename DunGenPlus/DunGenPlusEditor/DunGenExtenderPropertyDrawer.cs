@@ -70,15 +70,15 @@ namespace DunGenPlusEditor {
 
   }
 
-  [CustomPropertyDrawer(typeof(ForcedTilesProperties))]
+  [CustomPropertyDrawer(typeof(AdditionalTilesProperties))]
   public class ForcedTilesPropertiesPropertyDrawer : PropertyDrawer {
 
     public override VisualElement CreatePropertyGUI(SerializedProperty property) {
 
       var container = new VisualElement();
 
-      var box = PropertyDrawerUtility.CreateDropdown(property, "Forced Tiles");
-      PropertyDrawerUtility.SetupItemsBoolProperty(box.container, property, "UseForcedTiles", "Disabled");
+      var box = PropertyDrawerUtility.CreateDropdown(property, "Additional Tiles");
+      PropertyDrawerUtility.SetupItemsBoolProperty(box.container, property, "UseAdditionalTiles", "Disabled");
       container.Add(box.parent);
 
       return container;
