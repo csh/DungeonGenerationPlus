@@ -47,6 +47,8 @@ namespace DunGenPlus.DevTools {
     private Vector3 lastCameraPosition;
     private Quaternion lastCameraRotation;
 
+    private Vector2 cameraYRange;
+
     void Awake(){
       Instance = this;
 
@@ -66,6 +68,8 @@ namespace DunGenPlus.DevTools {
       disabledGameObject =  new GameObject("Disabled GOBJ");
       disabledGameObject.SetActive(false);
       disabledGameObject.transform.SetParent(transform);
+
+      cameraYRange = new Vector2(devCamera.transform.position.y - 200f, devCamera.transform.position.y);
     }
 
     void OnDestroy(){
@@ -91,6 +95,13 @@ namespace DunGenPlus.DevTools {
         var delta = Mouse.current.delta.value;
         var movement = delta;
         devCamera.transform.position += new Vector3(-movement.x, 0f, -movement.y);
+      }
+
+      var scroll = Mouse.current.scroll.value.y;
+      if (scroll != 0f) {
+        var pos = devCamera.transform.position;
+        pos.y = Mathf.Clamp(pos.y + scroll * -0.05f, cameraYRange.x, cameraYRange.y);
+        devCamera.transform.position = pos;
       }
     }
 
@@ -201,6 +212,7 @@ namespace DunGenPlus.DevTools {
     private void UpdatePanels() {
       DunFlowPanel.Instance?.UpdatePanel(true);
       DunGenPlusPanel.Instance?.UpdatePanel(true);
+      AssetsPanel.Instance?.UpdatePanel(true);
     }
 
     public void UpdateDungeonBounds(){

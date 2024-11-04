@@ -82,7 +82,10 @@ namespace DunGenPlus.DevTools.Panels.Collections {
       void AddArchetypes(IEnumerable<DungeonArchetype> archetypes){
         foreach(var x in archetypes){
           archetypesHashSet.Add(x);
-          if (x != null) AddTileSets(x.TileSets);
+          if (x != null) {
+            AddTileSets(x.TileSets);
+            AddTileSets(x.BranchCapTileSets);
+          }
         }
       }
 

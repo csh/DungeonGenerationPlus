@@ -19,9 +19,11 @@ namespace DunGenPlus.DevTools.UIElements {
 
     public GameObject templatePrefab;
     public Transform listTransform;
+    public GameObject buttonsGameObject;
 
     internal IList list;
     internal Type listType;
+    internal bool useExtended;
 
     public static readonly Dictionary<Type, ListEntryType> typeDictionary = new Dictionary<Type, ListEntryType>() {
       { typeof(DungeonArchetype), new ListEntryDungeonArchetype() },
@@ -31,10 +33,20 @@ namespace DunGenPlus.DevTools.UIElements {
       { typeof(TileInjectionRule), new ListEntryTileInjectionRule() },
       { typeof(GraphNode), new ListEntryGraphNode() },
       { typeof(GraphLine), new ListEntryGraphLine() },
+      { typeof(GameObjectChance), new ListEntryGameObjectChance() },
       { typeof(MainPathExtender), new ListEntryMainPathExtender() }
     };
 
-    public void SetupList<T>(TitleParameter titleParameter, List<T> list) {
+    public static readonly Dictionary<Type, ListEntryType> typeExtendedDictionary = new Dictionary<Type, ListEntryType>() {
+      { typeof(DungeonArchetype), new ListEntryDungeonArchetypeExtended() },
+      { typeof(TileSet), new ListEntryTileSetExtended() },
+      { typeof(GameObject), new ListEntryTileExtended() },
+      { typeof(MainPathExtender), new ListEntryMainPathExtenderExtended() },
+      
+    };
+
+
+    public void SetupList<T>(TitleParameter titleParameter, List<T> list, bool useExtended, bool useAddRemove) {
       SetupBase(titleParameter);
 
       var cValue = Mathf.LerpUnclamped(0.4f, 0.6f, titleParameter.offset / 100f);
@@ -42,6 +54,11 @@ namespace DunGenPlus.DevTools.UIElements {
 
       this.list = list;
       listType = typeof(T);
+      this.useExtended = useExtended;
+      if (!useAddRemove) {
+        buttonsGameObject.SetActive(false);
+      }
+
       for(var i = 0; i < list.Count; ++i) {
         CreateEntry(i);
       }
@@ -49,7 +66,8 @@ namespace DunGenPlus.DevTools.UIElements {
 
     public void AddElement() {
       object item = null;
-      if (!typeDictionary.TryGetValue(listType, out var value)){
+      var dictionary = useExtended ? typeExtendedDictionary : typeDictionary;
+      if (!dictionary.TryGetValue(listType, out var value)){
         Plugin.logger.LogError($"Type {listType} does not has a defined list UI display");
       }
       item = value.CreateEmptyObject();
@@ -67,17 +85,30 @@ namespace DunGenPlus.DevTools.UIElements {
       var copy = CreateCopy(index);
       var copyParentTransform = copy.transform.Find("Items");
 
-      if (!typeDictionary.TryGetValue(listType, out var value)){
+      var dictionary = useExtended ? typeExtendedDictionary : typeDictionary;
+      if (!dictionary.TryGetValue(listType, out var value)){
         Plugin.logger.LogError($"Type {listType} does not has a defined list UI display");
       }
       value.CreateEntry(list, index, copyParentTransform, layoutOffset + 24f);
+      SetElementText(copy, value, index);
       copy.SetActive(true);
     }
 
     public GameObject CreateCopy(int index){
       var copy = Instantiate(templatePrefab, listTransform);
-      copy.transform.Find("Element").GetComponent<TextMeshProUGUI>().text = $"Element {index}";
       return copy;
+    }
+
+    public void SetElementText(GameObject elementGameObject, ListEntryType entryType, int index){
+      var comp = elementGameObject.transform.Find("Element").GetComponent<TextMeshProUGUI>();
+      string elementText;
+      if (entryType.UseCustomElementText()) {
+        elementText = entryType.GetCustomElementText(list, index);
+        comp.fontStyle |= FontStyles.Underline;
+      } else {
+        elementText = $"Element {index}";
+      }
+      comp.text = elementText;
     }
 
 

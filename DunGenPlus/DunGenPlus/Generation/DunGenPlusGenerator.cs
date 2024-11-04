@@ -16,6 +16,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using BepInEx.Logging;
 using DunGenPlus.DevTools;
+using DunGenPlus.Patches;
 
 [assembly: SecurityPermission( SecurityAction.RequestMinimum, SkipVerification = true )]
 namespace DunGenPlus.Generation {
@@ -138,7 +139,7 @@ namespace DunGenPlus.Generation {
         yield break;
       }
       var mainRoomStartingLengthIndex = mainRoom.Placement.Depth + 1;
-      Plugin.logger.LogDebug($"Length Index: {mainRoomStartingLengthIndex}");
+      Plugin.logger.LogDebug($"Main Room Length Index: {mainRoomStartingLengthIndex}");
 
       //FixDoorwaysToAllFloors(mainRoom, doorwayGroups);
 
@@ -184,7 +185,9 @@ namespace DunGenPlus.Generation {
 
         // most of this code is a mix of the GenerateMainPath()
         // and GenerateBranch() code
-        for(var t = mainRoomStartingLengthIndex; t < targetLength; ++t){
+        var reachedLastNode = false;
+        var lastNode = nodes.ElementAt(nodes.Count() - 1);
+        for(var t = mainRoomStartingLengthIndex; t < targetLength && !reachedLastNode; ++t){
           var lineDepthRatio = Mathf.Clamp01((float)t / (targetLength - 1));
           var lineAtDepth = GetLineAtDepth(gen.DungeonFlow, lineDepthRatio);
           if (lineAtDepth == null){
@@ -211,6 +214,11 @@ namespace DunGenPlus.Generation {
           if (graphNode != null) {
             archetype = ModifyMainBranchNodeArchetype(null, graphNode, gen.RandomStream);
             useableTileSets = graphNode.TileSets;
+
+            // Zaggy wants the last node to stop dungeon generation
+            if (graphNode == lastNode) {
+              reachedLastNode = true;
+            }
           } else {
             archetype = gen.currentArchetype;
             useableTileSets = archetype.TileSets;
@@ -219,12 +227,26 @@ namespace DunGenPlus.Generation {
           var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, archetype, TilePlacementResult.None);
           
           if (tileProxy == null) {
-            Plugin.logger.LogDebug($"Alt. main branch gen failed at {b}:{lineDepthRatio}");
+            var prevName = previousTile != null ? previousTile.Prefab.name : "NULL";
+            var archetypeName = archetype ? archetype.name : "NULL";
+            var tileSetNames = string.Join(", ", useableTileSets);
+            Plugin.logger.LogDebug($"Alt. main branch gen failed at Branch {b} (Length: {t}, Ratio: {lineDepthRatio})");
+            Plugin.logger.LogDebug($"Prev tile: {prevName}\nArchetype: {archetypeName}\nTilesets: {tileSetNames}");
+            Plugin.logger.LogDebug($"Reason: {DungeonGeneratorPatch.lastTilePlacementResult}");
+
+            if (previousTile != null) {
+              var availableDoorways = string.Join(",", previousTile.UnusedDoorways);
+              var usedDoorways = string.Join(",", previousTile.UsedDoorways);
+
+              Plugin.logger.LogDebug($"Available Doorways: {availableDoorways}");
+              Plugin.logger.LogDebug($"Used Doorways: {usedDoorways}");
+            }
+
             yield return gen.Wait(gen.InnerGenerate(true));
 						yield break;
           }
 
-          if (lineDepthRatio >= 1f){
+          if (reachedLastNode || lineDepthRatio >= 1f){
             Plugin.logger.LogDebug($"Alt. main branch at {b} ended with {tileProxy.PrefabTile.name}");
           }
 

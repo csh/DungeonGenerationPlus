@@ -118,10 +118,18 @@ namespace DunGenPlus.DevTools {
       return field;
     }
 
-    public ListUIElement CreateListUIField<T>(Transform parentTransform, TitleParameter titleParameter, List<T> list){
+    public ListUIElement CreateListUIField<T>(Transform parentTransform, TitleParameter titleParameter, List<T> list, bool useAddRemove = true){
+      return CreateListSimpleUIField(parentTransform, titleParameter, list, false, useAddRemove);
+    }
+
+    public ListUIElement CreateListExtendedUIField<T>(Transform parentTransform, TitleParameter titleParameter, List<T> list, bool useAddRemove = true){
+      return CreateListSimpleUIField(parentTransform, titleParameter, list, true, useAddRemove);
+    }
+
+    private ListUIElement CreateListSimpleUIField<T>(Transform parentTransform, TitleParameter titleParameter, List<T> list, bool useExtended, bool useAddRemove){
       var gameObject = Instantiate(listUIPrefab, parentTransform);
       var field = gameObject.GetComponent<ListUIElement>();
-      field.SetupList(titleParameter, list);
+      field.SetupList(titleParameter, list, useExtended, useAddRemove);
       return field;
     }
 
@@ -160,7 +168,7 @@ namespace DunGenPlus.DevTools {
 
     public DropdownInputField CreateEnumOptionsUIField<T>(Transform parentTransform, TitleParameter titleParameter, int baseValue, Action<T> setAction) where T: Enum{
       var options = Enum.GetNames(typeof(T));
-      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (T)(object)i, options);
+      return CreateOptionsUIField(parentTransform, titleParameter, baseValue, setAction, (i) => (T)Enum.ToObject(typeof(T), i), options);
     }
 
     public DropdownInputField CreateAnimationCurveOptionsUIField(Transform parentTransform, TitleParameter titleParameter, AnimationCurve baseValue, Action<AnimationCurve> setAction){

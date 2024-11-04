@@ -318,6 +318,13 @@ namespace DunGenPlus.Patches {
       }
     }
 
+    public static TilePlacementResult lastTilePlacementResult;
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DungeonGenerator), "AddTilePlacementResult")]
+    public static void AddTilePlacementResultPatch(TilePlacementResult result){
+      lastTilePlacementResult = result;
+    }
+
     /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]

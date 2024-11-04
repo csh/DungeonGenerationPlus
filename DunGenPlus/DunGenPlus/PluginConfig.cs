@@ -11,7 +11,7 @@ namespace DunGenPlus {
     public static ConfigEntry<bool> EnableDevDebugTools;
 
     public static void SetupConfig(ConfigFile cfg) {
-      EnableDevDebugTools = cfg.Bind(new ConfigDefinition("Dev", "Enable Dev Debug Tools"), false, new ConfigDescription("If enabled, allows the dev debug tools to be usable in the ship.\n\nPress M to activate."));
+      EnableDevDebugTools = cfg.Bind(new ConfigDefinition("Dev", "Enable Dev Debug Tools"), false, new ConfigDescription("If enabled, allows the dev debug tools to be usable in the ship.\n\nPress LeftAlt + M to activate."));
     }
 
   }
