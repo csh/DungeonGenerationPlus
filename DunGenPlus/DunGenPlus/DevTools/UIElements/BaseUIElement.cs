@@ -17,6 +17,7 @@ namespace DunGenPlus.DevTools.UIElements {
 
     public LayoutElement layoutElement;
     internal float layoutOffset;
+    internal float layoutWidthBase;
 
     public void SetupBase(TitleParameter titleParameter) {
       title = titleParameter.text;
@@ -26,8 +27,17 @@ namespace DunGenPlus.DevTools.UIElements {
       layoutOffset = titleParameter.offset;
       if (layoutElement) {
         layoutElement.minWidth -= layoutOffset;
+        layoutWidthBase = layoutElement.minWidth;
+      }  
+    }
+
+    void Update(){
+      if (layoutElement) {
+        var minWidth = layoutWidthBase;
+        if (DevDebugManager.Instance.canvasExtended) minWidth += 40f;
+
+        layoutElement.minWidth = Mathf.Lerp(layoutElement.minWidth, minWidth, Time.deltaTime * 10f);
       }
-      
     }
 
     public void SetText(string value) {

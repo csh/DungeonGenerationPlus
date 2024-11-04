@@ -25,6 +25,7 @@ namespace DunGenPlus.DevTools {
     public RuntimeDungeon dungeon;
     public GameObject devCamera;
     public BasePanel[] panels;
+    public RectTransform canvasRectTransform;
 
     public TMP_Dropdown dungeonFlowSelectionDropDown;
     private ExtendedDungeonFlow[] dungeonFlows;
@@ -49,6 +50,10 @@ namespace DunGenPlus.DevTools {
 
     private Vector2 cameraYRange;
 
+    // canvas
+    public bool canvasExtended;
+    private float canvasWidthTarget;
+
     void Awake(){
       Instance = this;
 
@@ -70,6 +75,9 @@ namespace DunGenPlus.DevTools {
       disabledGameObject.transform.SetParent(transform);
 
       cameraYRange = new Vector2(devCamera.transform.position.y - 200f, devCamera.transform.position.y);
+
+      canvasExtended = false;
+      canvasWidthTarget = 440f;
     }
 
     void OnDestroy(){
@@ -85,6 +93,10 @@ namespace DunGenPlus.DevTools {
     }
 
     void Update(){
+      var sizeDelta = canvasRectTransform.sizeDelta;
+      sizeDelta.x = Mathf.Lerp(sizeDelta.x, canvasWidthTarget, Time.deltaTime * 10f);
+      canvasRectTransform.sizeDelta = sizeDelta;
+
       statusTextMesh.text = dungeon.Generator.Status.ToString();
 
       if (!DevDebugOpen.IsSinglePlayerInShip()) {
@@ -109,6 +121,11 @@ namespace DunGenPlus.DevTools {
       for(var i = 0; i < panels.Length; ++i) {
         panels[i].SetPanelVisibility(i == index);
       }
+    }
+
+    public void ToggleCanvasExtended(){
+      canvasExtended = !canvasExtended;
+      canvasWidthTarget = canvasExtended ? 800f : 440f;
     }
 
     public void SelectDungeonFlow(int index){
