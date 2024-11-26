@@ -7,6 +7,7 @@ using DunGen;
 using DunGen.Graph;
 using DunGenPlus;
 using DunGenPlus.Collections;
+using HarmonyLib;
 
 namespace LoadstoneNighty {
 
@@ -78,6 +79,12 @@ namespace LoadstoneNighty {
 			  }
 		  }
 	  }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Loadstone.Patches.FromProxyPatches), "FromProxyEnd")]
+    public static void FromProxyEndPatch(Dictionary<TileProxy, Tile> dictionary){
+      DunGenPlus.API.AddTileToMainPathDictionary(dictionary);
+    }
 
   }
 }

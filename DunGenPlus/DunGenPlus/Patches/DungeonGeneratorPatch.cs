@@ -343,6 +343,49 @@ namespace DunGenPlus.Patches {
       lastTilePlacementResult = result;
     }
 
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(Dungeon), "FromProxy")]
+    public static IEnumerable<CodeInstruction> FromProxyPatch(IEnumerable<CodeInstruction> instructions){
+
+      var endSequence = new InstructionSequenceStandard("Forloop End");
+      endSequence.AddBasicLocal(OpCodes.Ldloca_S, 1);
+      endSequence.AddBasic(OpCodes.Constrained);
+      endSequence.AddBasic(OpCodes.Callvirt);
+      endSequence.AddBasic(OpCodes.Endfinally);
+
+      foreach(var instruction in instructions){
+        if (endSequence.VerifyStage(instruction)) {
+          yield return instruction;
+
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("AddTileToMainPathDictionary", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Ldloc_0);
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+        yield return instruction;
+      }
+
+      endSequence.ReportComplete();
+    }
+    
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DungeonGenerator), "ProcessGlobalProps")]
+    public static bool ProcessGlobalPropsPatch(ref DungeonGenerator __instance){
+      if (DunGenPlusGenerator.Active){
+        var list = DunGenPlusGenerator.Properties.MainPathProperties.LocalMainPathGlobalProps;
+        if (list != null && list.Count > 0) {
+          Plugin.logger.LogDebug("Performing Local Global Props algorithm");
+          DunGenPlusGenerator.ProcessGlobalPropsPerMainPath(__instance);
+          return false;
+        }
+        
+      }
+      return true;
+    }
+    
+
     /*
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]

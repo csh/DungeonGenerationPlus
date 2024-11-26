@@ -87,16 +87,47 @@ namespace DunGenPlus.Generation {
     }
 
     private static Dictionary<TileProxy, int> tileProxyMainPath = new Dictionary<TileProxy, int>();
+    private static Dictionary<Tile, int> tileMainPath = new Dictionary<Tile, int>();
 
     public static int GetMainPathIndexFromTileProxy(TileProxy tileProxy){
       return tileProxyMainPath[tileProxy];
     }
 
-    private static void AddTileProxyToMainPathDictionary(IEnumerable<TileProxy> tileProxies, int index) {  
+    public static int GetMainPathIndexFromTile(Tile tile){
+      return tileMainPath[tile];
+    }
+
+    public static void AddTileProxy(TileProxy tileProxy, int index) {  
+      //Plugin.logger.LogWarning($"Adding: {tileProxy.Prefab.name} ({tileProxy.Placement.IsOnMainPath}): {index}");
+      tileProxyMainPath.Add(tileProxy, index);
+    }
+
+    public static void AddMainPathTileProxies(IEnumerable<TileProxy> tileProxies, int index){
       var totalLength = (float)tileProxies.Last().Placement.PathDepth;
       foreach(var t in tileProxies) {
-        tileProxyMainPath.Add(t, index);
+        AddTileProxy(t, index);
         t.Placement.NormalizedPathDepth = t.Placement.PathDepth / totalLength;
+      }
+    }
+
+    public static void BuildBranchPathTileProxiesDictionary(DungeonProxy dungeonProxy){
+      var lastIndex = 0;
+      foreach(var connection in dungeonProxy.Connections){
+        var aTileProxy = connection.A.TileProxy;
+        if (aTileProxy.Placement.IsOnMainPath) {
+          lastIndex = GetMainPathIndexFromTileProxy(aTileProxy);
+        }
+
+        var bTileProxy = connection.B.TileProxy;
+        if (!bTileProxy.Placement.IsOnMainPath){
+          AddTileProxy(bTileProxy, lastIndex);
+        }
+      }
+    }
+
+    public static void AddTileToMainPathDictionary(Dictionary<TileProxy, Tile> dictionary){
+      foreach(var pair in dictionary){
+        tileMainPath.Add(pair.Value, GetMainPathIndexFromTileProxy(pair.Key));
       }
     }
 
@@ -112,6 +143,10 @@ namespace DunGenPlus.Generation {
 
       var altCount = Properties.MainPathProperties.MainPathCount - 1;
       tileProxyMainPath.Clear();
+      tileMainPath.Clear();
+
+      var firstMainPathTiles = gen.proxyDungeon.MainPathTiles.ToList();
+      AddMainPathTileProxies(firstMainPathTiles, 0);
 
       var mainRoomTilePrefab = Properties.MainPathProperties.MainRoomTilePrefab;
       var copyNodeBehaviour = Properties.MainPathProperties.CopyNodeBehaviour;
@@ -127,9 +162,7 @@ namespace DunGenPlus.Generation {
       }
 
       var allMainPathTiles = new List<List<TileProxy>>();
-      var firstMainPathTiles = gen.proxyDungeon.MainPathTiles.ToList();
       allMainPathTiles.Add(firstMainPathTiles);
-      AddTileProxyToMainPathDictionary(firstMainPathTiles, 0);
 
       // main room is the true main room and not the fake room
       // this MUST have multiple doorways as you can imagine
@@ -267,7 +300,7 @@ namespace DunGenPlus.Generation {
 					if (gen.ShouldSkipFrame(true)) yield return gen.GetRoomPause();
         }
 
-        AddTileProxyToMainPathDictionary(newMainPathTiles, b + 1);
+        AddMainPathTileProxies(newMainPathTiles, b + 1);
         allMainPathTiles.Add(newMainPathTiles);
 			}
 
@@ -291,13 +324,17 @@ namespace DunGenPlus.Generation {
           yield return gen.Wait(GenerateMultiBranchPaths(gen));
           GenerateBranchBoostedPathsStopWatch.Stop();
           GenerateBranchBoostedPathsTime += (float)GenerateBranchBoostedPathsStopWatch.Elapsed.TotalMilliseconds;
+        } else {
+          yield return gen.Wait(gen.GenerateBranchPaths());
         }
-        else yield return gen.Wait(gen.GenerateBranchPaths());
       }
 
       ActiveAlternative = true;
-
       gen.proxyDungeon.MainPathTiles = allMainPathTiles[0];
+      
+      if (!Properties.BranchPathMultiSimulationProperties.UseBranchPathMultiSim){
+        BuildBranchPathTileProxiesDictionary(gen.proxyDungeon);
+      }
 
       AddForcedTiles(gen);
 		}
@@ -312,6 +349,7 @@ namespace DunGenPlus.Generation {
       yield return gen.Wait(gen.GenerateBranchPaths());
       ActiveAlternative = true;
 
+      BuildBranchPathTileProxiesDictionary(gen.proxyDungeon);
       AddForcedTiles(gen);
     }
 

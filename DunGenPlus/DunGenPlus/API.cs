@@ -126,5 +126,13 @@ namespace DunGenPlus
       return extender;
     }
 
+    /// <summary>
+    /// DO NOT USE!
+    /// </summary>
+    /// <param name="dictionary"></param>
+    public static void AddTileToMainPathDictionary(Dictionary<TileProxy, Tile> dictionary){
+      DunGenPlusGenerator.AddTileToMainPathDictionary(dictionary);
+    }
+
   }
 }

@@ -47,6 +47,13 @@ namespace LoadstoneNighty {
 
       if (validVersion){
         logger.LogInfo($"Plugin {modName} has been added!");
+
+        try {
+          harmony.PatchAll(typeof(Patch));
+        } catch {
+          
+        }
+
         Patch.Activate();
       }
     }

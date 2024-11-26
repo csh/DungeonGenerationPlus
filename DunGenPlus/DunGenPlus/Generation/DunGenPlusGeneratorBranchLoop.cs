@@ -191,7 +191,7 @@ namespace DunGenPlus.Generation
             gen.injectedTiles = bestPath.injectedTiles;
             gen.tilesPendingInjection = bestPath.tilesPendingInjection;
 
-            AddTileProxyToMainPathDictionary(bestPath.list.Select(x => x.tileProxy), bestPath.mainPathIndex);
+            AddMainPathTileProxies(bestPath.list.Select(x => x.tileProxy), bestPath.mainPathIndex);
 
             if (gen.ShouldSkipFrame(true)){
               yield return gen.GetRoomPause();

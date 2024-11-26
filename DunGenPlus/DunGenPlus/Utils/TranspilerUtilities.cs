@@ -255,10 +255,14 @@ namespace DunGenPlus.Utils {
 
     public static void PrintInstructions(IEnumerable<CodeInstruction> instructions) {
       foreach(var i in instructions){
-        var opString = i.opcode.ToString();
-        var objString = i.operand != null ? i.operand.ToString() : "NULL";
-        Plugin.logger.LogInfo($"{opString}: {objString}");
+        PrintInstruction(i);
       }
+    }
+
+    public static void PrintInstruction(CodeInstruction inst) {
+      var opString = inst.opcode.ToString();
+      var objString = inst.operand != null ? inst.operand.ToString() : "NULL";
+      Plugin.logger.LogInfo($"{opString}: {objString}");
     }
 
   }
