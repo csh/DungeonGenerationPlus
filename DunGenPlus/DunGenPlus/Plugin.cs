@@ -25,7 +25,7 @@ namespace DunGenPlus {
 
     internal const string modGUID = "dev.ladyalice.dungenplus";
     private const string modName = "Dungeon Generation Plus";
-    private const string modVersion = "1.2.0";
+    private const string modVersion = "1.2.1";
 
     internal readonly Harmony Harmony = new Harmony(modGUID);
 
@@ -58,24 +58,7 @@ namespace DunGenPlus {
 
       Assets.LoadAssets();
       Assets.LoadAssetBundle();
-      DungeonManager.GlobalDungeonEvents.onBeforeDungeonGenerate.AddListener(OnDunGenExtenderLoad);
       DoorwayManager.onMainEntranceTeleportSpawnedEvent.AddEvent("DoorwayCleanup", DoorwayManager.onMainEntranceTeleportSpawnedFunction);
-    }
-
-    void OnDunGenExtenderLoad(RoundManager roundManager) {
-      DunGenPlusGenerator.Deactivate();
-
-      var generator = roundManager.dungeonGenerator.Generator;
-      var flow = generator.DungeonFlow;
-      var extender = API.GetDunGenExtender(flow);
-      if (extender && extender.Active) {
-        Plugin.logger.LogInfo($"Loading DunGenExtender for {flow.name}");
-        DunGenPlusGenerator.Activate(generator, extender);
-        return;
-      }
-
-      Plugin.logger.LogInfo($"Did not load a DunGenExtenderer");
-      DunGenPlusGenerator.Deactivate();
     }
 
   }

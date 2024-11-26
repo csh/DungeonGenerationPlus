@@ -20,6 +20,24 @@ using DunGenPlus.Components;
 namespace DunGenPlus.Patches {
   internal class DungeonGeneratorPatch {
 
+    [HarmonyPriority(Priority.First)]
+    [HarmonyPatch(typeof(DungeonGenerator), "Generate")]
+    [HarmonyPrefix]
+    public static void GeneratePatch(ref DungeonGenerator __instance){
+      DunGenPlusGenerator.Deactivate();
+
+      var flow = __instance.DungeonFlow;
+      var extender = API.GetDunGenExtender(flow);
+      if (extender && extender.Active) {
+        Plugin.logger.LogInfo($"Loading DunGenExtender for {flow.name}");
+        DunGenPlusGenerator.Activate(__instance, extender);
+        return;
+      }
+
+      Plugin.logger.LogInfo($"Did not load a DunGenExtenderer");
+      DunGenPlusGenerator.Deactivate();
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate")]
     public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){

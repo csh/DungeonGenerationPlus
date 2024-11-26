@@ -97,6 +97,24 @@ namespace DunGenPlus
     }
 
     /// <summary>
+    /// Returns true if the Dungeon Generation Plus logic is active for <paramref name="dungeonFlow"/>.
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <returns></returns>
+    public static bool IsDunGenExtenderActive(DungeonFlow dungeonFlow){
+      return IsDunGenExtenderActive(GetDunGenExtender(dungeonFlow));
+    }
+
+    /// <summary>
+    /// Returns true if the Dungeon Generation Plus logic is active for <paramref name="extender"/>.
+    /// </summary>
+    /// <param name="dungeonFlow"></param>
+    /// <returns></returns>
+    public static bool IsDunGenExtenderActive(DunGenExtender extender){
+      return extender != null && extender == DunGenPlusGenerator.Instance;
+    }
+
+    /// <summary>
     /// Creates and returns an empty <see cref="DunGenExtender"/>.
     /// </summary>
     /// <param name="dungeonFlow"></param>
