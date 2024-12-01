@@ -134,6 +134,7 @@
     <Compile Include="Collections\DunGenExtenderPropertiesCollection.cs" />
     <Compile Include="Collections\ExtenderEvent.cs" />
     <Compile Include="Collections\ForcedTileSetList.cs" />
+    <Compile Include="Collections\LocalGlobalPropSettings.cs" />
     <Compile Include="Collections\NodeArchetype.cs" />
     <Compile Include="Collections\NullObject.cs" />
     <Compile Include="Components\DoorwayCleanup.cs" />

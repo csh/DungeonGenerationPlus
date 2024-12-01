@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using DunGenPlus.Collections;
 
 namespace DunGenPlus {
 
@@ -24,6 +25,8 @@ namespace DunGenPlus {
   [CreateAssetMenu(fileName = "Main Path Extender", menuName = "DunGenExtender/Main Path Extender", order = 2)]
   public class MainPathExtender : ScriptableObject {
 
+    internal const string LocalMainPathGlobalPropsTooltip = "Limits the amount of Global Props that can spawn on a single main path.\n\nThis does not afffect the global limit defined in DungeonFlow.";
+
     public PropertyOverride<IntRange> Length = new PropertyOverride<IntRange>(false, new IntRange(5, 10));
 
     public PropertyOverride<BranchMode> BranchMode = new PropertyOverride<BranchMode>(false, DunGen.BranchMode.Local);
@@ -31,6 +34,9 @@ namespace DunGenPlus {
 
     public PropertyOverride<List<GraphNode>> Nodes = new PropertyOverride<List<GraphNode>>(false, new List<GraphNode>());
     public PropertyOverride<List<GraphLine>> Lines = new PropertyOverride<List<GraphLine>>(false, new List<GraphLine>());
+
+    [Tooltip(LocalMainPathGlobalPropsTooltip)]
+    public List<LocalGlobalPropSettings> LocalGroupProps = new List<LocalGlobalPropSettings>();
 
     [Header("DEV ONLY: DON'T TOUCH")]
     [Attributes.ReadOnly]

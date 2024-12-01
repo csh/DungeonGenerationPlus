@@ -126,6 +126,8 @@ namespace DunGenPlus.Generation {
     }
 
     public static void AddTileToMainPathDictionary(Dictionary<TileProxy, Tile> dictionary){
+      if (!DunGenPlusGenerator.Active) return;
+
       foreach(var pair in dictionary){
         tileMainPath.Add(pair.Value, GetMainPathIndexFromTileProxy(pair.Key));
       }

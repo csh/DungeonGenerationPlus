@@ -9,6 +9,7 @@ using DunGen.Graph;
 using DunGenPlus.Generation;
 using LethalLevelLoader;
 using UnityEngine;
+using static DunGenPlus.Components.DoorwayCleanupScripting.DCSConnectorBlockerSpawnedPrefab;
 
 namespace DunGenPlus
 {
@@ -128,6 +129,8 @@ namespace DunGenPlus
 
     /// <summary>
     /// DO NOT USE!
+    /// 
+    /// Registers the connection between <see cref="TileProxy"/> to <see cref="Tile"/> that's specifically created during <see cref="DunGen.Dungeon.FromProxy(DungeonProxy, DungeonGenerator)"/>.
     /// </summary>
     /// <param name="dictionary"></param>
     public static void AddTileToMainPathDictionary(Dictionary<TileProxy, Tile> dictionary){

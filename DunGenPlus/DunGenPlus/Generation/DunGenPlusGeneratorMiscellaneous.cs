@@ -98,7 +98,7 @@ namespace DunGenPlus.Generation {
 
     // Copied and pasted from DunGen
     public static void ProcessGlobalPropsPerMainPath(DungeonGenerator dungeonGenerator){
-      var localIDs = Properties.MainPathProperties.LocalMainPathGlobalProps.Select(x => x.ID).ToHashSet();
+      var localIDs = Properties.MainPathProperties.MainPathDetails.SelectMany(d => d.LocalGroupProps).Select(x => x.ID).ToHashSet();
 
       // first parameter int is the GlobalProp ID
       // second parameter is the List of GameObjectChanceTable indexed by the main path index
@@ -166,6 +166,19 @@ namespace DunGenPlus.Generation {
         return i;
       }
 
+      int ProcessRemainingGlobalPropID(GameObjectChanceTable[] tables, int count){
+        count = Mathf.Clamp(count, 0, tables.Sum(t => t.Weights.Count));
+        var i = 0;
+        while(i < count){
+          var random = GameObjectChanceTable.GetCombinedRandom(dungeonGenerator.RandomStream, true, 0f, tables);
+          if (random != null) {
+            random.SetActive(true);
+          }
+          ++i;
+        }
+        return i;
+      }
+
       using(var enumerator = globalDictionary.GetEnumerator()){
         while(enumerator.MoveNext()){
           var pair = enumerator.Current;
@@ -178,12 +191,12 @@ namespace DunGenPlus.Generation {
               .Where(x => x.ID == pair.Key)
               .FirstOrDefault();
 
-            if (globalPropSettings != null){
+            if (globalPropSettings != null){    
               var tableClone = pair.Value.Clone();
               var globalMax = globalPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
 
               var spawned = ProcessGlobalPropID(tableClone, globalMax, 0, globalMax);
-              //Plugin.logger.LogError($"Spawned {spawned} ({spawned}/{globalMax})");
+              Plugin.logger.LogDebug($"Global ID: {pair.Key} ({spawned} / {globalMax})");
               list.Add(pair.Key);
             }
           }
@@ -193,29 +206,65 @@ namespace DunGenPlus.Generation {
       using(var enumerator = localDictionary.GetEnumerator()){
         while(enumerator.MoveNext()){
           var pair = enumerator.Current;
-          if (list.Contains(pair.Key)){
+          var globalPropId = pair.Key;
+          if (list.Contains(globalPropId)){
             Plugin.logger.LogWarning("Dungeon Flow contains multiple entries for the global prop group ID: " + pair.Key.ToString() + ". Only the first entry will be used.");
           } else {
             //Plugin.logger.LogWarning($"{pair.Key}: Local");
 
             var globalPropSettings = dungeonGenerator.DungeonFlow.GlobalProps
-              .Where(x => x.ID == pair.Key)
+              .Where(x => x.ID == globalPropId)
               .FirstOrDefault();
-            var localPropSettings = Properties.MainPathProperties.LocalMainPathGlobalProps
-              .Where(x => x.ID == pair.Key)
-              .FirstOrDefault();
-
-            if (globalPropSettings != null && localPropSettings != null){
+            
+            if (globalPropSettings != null){
               var globalCount = 0;
-              foreach(var path in pair.Value.Values){
-                var tableClone = path.Clone();
-                var globalMax = globalPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
+              var globalMax = globalPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
+              var pathDictionary = pair.Value;
+              Plugin.logger.LogDebug($"Local ID: {pair.Key} (Max {globalMax})");
+
+              var toRemoveKeys = new List<int>();
+
+              foreach(var pathPair in pathDictionary){
+                // try and get local main path properites based on key of Dictionary<MainPathIndex (int), GlobalProps (GameObjectChanceTable)> 
+                var mainPathIndex = pathPair.Key;
+                var localGroupProps = Properties.MainPathProperties.GetMainPathDetails(mainPathIndex).LocalGroupProps;
+                var localPropSettings = localGroupProps
+                  .Where(x => x.ID == globalPropId)
+                  .FirstOrDefault();
+
+                if (localPropSettings == null) {
+                  Plugin.logger.LogDebug($"Main Path {mainPathIndex}: No local ID defined, skipping");
+                  continue;
+                }
+
+                var tableClone = pathPair.Value.Clone();
                 var localMax = localPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
 
-                var spawned =  ProcessGlobalPropID(tableClone, localMax, globalCount, globalMax);
+                var spawned = ProcessGlobalPropID(tableClone, localMax, globalCount, globalMax);
                 globalCount += spawned;
+                Plugin.logger.LogDebug($"Main Path {mainPathIndex}: Local ({spawned} / {localMax}), Global ({globalCount} / {globalMax})");
+
+                // all dictionaries that we done using get throw out
+                if (!localPropSettings.UseToReachGlobalPropLimit) toRemoveKeys.Add(mainPathIndex); 
+
                 //Plugin.logger.LogError($"Spawned {spawned} ({globalCount}/{globalMax})");
               }
+
+              foreach(var key in toRemoveKeys){ 
+                pathDictionary.Remove(key);
+              }
+
+              // spawn the last remaining global props if possible
+              if (globalCount < globalMax && pathDictionary.Count > 0) {
+                var combine = string.Join(", ", pathDictionary.Keys);
+                Plugin.logger.LogDebug($"Combining main paths ({combine}) into one GameObjectChanceTable");
+
+                var combinedTable = pathDictionary.Select(d => d.Value).ToArray();
+                var spawned = ProcessRemainingGlobalPropID(combinedTable, globalMax - globalCount);
+                globalCount += spawned;
+                Plugin.logger.LogDebug($"Spawned remaining props ({globalCount} / {globalMax})");
+              }
+
               list.Add(pair.Key);
             }
           }
