@@ -15,6 +15,8 @@ namespace DunGenPlus.Patches {
 
   internal class StartOfRoundPatch {
 
+    /*
+
     public static readonly string[] validDungeonFlowTargets = new [] {
       "Level1Flow", "Level2Flow", "Level1FlowExtraLarge", "Level1Flow3Exits"
     };
@@ -65,6 +67,7 @@ namespace DunGenPlus.Patches {
         }
       }
     }
+    */
 
   }
 }

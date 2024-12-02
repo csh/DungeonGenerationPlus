@@ -2,6 +2,7 @@
 using DunGenPlus.Components.Scrap;
 using DunGenPlus.DevTools;
 using DunGenPlus.Generation;
+using DunGenPlus.Managers;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -21,6 +22,13 @@ namespace DunGenPlus.Patches {
       if (PluginConfig.EnableDevDebugTools.Value){
         var devDebug = new GameObject("DevDebugOpen", typeof(DevDebugOpen));
       }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RoundManager), "Start")]
+    public static void StartPatch(ref RoundManager __instance){
+      ScrapItemManager.UndoPreviousChanges();
+      EnemyManager.UndoPreviousChanges();
     }
 
     [HarmonyPrefix]

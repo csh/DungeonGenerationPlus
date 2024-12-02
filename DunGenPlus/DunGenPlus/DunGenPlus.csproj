@@ -151,6 +151,8 @@
     <Compile Include="DevTools\Panels\AssetsPanel.cs" />
     <Compile Include="Generation\DunGenPlusGenerationPaths.cs" />
     <Compile Include="MainPathExtender.cs" />
+    <Compile Include="Managers\EnemyManager.cs" />
+    <Compile Include="Managers\ScrapItemManager.cs" />
     <Compile Include="PluginConfig.cs" />
     <Compile Include="DevTools\DevDebugManager.cs" />
     <Compile Include="DevTools\DevDebugManagerUI.cs" />
