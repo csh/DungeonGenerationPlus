@@ -85,6 +85,7 @@ namespace DunGenPlus.DevTools {
       MainPanel.Instance = null;
       DunFlowPanel.Instance = null;
       DunGenPlusPanel.Instance = null;
+      AssetsPanel.Instance = null;
 
       Cursor.lockState = CursorLockMode.Locked;
       Cursor.visible = false;

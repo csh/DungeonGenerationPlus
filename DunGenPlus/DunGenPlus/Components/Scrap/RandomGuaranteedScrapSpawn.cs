@@ -15,19 +15,40 @@ namespace DunGenPlus.Components.Scrap {
     public float spawnChance = 1f;
     [Tooltip("Minimum scrap value of the scrap item.")]
     public int minimumScrapValue = 0;
+    [Tooltip("Maximum scrap value of the scrap item.")]
+    public int maximumScrapValue = 100;
+    [Tooltip("Forces this item in particular to spawn. Overrides min/max scrap values")]
+    public string specificScrapTarget;
 
-    internal static Dictionary<int, IEnumerable<SpawnableItemWithRarity>> scrapItemRarityCache;
+    internal static Dictionary<(int, int), IEnumerable<SpawnableItemWithRarity>> scrapItemRarityValueCache;
+    internal static Dictionary<string, IEnumerable<SpawnableItemWithRarity>> scrapItemRarityNameCache;
 
     internal static void ResetCache(){
-      scrapItemRarityCache = new Dictionary<int, IEnumerable<SpawnableItemWithRarity>>();
+      scrapItemRarityValueCache = new Dictionary<(int, int), IEnumerable<SpawnableItemWithRarity>>();
+      scrapItemRarityNameCache = new Dictionary<string, IEnumerable<SpawnableItemWithRarity>>();
     }
 
-    internal static IEnumerable<SpawnableItemWithRarity> GetCachedItemList(List<SpawnableItemWithRarity> allMoonItems, int scrapValue) {
-      if (!scrapItemRarityCache.TryGetValue(scrapValue, out var list)){
-        list = allMoonItems.Where(i => i.spawnableItem.minValue >= scrapValue).ToArray();
-        scrapItemRarityCache.Add(scrapValue, list);
+    internal static IEnumerable<SpawnableItemWithRarity> GetCachedItemList(List<SpawnableItemWithRarity> allMoonItems, int minScrapValue, int maxScrapValue) {
+      var pair = (minScrapValue, maxScrapValue);
+      if (!scrapItemRarityValueCache.TryGetValue(pair, out var list)){
+        list = allMoonItems.Where(i => i.spawnableItem.minValue >= minScrapValue && maxScrapValue <= i.spawnableItem.minValue).ToArray();
+        scrapItemRarityValueCache.Add(pair, list);
       }
       return list;
+    }
+
+    internal static IEnumerable<SpawnableItemWithRarity> GetCachedItemList(List<SpawnableItemWithRarity> allMoonItems, string scrapName) {
+      scrapName = scrapName.ToLowerInvariant();
+      if (!scrapItemRarityNameCache.TryGetValue(scrapName, out var list)){
+        list = allMoonItems.Where(i => i.spawnableItem.name.ToLowerInvariant().Contains(scrapName) || i.spawnableItem.itemName.ToLowerInvariant().Contains(scrapName)).ToArray();
+        scrapItemRarityNameCache.Add(scrapName, list);
+      }
+      return list;
+    }
+
+    internal IEnumerable<SpawnableItemWithRarity> GetCachedItemList(List<SpawnableItemWithRarity> allMoonItems) {
+      if (string.IsNullOrWhiteSpace(specificScrapTarget)) return GetCachedItemList(allMoonItems, minimumScrapValue, maximumScrapValue);
+      return GetCachedItemList(allMoonItems, specificScrapTarget);
     }
 
     internal static Item GetRandomItem(IEnumerable<SpawnableItemWithRarity> list) {
@@ -45,7 +66,7 @@ namespace DunGenPlus.Components.Scrap {
       var anomalyRandom = roundManager.AnomalyRandom;
       if (anomalyRandom.NextDouble() >= spawnChance) return (null, 0);
 
-      var itemList = GetCachedItemList(allMoonItems, minimumScrapValue);
+      var itemList = GetCachedItemList(allMoonItems);
       var itemListCount = itemList.Count();
       if (itemListCount == 0) return (null, 0);
 

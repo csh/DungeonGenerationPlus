@@ -92,7 +92,7 @@ namespace DunGenPlus.Generation {
     }
 
     public static bool AllowRetryStop(bool defaultState){
-      return defaultState || DevDebugManager.IsActive;
+      return defaultState || API.IsDevDebugModeActive();
     }
 
   }

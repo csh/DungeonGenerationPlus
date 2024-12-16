@@ -232,6 +232,34 @@ namespace DunGenPlus.Generation
         collection = useableTileSets.SelectMany(t => t.TileWeights.Weights);
       }
 
+      DoorwayPairStopwatch.Reset();
+      DoorwayPairStopwatch.Start();
+      var doorwayPairs = GetDoorwayPairs(gen, attachTo, collection, archetype, normalizedDepth);
+      DoorwayPairStopwatch.Stop();
+      DoorwayPairTime += (float)DoorwayPairStopwatch.Elapsed.TotalMilliseconds;
+
+      var tilePlacementResult = new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
+      while(doorwayPairs.Count > 0) {
+        var pair = doorwayPairs.Dequeue();
+        tilePlacementResult = TryPlaceTileResult(gen, pathProxy, pair, archetype);
+        if (tilePlacementResult.result == TilePlacementResult.None) break;
+      }
+
+      if (tilePlacementResult.result == TilePlacementResult.None){
+        if (injectedTile != null) {
+          var tileProxy = tilePlacementResult.tileProxy;
+          tileProxy.Placement.InjectionData = injectedTile;
+          pathProxy.injectedTiles[tileProxy] = injectedTile;
+          pathProxy.tilesPendingInjection.RemoveAt(index);
+        }
+        return tilePlacementResult;
+      }
+
+      return new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
+
+    }
+
+    private static Queue<DoorwayPair> GetDoorwayPairs(DungeonGenerator gen, TileProxy attachTo, IEnumerable<GameObjectChance> collection, DungeonArchetype archetype, float normalizedDepth){
       // get rotation state
       var value = attachTo.PrefabTile.AllowRotation;
       if (gen.OverrideAllowTileRotation) {
@@ -275,32 +303,13 @@ namespace DunGenPlus.Generation
       };
 
       var maxCount = gen.UseMaximumPairingAttempts ? new int?(gen.MaxPairingAttempts) : null;
+      return doorwayPairFinder.GetDoorwayPairs(maxCount);
+    }
 
-      DoorwayPairStopwatch.Reset();
-      DoorwayPairStopwatch.Start();
-      var doorwayPairs = doorwayPairFinder.GetDoorwayPairs(maxCount);
-      DoorwayPairStopwatch.Stop();
-      DoorwayPairTime += (float)DoorwayPairStopwatch.Elapsed.TotalMilliseconds;
-
-      var tilePlacementResult = new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
-      while(doorwayPairs.Count > 0) {
-        var pair = doorwayPairs.Dequeue();
-        tilePlacementResult = TryPlaceTileResult(gen, pathProxy, pair, archetype);
-        if (tilePlacementResult.result == TilePlacementResult.None) break;
-      }
-
-      if (tilePlacementResult.result == TilePlacementResult.None){
-        if (injectedTile != null) {
-          var tileProxy = tilePlacementResult.tileProxy;
-          tileProxy.Placement.InjectionData = injectedTile;
-          pathProxy.injectedTiles[tileProxy] = injectedTile;
-          pathProxy.tilesPendingInjection.RemoveAt(index);
-        }
-        return tilePlacementResult;
-      }
-
-      return new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
-
+    private static Queue<DoorwayPair> GetDoorwayPairs(DungeonGenerator gen, TileProxy attachTo, IEnumerable<TileSet> useableTileSets, DungeonArchetype archetype, float normalizedDepth){
+      IEnumerable<GameObjectChance> collection;
+      collection = useableTileSets.SelectMany(t => t.TileWeights.Weights);
+      return GetDoorwayPairs(gen, attachTo, collection, archetype, normalizedDepth);
     }
 
     private static TilePlacementResultProxy TryPlaceTileResult(DungeonGenerator gen, BranchPathProxy pathProxy, DoorwayPair pair, DungeonArchetype archetype){

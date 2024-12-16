@@ -42,7 +42,7 @@ namespace DunGenPlus.Patches {
     [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate")]
     public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){
       //Plugin.logger.LogWarning($"InnerGenerate: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
-      if (DevDebugManager.IsActive && !isRetry) {
+      if (API.IsDevDebugModeActive() && !isRetry) {
         DevDebugManager.Instance.RecordNewSeed(__instance.ChosenSeed);
       }
 
@@ -381,6 +381,52 @@ namespace DunGenPlus.Patches {
       return true;
     }
     
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]
+    public static IEnumerable<CodeInstruction> GenerateMainPathDebugPatch(IEnumerable<CodeInstruction> instructions){
+
+      var tileProxyNullSequence = new InstructionSequenceStandard("TileProxyNull");
+      tileProxyNullSequence.AddBasic(OpCodes.Br);
+      tileProxyNullSequence.AddBasicLocal(OpCodes.Ldloc_S, 14);
+      tileProxyNullSequence.AddBasic(OpCodes.Brtrue);
+
+      foreach(var instruction in instructions){
+        if (tileProxyNullSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("PrintAddTileErrorQuick", BindingFlags.Static | BindingFlags.Public);
+          var field = typeof(DungeonGenerator).Assembly.GetType("DunGen.DungeonGenerator+<GenerateMainPath>d__100").GetField("<j>5__8", BindingFlags.NonPublic | BindingFlags.Instance);
+
+          yield return instruction;
+
+          yield return new CodeInstruction(OpCodes.Ldloc_1);
+          yield return new CodeInstruction(OpCodes.Ldarg_0);
+          yield return new CodeInstruction(OpCodes.Ldfld, field);
+
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          continue;
+        }
+
+        yield return instruction;
+      }
+
+      tileProxyNullSequence.ReportComplete();
+    }
+
+
+    public static TileProxy lastAttachTo;
+    public static IEnumerable<TileSet> lastUseableTileSets;
+    public static float lastNormalizedDepth;
+    public static DungeonArchetype lastArchetype;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DungeonGenerator), "AddTile")]
+    public static void AddTileDebugPatch(TileProxy attachTo, IEnumerable<TileSet> useableTileSets, float normalizedDepth, DungeonArchetype archetype){
+      lastAttachTo = attachTo;
+      lastUseableTileSets = useableTileSets;
+      lastNormalizedDepth = normalizedDepth;
+      lastArchetype = archetype;
+    }
 
     /*
     [HarmonyTranspiler]

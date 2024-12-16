@@ -191,6 +191,7 @@ namespace DunGenPlus.Generation {
       /*
       Plugin.logger.LogError("Spawned");
 
+
       var colors = new Color[] { Color.red, Color.blue };
 
       foreach(var tile in dungeonGenerator.CurrentDungeon.AllTiles){
@@ -198,27 +199,27 @@ namespace DunGenPlus.Generation {
 
         foreach(var globalProp in tile.GetComponentsInChildren<GlobalProp>()){
           if (globalProp.PropGroupID == 1717){
-            var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
-            newGameObject.transform.position = globalProp.transform.position + Vector3.up * 10f;
-            newGameObject.transform.localScale = Vector3.one * 4f;
-            Plugin.logger.LogError($"{globalProp.PropGroupID}: {newGameObject.transform.position}");
+            //var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
+            //newGameObject.transform.position = globalProp.transform.position;
+            //newGameObject.transform.localScale = Vector3.one * 1f;
+            Plugin.logger.LogError($"{globalProp.PropGroupID}: {globalProp.transform.position}");
 
-            var renderer = newGameObject.GetComponent<Renderer>();
-            renderer.material.color = colors[0];
+            //var renderer = newGameObject.GetComponent<Renderer>();
+            //renderer.material.color = colors[0];
 
-            newGameObject.SetActive(true);
+           // newGameObject.SetActive(true);
           }
 
           if (globalProp.PropGroupID == 1718){
-            var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
-            newGameObject.transform.position = globalProp.transform.position + Vector3.up * 10f;
-            newGameObject.transform.localScale = Vector3.one * 4f;
-            Plugin.logger.LogError($"{globalProp.PropGroupID}: {newGameObject.transform.position}");
+            //var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
+            //newGameObject.transform.position = globalProp.transform.position;
+            //newGameObject.transform.localScale = Vector3.one * 1f;
+            Plugin.logger.LogError($"{globalProp.PropGroupID}: {globalProp.transform.position}");
 
-            var renderer = newGameObject.GetComponent<Renderer>();
-            renderer.material.color = colors[1];
+            //var renderer = newGameObject.GetComponent<Renderer>();
+            //renderer.material.color = colors[1];
 
-             newGameObject.SetActive(true);
+             //newGameObject.SetActive(true);
           }
         }
 

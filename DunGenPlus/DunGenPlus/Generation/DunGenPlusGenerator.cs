@@ -261,22 +261,8 @@ namespace DunGenPlus.Generation {
 
           var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, archetype, TilePlacementResult.None);
           
-          if (tileProxy == null) {
-            var prevName = previousTile != null ? previousTile.Prefab.name : "NULL";
-            var archetypeName = archetype ? archetype.name : "NULL";
-            var tileSetNames = string.Join(", ", useableTileSets);
-            Plugin.logger.LogDebug($"Alt. main branch gen failed at Branch {b} (Length: {t}, Ratio: {lineDepthRatio})");
-            Plugin.logger.LogDebug($"Prev tile: {prevName}\nArchetype: {archetypeName}\nTilesets: {tileSetNames}");
-            Plugin.logger.LogDebug($"Reason: {DungeonGeneratorPatch.lastTilePlacementResult}");
-
-            if (previousTile != null) {
-              var availableDoorways = string.Join(",", previousTile.UnusedDoorways);
-              var usedDoorways = string.Join(",", previousTile.UsedDoorways);
-
-              Plugin.logger.LogDebug($"Available Doorways: {availableDoorways}");
-              Plugin.logger.LogDebug($"Used Doorways: {usedDoorways}");
-            }
-
+          if (tileProxy == null) {  
+            PrintAddTileError(gen, previousTile, archetype, useableTileSets, b + 1, t, lineDepthRatio);
             yield return gen.Wait(gen.InnerGenerate(true));
 						yield break;
           }
@@ -340,6 +326,42 @@ namespace DunGenPlus.Generation {
 
       AddForcedTiles(gen);
 		}
+
+    public static void PrintAddTileError(DungeonGenerator gen, TileProxy previousTile, DungeonArchetype archetype, IEnumerable<TileSet> useableTileSets, int branchId, int lineLength, float lineRatio){
+
+      var prevName = previousTile != null ? previousTile.Prefab.name : "NULL";
+      var archetypeName = archetype ? archetype.name : "NULL";
+      var tileSetNames = string.Join(", ", useableTileSets);
+
+      var stringList = new List<string>();  
+      stringList.Add($"Main branch gen failed at Branch {branchId} (Length: {lineLength}, Ratio: {lineRatio})");
+      stringList.Add($"Prev tile: {prevName}");
+      stringList.Add($"Archetype: {archetypeName}");
+      stringList.Add($"Tilesets: {tileSetNames}");
+      stringList.Add($"Reason: {DungeonGeneratorPatch.lastTilePlacementResult}");
+
+      if (previousTile != null) {
+        var availableDoorways = string.Join(", ", previousTile.UnusedDoorways.Select(d => d.DoorwayComponent.gameObject.name));
+        var usedDoorways = string.Join(", ", previousTile.UsedDoorways.Select(d => d.DoorwayComponent.gameObject.name));
+
+        stringList.Add($"Available Doorways: {availableDoorways}");
+        stringList.Add($"Used Doorways: {usedDoorways}");
+
+        if (API.IsDevDebugModeActive()){
+          var allTiles = GetDoorwayPairs(gen, previousTile, useableTileSets, archetype, lineRatio);
+          var uniqueTiles = string.Join(", ", allTiles.Select(t => t.NextTemplate.Prefab).Distinct().Select(d => d.name));
+
+          stringList.Add($"Next Possible Tiles: {uniqueTiles}");
+        }
+      }
+
+      stringList.Add(string.Empty);
+      Plugin.logger.LogDebug(string.Join("\n", stringList));
+    }
+
+    public static void PrintAddTileErrorQuick(DungeonGenerator gen, int lineLength){
+      PrintAddTileError(gen, DungeonGeneratorPatch.lastAttachTo, DungeonGeneratorPatch.lastArchetype, DungeonGeneratorPatch.lastUseableTileSets, 0, lineLength, DungeonGeneratorPatch.lastNormalizedDepth);
+    }
 
     private static IEnumerator GenerateBranchPaths(DungeonGenerator gen, TileProxy mainRoom, string message, LogLevel logLevel){
       Plugin.logger.Log(logLevel, $"Switching to default dungeon branch generation: {message}");

@@ -9,7 +9,6 @@ using DunGen.Graph;
 using DunGenPlus.Generation;
 using LethalLevelLoader;
 using UnityEngine;
-using static DunGenPlus.Components.DoorwayCleanupScripting.DCSConnectorBlockerSpawnedPrefab;
 
 namespace DunGenPlus
 {
@@ -135,6 +134,10 @@ namespace DunGenPlus
     /// <param name="dictionary"></param>
     public static void AddTileToMainPathDictionary(Dictionary<TileProxy, Tile> dictionary){
       DunGenPlusGenerator.AddTileToMainPathDictionary(dictionary);
+    }
+
+    public static bool IsDevDebugModeActive(){
+      return DevTools.DevDebugManager.IsActive;
     }
 
   }
