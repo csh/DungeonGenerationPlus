@@ -336,11 +336,32 @@ namespace DunGenPlus.Patches {
       }
     }
 
-    public static TilePlacementResult lastTilePlacementResult;
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(DungeonGenerator), "AddTilePlacementResult")]
-    public static void AddTilePlacementResultPatch(TilePlacementResult result){
-      lastTilePlacementResult = result;
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(DungeonGenerator), "AddTile")]
+    public static IEnumerable<CodeInstruction> AddTileDebugPatch(IEnumerable<CodeInstruction> instructions){
+
+      var addTileSequence = new InstructionSequenceStandard("Add Tile Placement");
+      addTileSequence.AddBasic(OpCodes.Callvirt);
+      addTileSequence.AddBasic(OpCodes.Ldc_I4_0);
+      addTileSequence.AddBasic(OpCodes.Bgt);
+      addTileSequence.AddBasicLocal(OpCodes.Ldloc_S, 9);
+
+      foreach(var instruction in instructions){
+        if (addTileSequence.VerifyStage(instruction)) {
+          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("RecordLastTilePlacementResult", BindingFlags.Static | BindingFlags.Public);
+
+          yield return new CodeInstruction(OpCodes.Ldarg_0);
+          yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
+          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+
+          yield return instruction;
+
+          continue;
+        }
+        yield return instruction;
+      }
+
+      addTileSequence.ReportComplete();
     }
 
     [HarmonyTranspiler]

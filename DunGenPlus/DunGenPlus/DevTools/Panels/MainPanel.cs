@@ -18,9 +18,13 @@ namespace DunGenPlus.DevTools.Panels {
 
     internal IntInputField seedInputField;
     internal TextUIElement lengthMultiplierField;
+    internal TextUIElement mapSizeMultiplierField;
+    internal TextUIElement factorySizeMultiplierField;
+    internal TextUIElement mapTileSizeField;
 
     internal ExtendedLevel[] levels;
     internal IEnumerable<string> levelOptions;
+    private ExtendedLevel selectedLevel;
 
     private GameObject asyncParentGameobject;
 
@@ -50,10 +54,18 @@ namespace DunGenPlus.DevTools.Panels {
 
       manager.CreateHeaderUIField(parentTransform, "Levels");
       manager.CreateLevelOptionsUIField(parentTransform, "Level", 0, SetLevel);
-      lengthMultiplierField = manager.CreateTextUIField(parentTransform, ("Length Multiplier", "Dungeon size multiplier based on the level."));
+      lengthMultiplierField = manager.CreateTextUIField(parentTransform, ("Length Multiplier", "Dungeon generation length multiplier based on the numerous factors."));
+      mapSizeMultiplierField = manager.CreateTextUIField(parentTransform, ("Map Size Multiplier", "Map size multiplier based on the round manager (fixed)."));
+      factorySizeMultiplierField = manager.CreateTextUIField(parentTransform, ("Factory Size Multiplier", "Factory size multiplier based on the level."));
+      mapTileSizeField = manager.CreateTextUIField(parentTransform, ("Map Tile Size", "Map tile size based on the dungeon."));
+
       SetLevel(levels[0]);
 
       asyncParentGameobject.SetActive(gen.GenerateAsynchronously);
+    }
+
+    public void UpdatePanel(){
+      SetLevel(selectedLevel);
     }
 
     public void SetSeed(int value) {
@@ -87,20 +99,38 @@ namespace DunGenPlus.DevTools.Panels {
     }
 
     public void SetLevel(ExtendedLevel level){
-      var currentLevelLengthMultlpier = GetLevelMultiplier(level);
-      dungeon.Generator.LengthMultiplier = currentLevelLengthMultlpier;
+      var currentValues = GetLevelMultiplier(level);
+      dungeon.Generator.LengthMultiplier = currentValues.lengthMultiplier;
       manager.UpdateDungeonBounds();
-      lengthMultiplierField.SetText($"Length multiplier: {currentLevelLengthMultlpier.ToString("F2")}");
+
+      var lengthString = currentValues.lengthMultiplier.ToString("F2");
+      var mapSizeString = currentValues.mapSizeMultiplier.ToString("F2");
+      var factoryString = currentValues.factorySizeMultiplier.ToString("F2");
+      var tileString = currentValues.mapTileSize.ToString("F2");
+
+      lengthMultiplierField.SetText($"Length multiplier: {lengthString} [{mapSizeString} / {tileString} * {factoryString}]");
+      mapSizeMultiplierField.SetText($"Map size multiplier: {mapSizeString}");
+      factorySizeMultiplierField.SetText($"Factory size multiplier: {factoryString}");
+      mapTileSizeField.SetText($"Map tile size: {tileString}");
+
+      selectedLevel = level;
     }
 
-    private float GetLevelMultiplier(ExtendedLevel level){
+    private (float lengthMultiplier, float mapSizeMultiplier, float factorySizeMultiplier, float mapTileSize) GetLevelMultiplier(ExtendedLevel level){
       var roundManager = RoundManager.Instance;
-      if (roundManager == null) {
-        Plugin.logger.LogError("RoundManager somehow null. Can't set level length multiplier");
-        return 1f;
+      var mapSizeMultiplier = 1f;
+      if (roundManager != null) {
+        mapSizeMultiplier = roundManager.mapSizeMultiplier;
+      } else {
+        Plugin.logger.LogError("RoundManager somehow null.");
       }
 
-      return roundManager.mapSizeMultiplier * level.SelectableLevel.factorySizeMultiplier; 
+      var factorySizeMultiplier = level.SelectableLevel.factorySizeMultiplier;
+      var mapTileSize = selectedExtendedDungeonFlow.MapTileSize;
+
+      var num2 = mapSizeMultiplier / mapTileSize * factorySizeMultiplier; 
+      num2 = (float)((double)Mathf.Round(num2 * 100f) / 100f);
+      return (num2, mapSizeMultiplier, factorySizeMultiplier, mapTileSize);
     }
 
   }

@@ -150,6 +150,7 @@
     <Compile Include="Components\Scrap\RandomGuaranteedScrapSpawn.cs" />
     <Compile Include="DevTools\Panels\AssetsPanel.cs" />
     <Compile Include="Generation\DunGenPlusGenerationPaths.cs" />
+    <Compile Include="Generation\DunGenPlusGeneratorDebug.cs" />
     <Compile Include="Generation\DunGenPlusGeneratorGlobalProps.cs" />
     <Compile Include="MainPathExtender.cs" />
     <Compile Include="Managers\EnemyManager.cs" />

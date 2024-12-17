@@ -25,7 +25,7 @@ namespace DunGenPlus.DevTools {
     public RuntimeDungeon dungeon;
     public GameObject devCamera;
     public BasePanel[] panels;
-    public RectTransform canvasRectTransform;
+    public LayoutElement canvasLayoutElement;
 
     public TMP_Dropdown dungeonFlowSelectionDropDown;
     private ExtendedDungeonFlow[] dungeonFlows;
@@ -52,6 +52,7 @@ namespace DunGenPlus.DevTools {
 
     // canvas
     public bool canvasExtended;
+    private bool canvasExtendedInAnimation;
     private float canvasWidthTarget;
 
     void Awake(){
@@ -94,9 +95,16 @@ namespace DunGenPlus.DevTools {
     }
 
     void Update(){
-      var sizeDelta = canvasRectTransform.sizeDelta;
-      sizeDelta.x = Mathf.Lerp(sizeDelta.x, canvasWidthTarget, Time.deltaTime * 10f);
-      canvasRectTransform.sizeDelta = sizeDelta;
+      if (canvasExtendedInAnimation){
+        var currentWidth = canvasLayoutElement.preferredWidth;
+        if (Mathf.Abs(currentWidth - canvasWidthTarget) < 4f) {
+          canvasLayoutElement.preferredWidth = canvasWidthTarget;
+          canvasExtendedInAnimation = false;
+        } else {
+          canvasLayoutElement.preferredWidth = Mathf.Lerp(currentWidth, canvasWidthTarget, Time.deltaTime * 10f);
+        }
+      }
+      
 
       statusTextMesh.text = dungeon.Generator.Status.ToString();
 
@@ -125,6 +133,7 @@ namespace DunGenPlus.DevTools {
     }
 
     public void ToggleCanvasExtended(){
+      canvasExtendedInAnimation = true;
       canvasExtended = !canvasExtended;
       canvasWidthTarget = canvasExtended ? 800f : 440f;
     }
@@ -220,6 +229,17 @@ namespace DunGenPlus.DevTools {
       textList.AppendLine($"DoorwayPair Time: {DunGenPlusGenerator.DoorwayPairTime:F2} ms");
       textList.AppendLine($"CalculateWeight Time: {DunGenPlusGenerator.CalculateWeightTime:F2} ms");
 
+      /*
+      var errors = generator.tilePlacementResultCounters;
+      if (errors.Count > 0) {
+        textList.AppendLine("");
+        textList.AppendLine("Reasons for faliure:");
+        foreach(var pair in errors){
+          textList.AppendLine($"{pair.Key} (x{pair.Value})");
+        }
+      }
+      */
+
       statsTextMesh.text = textList.ToString();
     }
 
@@ -228,6 +248,7 @@ namespace DunGenPlus.DevTools {
     }
 
     private void UpdatePanels() {
+      MainPanel.Instance?.UpdatePanel();
       DunFlowPanel.Instance?.UpdatePanel(true);
       DunGenPlusPanel.Instance?.UpdatePanel(true);
       AssetsPanel.Instance?.UpdatePanel(true);

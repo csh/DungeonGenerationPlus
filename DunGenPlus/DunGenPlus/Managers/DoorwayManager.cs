@@ -29,6 +29,9 @@ namespace DunGenPlus.Managers {
           d.Cleanup();
         }
 
+        // we can leave early if doorway cleanup is not used (most likely for most dungeons anyway)
+        if (doorwayCleanupList.Count == 0) return;
+
         try{
           var dungeonGen = RoundManager.Instance.dungeonGenerator;
           var navmesh = dungeonGen.transform.parent.GetComponentInChildren<UnityNavMeshAdapter>();

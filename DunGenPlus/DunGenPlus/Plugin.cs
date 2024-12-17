@@ -25,7 +25,7 @@ namespace DunGenPlus {
 
     internal const string modGUID = "dev.ladyalice.dungenplus";
     private const string modName = "Dungeon Generation Plus";
-    private const string modVersion = "1.3.0";
+    private const string modVersion = "1.3.1";
 
     internal readonly Harmony Harmony = new Harmony(modGUID);
 
