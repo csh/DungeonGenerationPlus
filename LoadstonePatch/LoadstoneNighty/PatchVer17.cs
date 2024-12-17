@@ -1,20 +1,23 @@
-﻿using System;
+﻿using DunGen.Graph;
+using DunGen;
+using DunGenPlus.Collections;
+using DunGenPlus;
+using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DunGen;
-using DunGen.Graph;
-using DunGenPlus;
-using DunGenPlus.Collections;
-using HarmonyLib;
 
 namespace LoadstoneNighty {
 
-  public class Patch {
+
+  // patch 17 has the patch functions for me to use
+  public class PatchVer17 {
 
     public static void Activate(){
       Loadstone.Patches.DungenOptimizationPatches.tileCollectors.Add(GetTiles);
+      Plugin.logger.LogInfo($"DungenOptimizationPatches function has been patched!");
     }
 
     private static HashSet<Tile> GetTiles(DungeonGenerator generator) {

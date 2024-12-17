@@ -20,8 +20,8 @@ namespace LoadstoneNighty {
     private const string modName = "Dungeon Generation Plus Loadstone Patch";
     private const string modVersion = "1.0.0";
 
-    public const string targetModGUID = "com.adibtw.loadstone.Nightly";
-    public const string targetModVersion = "0.1.16";
+    public const string targetModGUID = "com.adibtw.loadstone";
+    public const string targetModVersion = "0.1.17";
 
     public readonly Harmony harmony = new Harmony(modGUID);
     public static Plugin Instance {get; private set;}
@@ -32,8 +32,11 @@ namespace LoadstoneNighty {
      
       logger = BepInEx.Logging.Logger.CreateLogSource(modGUID);
 
-       var modLoaded = Chainloader.PluginInfos.ContainsKey(targetModGUID);
+      var modLoaded = Chainloader.PluginInfos.ContainsKey(targetModGUID);
       if (!modLoaded) return;
+
+      logger.LogInfo($"Plugin {modName} has been added!");
+      PatchVer16.Activate();
 
       bool validVersion;
       var pluginInfo = Chainloader.PluginInfos[targetModGUID];
@@ -46,15 +49,7 @@ namespace LoadstoneNighty {
       }
 
       if (validVersion){
-        logger.LogInfo($"Plugin {modName} has been added!");
-
-        try {
-          harmony.PatchAll(typeof(Patch));
-        } catch {
-          
-        }
-
-        Patch.Activate();
+        PatchVer17.Activate();
       }
     }
   }
