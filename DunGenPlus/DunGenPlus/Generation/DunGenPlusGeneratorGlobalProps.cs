@@ -50,7 +50,6 @@ namespace DunGenPlus.Generation {
           var num = tile.Placement.IsOnMainPath ? globalProp.MainPathWeight : globalProp.BranchPathWeight;
           num *= globalProp.DepthWeightScale.Evaluate(tile.Placement.NormalizedDepth);
           gameObjectChanceTable.Weights.Add(new GameObjectChance(globalProp.gameObject, num, 0f, null));
-
         }
       }
 

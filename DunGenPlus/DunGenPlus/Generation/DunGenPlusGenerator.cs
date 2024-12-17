@@ -94,7 +94,10 @@ namespace DunGenPlus.Generation {
     }
 
     public static int GetMainPathIndexFromTile(Tile tile){
-      return tileMainPath[tile];
+      if (tileMainPath.TryGetValue(tile, out var value)){
+        return value;
+      }
+      return 0;
     }
 
     public static void AddTileProxy(TileProxy tileProxy, int index) {  

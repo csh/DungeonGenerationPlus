@@ -367,7 +367,6 @@ namespace DunGenPlus.Patches {
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(Dungeon), "FromProxy")]
     public static IEnumerable<CodeInstruction> FromProxyPatch(IEnumerable<CodeInstruction> instructions){
-
       var endSequence = new InstructionSequenceStandard("Forloop End");
       endSequence.AddBasicLocal(OpCodes.Ldloca_S, 1);
       endSequence.AddBasic(OpCodes.Constrained);
