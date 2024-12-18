@@ -373,16 +373,17 @@ namespace DunGenPlus.Patches {
       endSequence.AddBasic(OpCodes.Callvirt);
       endSequence.AddBasic(OpCodes.Endfinally);
 
+      // WE MUST INJECT BEFORE ENDFINALLY
+      // DiFFoZ says cause try/catch block something
+      // Idk that makes no sense
+      // But if it works it works
+
       foreach(var instruction in instructions){
         if (endSequence.VerifyStage(instruction)) {
-          yield return instruction;
-
           var specialFunction = typeof(DunGenPlusGenerator).GetMethod("AddTileToMainPathDictionary", BindingFlags.Static | BindingFlags.Public);
 
           yield return new CodeInstruction(OpCodes.Ldloc_0);
           yield return new CodeInstruction(OpCodes.Call, specialFunction);
-
-          continue;
         }
         yield return instruction;
       }

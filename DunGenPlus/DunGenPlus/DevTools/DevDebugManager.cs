@@ -14,6 +14,8 @@ using DunGenPlus.DevTools.Panels;
 using DunGenPlus.DevTools.UIElements;
 using DunGenPlus.Generation;
 using DunGenPlus.DevTools.Panels.Collections;
+using HarmonyLib;
+using HarmonyLib.Public.Patching;
 
 namespace DunGenPlus.DevTools {
   internal partial class DevDebugManager : MonoBehaviour {
