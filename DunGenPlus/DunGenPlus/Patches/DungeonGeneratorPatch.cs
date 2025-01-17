@@ -394,10 +394,14 @@ namespace DunGenPlus.Patches {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DungeonGenerator), "ProcessGlobalProps")]
     public static bool ProcessGlobalPropsPatch(ref DungeonGenerator __instance){
-      if (DunGenPlusGenerator.Active && DunGenPlusGenerator.Properties.MainPathProperties.MainPathDetails.Any(d => d.LocalGroupProps.Count > 0)){
-        Plugin.logger.LogDebug("Performing Local Global Props algorithm");
-        DunGenPlusGenerator.ProcessGlobalPropsPerMainPath(__instance);
-        return false;
+      if (DunGenPlusGenerator.Active){
+        var anyGlobalSettings = DunGenPlusGenerator.Properties.MainPathProperties.DetailedGlobalPropSettings.Count > 0;
+        var anyLocalSettings = DunGenPlusGenerator.Properties.MainPathProperties.MainPathDetails.Any(d => d.LocalGroupProps.Count > 0);
+        if (anyGlobalSettings || anyLocalSettings){
+          Plugin.logger.LogDebug("Performing Local Global Props algorithm");
+          DunGenPlusGenerator.ProcessGlobalPropsPerMainPath(__instance);
+          return false;
+        }  
       }
       return true;
     }

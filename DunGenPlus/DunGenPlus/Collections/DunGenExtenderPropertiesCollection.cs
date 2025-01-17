@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using static DunGenPlus.Collections.DunGenExtenderProperties;
 using UnityEngine;
 using DunGen;
-using DunGen.Graph;
 
 namespace DunGenPlus.Collections {
 
@@ -17,7 +16,7 @@ namespace DunGenPlus.Collections {
     internal const string MainRoomTilePrefabTooltip = "The Tile prefab where the additional main paths will start from.\n\nCannot be null if MainPathCount is more than 1.";
     internal const string CopyNodeBehaviourTooltip = "Defines how the nodes list is copied onto the additional main paths.\n\nCopyFromMainPathPosition: nodes will copy based on the MainRoomTilePrefab's position in the main path.\nCopyFromNodeList: nodes will copy based on the MainRoomTilePrefab's position in the node list + 1.";
     internal const string MainPathDetailsTooltip = "Overrides certain DungeonFlow values during the main path generation.\n\nThe order of items in this list correspond to the order of the main paths being generated.\nThe first item in this list will activate for the first main path, the second item for the second main path, and so on. If there are more main paths than items in this list, the last item is used instead.";
-    
+    internal const string DetailedGlobalPropSettingsTooltip = "Additional settings for how Global Props spawn.";
 
     [Tooltip(MainPathCountTooltip)]
     [Range(1, 9)]
@@ -28,6 +27,8 @@ namespace DunGenPlus.Collections {
     public CopyNodeBehaviour CopyNodeBehaviour = CopyNodeBehaviour.CopyFromMainPathPosition;
     [Tooltip(MainPathDetailsTooltip)]
     public List<MainPathExtender> MainPathDetails = new List<MainPathExtender>();
+    [Tooltip(DetailedGlobalPropSettingsTooltip)]
+    public List<DetailedGlobalPropSettings> DetailedGlobalPropSettings = new List<DetailedGlobalPropSettings>();
 
     public MainPathExtender GetMainPathDetails(int index) {
       var count = MainPathDetails.Count;
@@ -41,6 +42,7 @@ namespace DunGenPlus.Collections {
       MainRoomTilePrefab = props.MainRoomTilePrefab;
       CopyNodeBehaviour = props.CopyNodeBehaviour;
       MainPathDetails = props.MainPathDetails;
+      DetailedGlobalPropSettings = props.DetailedGlobalPropSettings;
     }
 
     internal MainPathProperties Copy() {

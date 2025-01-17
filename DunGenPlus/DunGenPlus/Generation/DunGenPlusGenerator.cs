@@ -97,6 +97,8 @@ namespace DunGenPlus.Generation {
       if (tileMainPath.TryGetValue(tile, out var value)){
         return value;
       }
+
+      Plugin.logger.LogWarning("Error with GetMainPathIndexFromTile.\nPLEASE REPORT TO MR. DEV WITH YOUR MOD PACK. THIS SHOULD NOT BE HAPPENING!");
       return 0;
     }
 

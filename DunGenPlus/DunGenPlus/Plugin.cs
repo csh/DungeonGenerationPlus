@@ -19,13 +19,13 @@ using UnityEngine.Assertions;
 namespace DunGenPlus {
 
   [BepInPlugin(modGUID, modName, modVersion)]
-  [BepInDependency("imabatby.lethallevelloader", "1.2.0.3")]
+  [BepInDependency("imabatby.lethallevelloader", "1.4.0")]
   [BepInProcess("Lethal Company.exe")]
   public class Plugin : BaseUnityPlugin {
 
     internal const string modGUID = "dev.ladyalice.dungenplus";
     private const string modName = "Dungeon Generation Plus";
-    private const string modVersion = "1.3.3";
+    private const string modVersion = "1.3.4";
 
     internal readonly Harmony Harmony = new Harmony(modGUID);
 

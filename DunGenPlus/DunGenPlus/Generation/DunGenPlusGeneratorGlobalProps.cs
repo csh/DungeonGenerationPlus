@@ -16,6 +16,7 @@ namespace DunGenPlus.Generation {
     // Copied and pasted from DunGen
     public static void ProcessGlobalPropsPerMainPath(DungeonGenerator dungeonGenerator){
       var localIDs = Properties.MainPathProperties.MainPathDetails.SelectMany(d => d.LocalGroupProps).Select(x => x.ID).ToHashSet();
+      var detailedSettings = Properties.MainPathProperties.DetailedGlobalPropSettings;
 
       // first parameter int is the GlobalProp ID
       // second parameter is the List of GameObjectChanceTable indexed by the main path index
@@ -69,26 +70,46 @@ namespace DunGenPlus.Generation {
 
       var list = new List<int>(localDictionary.Count + globalDictionary.Count);
 
-      int ProcessGlobalPropID(GameObjectChanceTable table, int localMax, int globalCount, int globalMax){
+      void RemoveElementsTooClose(GameObjectChanceTable table, Vector3 position, float minDistance){
+        if (minDistance <= 0f) return;
+
+        var elementsToRemove = new List<GameObjectChance>();
+        foreach(var item in table.Weights){
+          if (Vector3.SqrMagnitude(position - item.Value.transform.position) < minDistance * minDistance) {
+            elementsToRemove.Add(item);
+          }
+        }
+
+        foreach(var e in elementsToRemove){
+          table.Weights.Remove(e);
+        }
+      }
+
+      int ProcessGlobalPropID(GameObjectChanceTable table, int localMax, int globalCount, int globalMax, float minDistance){
         localMax = Mathf.Clamp(localMax, 0, table.Weights.Count);
         var i = 0;
         while(i < localMax && i + globalCount < globalMax){
           var random = table.GetRandom(dungeonGenerator.RandomStream, true, 0f, null, true, true);
           if (random != null && random.Value != null) {
             random.Value.SetActive(true);
+            RemoveElementsTooClose(table, random.Value.transform.position, minDistance);
           }
           ++i;
         }
         return i;
       }
 
-      int ProcessRemainingGlobalPropID(GameObjectChanceTable[] tables, int count){
+      int ProcessRemainingGlobalPropID(GameObjectChanceTable[] tables, int count, float minDistance){
         count = Mathf.Clamp(count, 0, tables.Sum(t => t.Weights.Count));
         var i = 0;
         while(i < count){
           var random = GameObjectChanceTable.GetCombinedRandom(dungeonGenerator.RandomStream, true, 0f, tables);
           if (random != null) {
             random.SetActive(true);
+
+            foreach(var t in tables){
+              RemoveElementsTooClose(t, random.transform.position, minDistance);
+            }
           }
           ++i;
         }
@@ -107,12 +128,17 @@ namespace DunGenPlus.Generation {
               .Where(x => x.ID == pair.Key)
               .FirstOrDefault();
 
+            var detailedPropSettings = detailedSettings
+                .Where(x => x.ID == pair.Key)
+                .FirstOrDefault();
+            var minDistance = detailedPropSettings != null ? detailedPropSettings.MinimumDistance : -1f;
+
             if (globalPropSettings != null){    
               var tableClone = pair.Value.Clone();
               var globalMax = globalPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
 
-              var spawned = ProcessGlobalPropID(tableClone, globalMax, 0, globalMax);
-              Plugin.logger.LogDebug($"Global ID: {pair.Key} ({spawned} / {globalMax})");
+              var spawned = ProcessGlobalPropID(tableClone, globalMax, 0, globalMax, minDistance);
+              Plugin.logger.LogDebug($"Global ID: {pair.Key} ({spawned} / {globalMax}). Min Dist: {minDistance}");
               list.Add(pair.Key);
             }
           }
@@ -131,16 +157,23 @@ namespace DunGenPlus.Generation {
             var globalPropSettings = dungeonGenerator.DungeonFlow.GlobalProps
               .Where(x => x.ID == globalPropId)
               .FirstOrDefault();
-            
+
+            var detailedPropSettings = detailedSettings
+                  .Where(x => x.ID == pair.Key)
+                  .FirstOrDefault();
+            var minDistance = detailedPropSettings != null ? detailedPropSettings.MinimumDistance : -1f;
+
             if (globalPropSettings != null){
               var globalCount = 0;
               var globalMax = globalPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
               var pathDictionary = pair.Value;
-              Plugin.logger.LogDebug($"Local ID: {pair.Key} (Max {globalMax})");
+              Plugin.logger.LogDebug($"Local ID: {pair.Key} (Max {globalMax}). Min Dist: {minDistance}");
 
               var toRemoveKeys = new List<int>();
 
               foreach(var pathPair in pathDictionary){
+                
+
                 // try and get local main path properites based on key of Dictionary<MainPathIndex (int), GlobalProps (GameObjectChanceTable)> 
                 var mainPathIndex = pathPair.Key;
                 var localGroupProps = Properties.MainPathProperties.GetMainPathDetails(mainPathIndex).LocalGroupProps;
@@ -156,7 +189,7 @@ namespace DunGenPlus.Generation {
                 var tableClone = pathPair.Value.Clone();
                 var localMax = localPropSettings.Count.GetRandom(dungeonGenerator.RandomStream);
 
-                var spawned = ProcessGlobalPropID(tableClone, localMax, globalCount, globalMax);
+                var spawned = ProcessGlobalPropID(tableClone, localMax, globalCount, globalMax, minDistance);
                 globalCount += spawned;
                 Plugin.logger.LogDebug($"Main Path {mainPathIndex}: Local ({spawned} / {localMax}), Global ({globalCount} / {globalMax})");
 
@@ -176,7 +209,7 @@ namespace DunGenPlus.Generation {
                 Plugin.logger.LogDebug($"Combining main paths ({combine}) into one GameObjectChanceTable");
 
                 var combinedTable = pathDictionary.Select(d => d.Value).ToArray();
-                var spawned = ProcessRemainingGlobalPropID(combinedTable, globalMax - globalCount);
+                var spawned = ProcessRemainingGlobalPropID(combinedTable, globalMax - globalCount, minDistance);
                 globalCount += spawned;
                 Plugin.logger.LogDebug($"Spawned remaining props ({globalCount} / {globalMax})");
               }
@@ -186,45 +219,6 @@ namespace DunGenPlus.Generation {
           }
         }
       }
-
-      /*
-      Plugin.logger.LogError("Spawned");
-
-
-      var colors = new Color[] { Color.red, Color.blue };
-
-      foreach(var tile in dungeonGenerator.CurrentDungeon.AllTiles){
-        var mainPathIndex = GetMainPathIndexFromTile(tile);
-
-        foreach(var globalProp in tile.GetComponentsInChildren<GlobalProp>()){
-          if (globalProp.PropGroupID == 1717){
-            //var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
-            //newGameObject.transform.position = globalProp.transform.position;
-            //newGameObject.transform.localScale = Vector3.one * 1f;
-            Plugin.logger.LogError($"{globalProp.PropGroupID}: {globalProp.transform.position}");
-
-            //var renderer = newGameObject.GetComponent<Renderer>();
-            //renderer.material.color = colors[0];
-
-           // newGameObject.SetActive(true);
-          }
-
-          if (globalProp.PropGroupID == 1718){
-            //var newGameObject = GameObject.Instantiate(DunGenPlusPanel.Instance.dungeonBoundsHelperGameObject);
-            //newGameObject.transform.position = globalProp.transform.position;
-            //newGameObject.transform.localScale = Vector3.one * 1f;
-            Plugin.logger.LogError($"{globalProp.PropGroupID}: {globalProp.transform.position}");
-
-            //var renderer = newGameObject.GetComponent<Renderer>();
-            //renderer.material.color = colors[1];
-
-             //newGameObject.SetActive(true);
-          }
-        }
-
-       
-      }
-      */
 
     }
 
