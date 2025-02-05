@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using DunGen;
 using DunGen.Graph;
+using DunGenPlus.Collections;
 using DunGenPlus.Generation;
 using DunGenPlus.Managers;
 using DunGenPlus.Patches;
@@ -44,9 +45,12 @@ namespace DunGenPlus {
       PluginConfig.SetupConfig(Config);
 
       Harmony.PatchAll(typeof(DungeonGeneratorPatch));
-      Harmony.PatchAll(typeof(DoorwayConnectionPatch));
+      Harmony.PatchAll(typeof(DungeonPatch));
+      Harmony.PatchAll(typeof(DungeonProxyPatch));
       Harmony.PatchAll(typeof(RoundManagerPatch));
-
+      Harmony.PatchAll(typeof(BranchCountHelperPatch));
+      Harmony.PatchAll(typeof(TileProxyPatch));
+      
       try {
         Harmony.PatchAll(typeof(LethalLevelLoaderPatches));
       } catch (Exception e) {

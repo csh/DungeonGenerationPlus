@@ -145,6 +145,7 @@
     <Compile Include="Collections\LocalGlobalPropSettings.cs" />
     <Compile Include="Collections\NodeArchetype.cs" />
     <Compile Include="Collections\NullObject.cs" />
+    <Compile Include="Collections\TileExtenderProxy.cs" />
     <Compile Include="Components\DoorwayCleanup.cs" />
     <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwayConnectedDoorway.cs" />
     <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwaySpawnedPrefab.cs" />
@@ -163,6 +164,9 @@
     <Compile Include="MainPathExtender.cs" />
     <Compile Include="Managers\EnemyManager.cs" />
     <Compile Include="Managers\ScrapItemManager.cs" />
+    <Compile Include="Patches\BranchCountHelperPatch.cs" />
+    <Compile Include="Patches\DungeonPatch.cs" />
+    <Compile Include="Patches\TileProxyPatch.cs" />
     <Compile Include="PluginConfig.cs" />
     <Compile Include="DevTools\DevDebugManager.cs" />
     <Compile Include="DevTools\DevDebugManagerUI.cs" />
@@ -196,7 +200,7 @@
     <Compile Include="Generation\DunGenPlusGeneratorBranchLoop.cs" />
     <Compile Include="Generation\DunGenPlusGeneratorMiscellaneous.cs" />
     <Compile Include="Managers\DoorwayManager.cs" />
-    <Compile Include="Patches\DoorwayConnectionPatch.cs" />
+    <Compile Include="Patches\DungeonProxyPatch.cs" />
     <Compile Include="Generation\DoorwaySistersRule.cs" />
     <Compile Include="Patches\DungeonGeneratorPatch.cs" />
     <Compile Include="Patches\LethalLevelLoaderPatches.cs" />
@@ -204,6 +208,7 @@
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Components\TileExtender.cs" />
     <Compile Include="Utils\TranspilerUtilities.cs" />
     <Compile Include="Utils\Utility.cs" />
   </ItemGroup>

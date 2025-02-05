@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using DunGenPlus.Generation;
 
 namespace DunGenPlus.Patches {
-  internal class DoorwayConnectionPatch {
+  internal class DungeonProxyPatch {
 
     [HarmonyPatch(typeof(DungeonProxy), "ConnectOverlappingDoorways")]
     [HarmonyPrefix]

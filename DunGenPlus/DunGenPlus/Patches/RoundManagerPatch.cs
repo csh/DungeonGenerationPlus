@@ -14,7 +14,22 @@ using Unity.Netcode;
 using UnityEngine;
 
 namespace DunGenPlus.Patches {
-  public class RoundManagerPatch {
+  internal class RoundManagerPatch {
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RoundManager), "FinishGeneratingLevel")]
+    public static void GenerateBranchPathsPatch(){
+      if (DunGenPlusGenerator.Active) {
+        Plugin.logger.LogDebug("Alt. InnerGenerate() function complete");
+      }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RoundManager), "SetPowerOffAtStart")]
+    public static void SetPowerOffAtStartPatch(){
+      DoorwayManager.onMainEntranceTeleportSpawnedEvent.Call();
+    }
+
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RoundManager), "Awake")]
