@@ -17,6 +17,7 @@ using UnityEngine.Rendering.HighDefinition;
 using BepInEx.Logging;
 using DunGenPlus.DevTools;
 using DunGenPlus.Patches;
+using DunGenPlus.DevTools.Panels;
 
 [assembly: SecurityPermission( SecurityAction.RequestMinimum, SkipVerification = true )]
 namespace DunGenPlus.Generation {
@@ -36,7 +37,7 @@ namespace DunGenPlus.Generation {
       ActiveAlternative = true;
 
       var props = extender.Properties.Copy(extender.Version);
-      var callback = new EventCallbackScenario(DevDebugManager.Instance);
+      var callback = new EventCallbackScenario(DunGenPlusPanel.Instance && DunGenPlusPanel.Instance.eventCallbackValue);
       Instance.Events.OnModifyDunGenExtenderProperties.Invoke(props, callback);
       props.NormalNodeArchetypesProperties.SetupProperties(generator);
       Properties = props;

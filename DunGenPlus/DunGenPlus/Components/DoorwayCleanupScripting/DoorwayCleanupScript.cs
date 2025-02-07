@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DunGenPlus.Components.DoorwayCleanupScripting {
+  [Obsolete("Please use DoorwayScriptingParent")]
   public abstract class DoorwayCleanupScript : MonoBehaviour {
 
     public abstract void Cleanup(DoorwayCleanup parent);

@@ -56,6 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\MonoMod.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -157,7 +160,24 @@
     <Compile Include="Components\MainRoomDoorwayGroups.cs" />
     <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
     <Compile Include="Components\Scrap\RandomGuaranteedScrapSpawn.cs" />
+    <Compile Include="Components\Scripting\DoorwayScriptingParent.cs" />
+    <Compile Include="Components\Scripting\DunGenPlusScript.cs" />
+    <Compile Include="Components\Scripting\DunGenPlusScriptingParent.cs" />
     <Compile Include="DevTools\Panels\AssetsPanel.cs" />
+    <Compile Include="ExpressionParser\EvaluationContext.cs" />
+    <Compile Include="ExpressionParser\Evaluator.cs" />
+    <Compile Include="ExpressionParser\ExpressionToken.cs" />
+    <Compile Include="ExpressionParser\ExpressionTokenType.cs" />
+    <Compile Include="ExpressionParser\FunctionRoutine.cs" />
+    <Compile Include="ExpressionParser\Parsing\IExpressionTokenizer.cs" />
+    <Compile Include="ExpressionParser\Parsing\InfixTokenizer.cs" />
+    <Compile Include="ExpressionParser\Parsing\InfixToPostfixTokenizer.cs" />
+    <Compile Include="ExpressionParser\Parsing\KnownOperators.cs" />
+    <Compile Include="ExpressionParser\Parsing\ListReader.cs" />
+    <Compile Include="ExpressionParser\Parsing\OperatorType.cs" />
+    <Compile Include="ExpressionParser\Parsing\RawToken.cs" />
+    <Compile Include="ExpressionParser\Parsing\RawTokenizer.cs" />
+    <Compile Include="ExpressionParser\ValueTypeHint.cs" />
     <Compile Include="Generation\DunGenPlusGenerationPaths.cs" />
     <Compile Include="Generation\DunGenPlusGeneratorDebug.cs" />
     <Compile Include="Generation\DunGenPlusGeneratorGlobalProps.cs" />

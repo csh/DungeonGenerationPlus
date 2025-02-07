@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DunGenPlus.Components.DoorwayCleanupScripting {
+
+  [Obsolete("Please use DoorwayScriptingParent")]
   public class DCSRemoveDoorwaySpawnedPrefab : DoorwayCleanupScript {
 
     [Header("Removes Doorway Gameobject\nif Doorway instantiates a Connector/Blocker prefab with the target's name")]

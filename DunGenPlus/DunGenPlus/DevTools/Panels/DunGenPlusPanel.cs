@@ -32,6 +32,7 @@ namespace DunGenPlus.DevTools.Panels {
     private GameObject forcedTilesParentGameobject;
     private GameObject branchLoopBoostParentGameobject;
     private GameObject maxShadowsParentGameobject;
+    public bool eventCallbackValue = true;
 
     public override void AwakeCall() {
       Instance = this;
@@ -70,6 +71,7 @@ namespace DunGenPlus.DevTools.Panels {
     }
 
     internal const string ActivateDunGenPlusTooltip = "If disabled, the dungeon generation will ignore this DunGenPlusExtender asset and simply create a vanilla dungeon instead when generating.";
+    internal const string EventCallbackScenarioTooltip = "Sets the EventCallbackScenario.IsDevDebug value";
 
     public void SetupPanel() {
       selectedExtenderer = API.GetDunGenExtender(selectedDungeonFlow);
@@ -77,6 +79,7 @@ namespace DunGenPlus.DevTools.Panels {
       var parentTransform = selectedListGameObject.transform;
       var properties = selectedExtenderer.Properties;
       manager.CreateBoolInputField(parentTransform, ("Activate DunGenPlus", ActivateDunGenPlusTooltip), selectedExtenderer.Active, SetActivateDunGenPlus);
+      manager.CreateBoolInputField(parentTransform, ("EventCallbackScenario state", EventCallbackScenarioTooltip), eventCallbackValue, SetDebugCallbackState);
       manager.CreateSpaceUIField(parentTransform);
 
       var mainPathTransform = manager.CreateVerticalLayoutUIField(parentTransform);
@@ -166,6 +169,10 @@ namespace DunGenPlus.DevTools.Panels {
 
     public void SetActivateDunGenPlus(bool state){
       selectedExtenderer.Active = state;
+    }
+
+    public void SetDebugCallbackState(bool state){
+      eventCallbackValue = state;
     }
 
     public void SetMainPathCount(int value) {

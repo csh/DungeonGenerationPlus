@@ -69,5 +69,12 @@ namespace DunGenPlus.Patches {
       }
     }
 
+    [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
+    [HarmonyPatch(typeof(RoundManager), "SetLevelObjectVariables")]
+    public static void SetLevelObjectVariablesPatch (ref RoundManager __instance) {
+      DoorwayManager.SetLevelObjectVariablesFunction();
+    }
+
   }
 }

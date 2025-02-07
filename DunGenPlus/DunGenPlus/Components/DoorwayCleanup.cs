@@ -11,6 +11,7 @@ using UnityEngine;
 namespace DunGenPlus.Components {
   public class DoorwayCleanup : MonoBehaviour, IDungeonCompleteReceiver {
 
+    [Header("OBSOLUTE. Please use DoorwayScriptingParent")]
     [Header("Doorway References")]
     [Tooltip("The doorway reference.")]
     public Doorway doorway;

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace DunGenPlus.Components.DoorwayCleanupScripting {
+
+  [Obsolete("Please use DoorwayScriptingParent")]
   public class DCSConnectorBlockerSpawnedPrefab : DoorwayCleanupScript {
 
     public enum Action { SwitchToConnector, SwitchToBlocker };

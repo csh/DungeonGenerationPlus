@@ -1,8 +1,11 @@
-﻿using System;
+﻿using BepInEx.Logging;
+using DunGenPlus.Components.Scripting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace DunGenPlus.Utils {
@@ -49,6 +52,28 @@ namespace DunGenPlus.Utils {
 
     public void ClearTemporaryActionList(){
       temporaryActionList.Clear();
+    }
+  }
+
+  public static class Utility {
+
+    public static void PrintLog(string message, LogLevel logLevel){
+      if (DunGenPlusScript.InDebugMode){
+        switch(logLevel){
+          case LogLevel.Error:
+          case LogLevel.Fatal:
+            Debug.LogError(message); 
+            break;
+          case LogLevel.Warning:
+            Debug.LogWarning(message);
+            break;
+          default:
+            Debug.Log(message);
+            break;
+        }
+      } else {
+        Plugin.logger.Log(logLevel, message);
+      }
     }
   }
 

@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using DunGen;
 using DunGen.Graph;
 using DunGenPlus.Collections;
+using DunGenPlus.Components.Scripting;
 using DunGenPlus.Generation;
 using DunGenPlus.Managers;
 using DunGenPlus.Patches;
@@ -26,7 +27,7 @@ namespace DunGenPlus {
 
     internal const string modGUID = "dev.ladyalice.dungenplus";
     private const string modName = "Dungeon Generation Plus";
-    private const string modVersion = "1.3.4";
+    private const string modVersion = "1.4.0";
 
     internal readonly Harmony Harmony = new Harmony(modGUID);
 
@@ -62,7 +63,7 @@ namespace DunGenPlus {
 
       Assets.LoadAssets();
       Assets.LoadAssetBundle();
-      DoorwayManager.onMainEntranceTeleportSpawnedEvent.AddEvent("DoorwayCleanup", DoorwayManager.onMainEntranceTeleportSpawnedFunction);
+      DoorwayManager.onMainEntranceTeleportSpawnedEvent.AddEvent("DoorwayCleanup", DoorwayManager.OnMainEntranceTeleportSpawnedFunction);
     }
 
   }
