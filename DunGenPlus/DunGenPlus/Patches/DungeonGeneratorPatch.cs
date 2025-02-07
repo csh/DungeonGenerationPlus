@@ -259,18 +259,28 @@ namespace DunGenPlus.Patches {
       tileProxyNullSequence.AddBasicLocal(OpCodes.Ldloc_S, 14);
       tileProxyNullSequence.AddBasic(OpCodes.Brtrue);
 
+      FieldInfo indexField = null;
+
       foreach(var instruction in instructions){
+        if (instruction.operand is FieldInfo field && field.Name.StartsWith("<j>"))
+          indexField = field;
+
         if (tileProxyNullSequence.VerifyStage(instruction)) {
-          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("PrintAddTileErrorQuick", BindingFlags.Static | BindingFlags.Public);
-          var field = typeof(DungeonGenerator).Assembly.GetType("DunGen.DungeonGenerator+<GenerateMainPath>d__100").GetField("<j>5__8", BindingFlags.NonPublic | BindingFlags.Instance);
 
           yield return instruction;
 
-          yield return new CodeInstruction(OpCodes.Ldloc_1);
-          yield return new CodeInstruction(OpCodes.Ldarg_0);
-          yield return new CodeInstruction(OpCodes.Ldfld, field);
+          if (indexField != null) {
+            var specialFunction = typeof(DunGenPlusGenerator).GetMethod("PrintAddTileErrorQuick", BindingFlags.Static | BindingFlags.Public);
 
-          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+            yield return new CodeInstruction(OpCodes.Ldloc_1);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldfld, indexField);
+
+            yield return new CodeInstruction(OpCodes.Call, specialFunction);
+          }
+          else {
+            Plugin.logger.LogWarning("Failed to find current tile index field in the main path enumerator");
+          }
 
           continue;
         }
