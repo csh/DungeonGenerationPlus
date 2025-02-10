@@ -1,6 +1,7 @@
 ﻿using DunGen;
 using DunGen.Graph;
 using DunGenPlus.DevTools;
+using DunGenPlus.Patches;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,6 +94,95 @@ namespace DunGenPlus.Generation {
 
     public static bool AllowRetryStop(bool defaultState){
       return defaultState || API.IsDevDebugModeActive();
+    }
+
+    public static IEnumerable<DoorwayPair> GetPotentialDoorwayPairsForNonFirstTileAlternate(DoorwayPairFinder __instance){
+      var previousTile = __instance.PreviousTile;
+      var previousTileExtended = TileProxyPatch.GetTileExtenderProxy(previousTile);
+
+      var tileOrder = __instance.tileOrder;
+
+      
+      IEnumerable<DoorwayProxy> validPrevExits;
+      // default base behaviour
+      if (!previousTileExtended.EntranceExitInterchangable){
+        validPrevExits = previousTile.UnusedDoorways.Intersect(previousTileExtended.Exits);
+      }
+      // interchangable behaviour
+      else {
+        // check if previous tile used a specific exit/entrance
+        // they used an exit as their entrance, so use entrances
+        if (previousTile.UsedDoorways.Intersect(previousTileExtended.Exits).Any()){
+          validPrevExits = previousTile.UnusedDoorways.Intersect(previousTileExtended.Entrances);
+        } 
+        // they used an entrance as their entrance, so use exits
+        else if (previousTile.UsedDoorways.Intersect(previousTileExtended.Entrances).Any()){
+          validPrevExits = previousTile.UnusedDoorways.Intersect(previousTileExtended.Exits);
+        } 
+        // uhh i guess it's fine?
+        else {
+          validPrevExits = new List<DoorwayProxy>();
+        }
+      }
+
+      var requiresSpecExit = validPrevExits.Any();
+
+      foreach(var previousDoor in previousTile.UnusedDoorways) {
+        // overlapping doors aren't allowed to be potential doorway pairs since this function only finds entrance/exits
+        // or have fun
+        var isPrevOverlappingDoor = previousTileExtended.OverlappingDoorways.Contains(previousDoor);
+        if (isPrevOverlappingDoor) {
+          continue;
+        }
+
+        // only use allowed doorway exits
+        if (requiresSpecExit && !validPrevExits.Contains(previousDoor)) continue;
+
+        foreach(var tileWeight in __instance.TileWeights) {
+          // skip if not ever considered
+          if (!tileOrder.Contains(tileWeight)) continue;
+
+          var nextTile = __instance.GetTileTemplateDelegate(tileWeight.Value);
+          var nextTileExtended = TileProxyPatch.GetTileExtenderProxy(nextTile);
+          var weight = (float)(tileOrder.Count - tileOrder.IndexOf(tileWeight));
+
+          if (__instance.IsTileAllowedPredicate != null && !__instance.IsTileAllowedPredicate(previousTile, nextTile, ref weight)) continue;
+
+          foreach(var nextDoor in nextTile.Doorways) {
+            // check for previous and next
+            // i forget next which causes problems obviously
+            var isNextOverlappingDoor = nextTileExtended.OverlappingDoorways.Contains(nextDoor);
+            if (isNextOverlappingDoor) {
+              continue;
+            }
+
+            bool AllowEntranceAndExitPair(IEnumerable<DoorwayProxy> entrances, IEnumerable<DoorwayProxy> exits){
+              // only use allowed doorway entrances
+              if (entrances.Any() && !entrances.Contains(nextDoor)) return false;
+              // skip if desiganted as an exit
+              if (exits.Contains(nextDoor)) return false;
+              return true;
+            }
+
+            // normal default behaviour
+            if (!nextTileExtended.EntranceExitInterchangable){
+              if (!AllowEntranceAndExitPair(nextTileExtended.Entrances, nextTileExtended.Exits)) continue;
+            } 
+            // interchangable behaviour
+            else {
+              var firstCheck = AllowEntranceAndExitPair(nextTileExtended.Entrances, nextTileExtended.Exits);
+              var secondCheck = AllowEntranceAndExitPair(nextTileExtended.Exits, nextTileExtended.Entrances);
+              if (!firstCheck && !secondCheck) continue;
+            }
+
+            var doorwayWeight = 0f;
+            if (__instance.IsValidDoorwayPairing(previousDoor, nextDoor, previousTile, nextTile, ref doorwayWeight)) 
+              yield return new DoorwayPair(previousTile, previousDoor, nextTile, nextDoor, tileWeight.TileSet, weight, doorwayWeight);
+          }
+
+        }
+
+      }
     }
 
   }

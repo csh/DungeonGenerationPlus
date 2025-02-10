@@ -13,35 +13,51 @@ namespace DunGenPlus.Collections {
     public TileExtender PrefabTileExtender { get; internal set; }
     public List<DoorwayProxy> Entrances { get; internal set; }
     public List<DoorwayProxy> Exits { get; internal set; }
+    public List<DoorwayProxy> OverlappingDoorways { get; internal set; }
+    public bool EntranceExitInterchangable { get; internal set; }
 
-    public TileExtenderProxy(TileExtenderProxy existingTileExtenderProxy) {
-      TileProxy = existingTileExtenderProxy.TileProxy;
+    public TileExtenderProxy(TileProxy tileProxy, TileExtenderProxy existingTileExtenderProxy) {
+      TileProxy = tileProxy;
       PrefabTileExtender = existingTileExtenderProxy.PrefabTileExtender;
+
       Entrances = new List<DoorwayProxy>();
       Exits = new List<DoorwayProxy>();
+      OverlappingDoorways = new List<DoorwayProxy>();
 
-      foreach(var existingDoorway in TileProxy.doorways) {
-        if (existingTileExtenderProxy.Entrances.Contains(existingDoorway)) Entrances.Add(existingDoorway);
-        if (existingTileExtenderProxy.Exits.Contains(existingDoorway)) Exits.Add(existingDoorway);
+      EntranceExitInterchangable = existingTileExtenderProxy.EntranceExitInterchangable;
+
+      var existingTile = existingTileExtenderProxy.TileProxy;
+      for(var i = 0; i < tileProxy.doorways.Count; ++i){
+        var doorway = tileProxy.doorways[i];
+        var existingDoorway = existingTile.doorways[i];
+        if (existingTileExtenderProxy.Entrances.Contains(existingDoorway)) Entrances.Add(doorway);
+        if (existingTileExtenderProxy.Exits.Contains(existingDoorway)) Exits.Add(doorway);
+        if (existingTileExtenderProxy.OverlappingDoorways.Contains(existingDoorway)) OverlappingDoorways.Add(doorway);
       }
     }
 
     public TileExtenderProxy(TileProxy tileProxy) {
       TileProxy = tileProxy;
       PrefabTileExtender = tileProxy.Prefab.GetComponent<TileExtender>();
+
       Entrances = new List<DoorwayProxy>();
       Exits = new List<DoorwayProxy>();
+      OverlappingDoorways = new List<DoorwayProxy>();
 
       if (PrefabTileExtender == null) {
         if (tileProxy.Entrance != null) Entrances.Add(tileProxy.Entrance);
         if (tileProxy.Exit != null) Exits.Add(tileProxy.Exit);
+        EntranceExitInterchangable = false;
         return;
       }
 
       foreach(var proxyDoorway in tileProxy.doorways) {
         if (PrefabTileExtender.entrances.Contains(proxyDoorway.DoorwayComponent)) Entrances.Add(proxyDoorway);
         if (PrefabTileExtender.exits.Contains(proxyDoorway.DoorwayComponent)) Exits.Add(proxyDoorway);
+        if (PrefabTileExtender.overlappingDoorways.Contains(proxyDoorway.DoorwayComponent)) OverlappingDoorways.Add(proxyDoorway);
       }
+
+      EntranceExitInterchangable = PrefabTileExtender.entranctExitInterchangable;
     }
   }
 }

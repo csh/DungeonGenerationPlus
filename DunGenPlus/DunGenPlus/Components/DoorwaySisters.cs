@@ -20,7 +20,7 @@ namespace DunGenPlus.Components {
     }
 
     [Tooltip("The list of 'sister' doorways.\n\nUseDoorwaySisters must be toggled in DunGenExtender for this component to be used.\n\nThis doorway will not generate if it's an intersecting doorway, any of it's 'sister' doorways are generated, and both this doorway and the 'sister' doorway lead to the same tile.")]
-    public List<Doorway> sisters;
+    public List<Doorway> sisters = new List<Doorway>();
 
     void OnValidate(){
       var sis = sisters.Select(s => s.GetComponent<DoorwaySisters>());

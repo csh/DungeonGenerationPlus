@@ -149,13 +149,6 @@
     <Compile Include="Collections\NodeArchetype.cs" />
     <Compile Include="Collections\NullObject.cs" />
     <Compile Include="Collections\TileExtenderProxy.cs" />
-    <Compile Include="Components\DoorwayCleanup.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwayConnectedDoorway.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveDoorwaySpawnedPrefab.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DCSRemoveGameObjectsConnectedDoorway.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DoorwayCleanupScript.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DCSConnectorBlockerSpawnedPrefab.cs" />
-    <Compile Include="Components\DoorwayCleanupScripting\DoorwayCleanupScriptDoorwayCompare.cs" />
     <Compile Include="Components\DoorwaySisters.cs" />
     <Compile Include="Components\MainRoomDoorwayGroups.cs" />
     <Compile Include="Components\Props\SpawnSyncedObjectCycle.cs" />
@@ -163,6 +156,7 @@
     <Compile Include="Components\Scripting\DoorwayScriptingParent.cs" />
     <Compile Include="Components\Scripting\DunGenPlusScript.cs" />
     <Compile Include="Components\Scripting\DunGenPlusScriptingParent.cs" />
+    <Compile Include="Components\Scripting\GenericScriptingParent.cs" />
     <Compile Include="DevTools\Panels\AssetsPanel.cs" />
     <Compile Include="ExpressionParser\EvaluationContext.cs" />
     <Compile Include="ExpressionParser\Evaluator.cs" />
@@ -185,6 +179,7 @@
     <Compile Include="Managers\EnemyManager.cs" />
     <Compile Include="Managers\ScrapItemManager.cs" />
     <Compile Include="Patches\BranchCountHelperPatch.cs" />
+    <Compile Include="Patches\DoorwayPairFinderPatch.cs" />
     <Compile Include="Patches\DungeonPatch.cs" />
     <Compile Include="Patches\TileProxyPatch.cs" />
     <Compile Include="PluginConfig.cs" />

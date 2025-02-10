@@ -35,7 +35,7 @@ namespace DunGenPlus.Patches {
     [HarmonyPatch(typeof(TileProxy), MethodType.Constructor, new Type[] { typeof(TileProxy) })]
     [HarmonyPostfix]
     public static void TileProxyConstructorExistingPatch(ref TileProxy __instance, TileProxy existingTile){
-      AddTileExtenderProxy(__instance, new TileExtenderProxy(GetTileExtenderProxy(existingTile)));
+      AddTileExtenderProxy(__instance, new TileExtenderProxy(__instance, GetTileExtenderProxy(existingTile)));
     }
 
   }

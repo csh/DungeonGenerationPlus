@@ -27,7 +27,7 @@ namespace DunGenPlus {
 
     internal const string modGUID = "dev.ladyalice.dungenplus";
     private const string modName = "Dungeon Generation Plus";
-    private const string modVersion = "1.4.0";
+    private const string modVersion = "1.4.1";
 
     internal readonly Harmony Harmony = new Harmony(modGUID);
 
@@ -51,6 +51,7 @@ namespace DunGenPlus {
       Harmony.PatchAll(typeof(RoundManagerPatch));
       Harmony.PatchAll(typeof(BranchCountHelperPatch));
       Harmony.PatchAll(typeof(TileProxyPatch));
+      Harmony.PatchAll(typeof(DoorwayPairFinderPatch));
       
       try {
         Harmony.PatchAll(typeof(LethalLevelLoaderPatches));

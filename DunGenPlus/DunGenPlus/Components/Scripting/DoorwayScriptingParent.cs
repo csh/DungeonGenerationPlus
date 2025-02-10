@@ -55,9 +55,8 @@ namespace DunGenPlus.Components.Scripting {
     }
 
     public override EvaluationContext CreateContext() {
-      var context = new EvaluationContext(GetFields);
+      var context = base.CreateContext();
       context.RegisterFunction("doorwaySpawnedGameObject", new FunctionRoutine(2, doorwaySpawnedGameObjectFunction));
-
       return context;
     }
 
@@ -73,7 +72,7 @@ namespace DunGenPlus.Components.Scripting {
       return ExpressionToken.False;
     }
 
-    (object, ValueTypeHint) GetFields(string field) {
+    public override (object, ValueTypeHint) GetFields(string field) {
       var split = field.Split('.');
 
       if (split.Length <= 1) {

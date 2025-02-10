@@ -40,7 +40,7 @@ namespace DunGenPlus.Patches {
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "InnerGenerate")]
-    public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry, ref IEnumerator __result){
+    public static void InnerGeneratePatch(ref DungeonGenerator __instance, bool isRetry){
       //Plugin.logger.LogWarning($"InnerGenerate: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
       if (API.IsDevDebugModeActive() && !isRetry) {
         DevDebugManager.Instance.RecordNewSeed(__instance.ChosenSeed);
@@ -55,7 +55,7 @@ namespace DunGenPlus.Patches {
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath")]
-    public static void GenerateMainPathPatch(ref DungeonGenerator __instance, ref IEnumerator __result){
+    public static void GenerateMainPathPatch(ref DungeonGenerator __instance){
       //Plugin.logger.LogWarning($"GenerateMainPath: {DunGenPlusGenerator.Active}, {DunGenPlusGenerator.ActiveAlternative}, {__instance.Status}");
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
         DunGenPlusGenerator.RandomizeLineArchetypes(__instance, true);
@@ -69,7 +69,6 @@ namespace DunGenPlus.Patches {
       if (DunGenPlusGenerator.Active && DunGenPlusGenerator.ActiveAlternative) {
         __result = DunGenPlusGenerator.GenerateAlternativeMainPaths(__instance); 
       }
-
     }
 
     [HarmonyTranspiler]

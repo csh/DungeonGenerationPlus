@@ -124,6 +124,13 @@ namespace DunGenPlus.Components.Scripting {
       }
     }
 
+    public NamedGameObjectReference GetNamedGameObject(string name){
+      if (namedDictionary.TryGetValue(name, out var obj)){
+        return obj;
+      }
+      return null;
+    }
+
     public void SetNamedGameObjectOverrideState(string name, OverrideGameObjectState state){
       if (namedDictionary.TryGetValue(name, out var obj)){
         obj.overrideState = state;
@@ -138,15 +145,34 @@ namespace DunGenPlus.Components.Scripting {
       }
     }
 
-    protected bool CheckIfNotNull(object target, string name){
-      if (target == null) {
-        Utils.Utility.PrintLog($"{name} was null", BepInEx.Logging.LogLevel.Error);
-        return false;
-      }
-      return true;
+    public virtual EvaluationContext CreateContext() {
+      var context = new EvaluationContext(GetFields);
+      context.RegisterFunction("isAnyActive", new FunctionRoutine(1, isAnyActiveFunction));
+      context.RegisterFunction("isAllActive", new FunctionRoutine(1, isAllActiveFunction));
+      return context;
     }
 
-    public abstract EvaluationContext CreateContext();
+    public virtual (object, ValueTypeHint) GetFields(string field) {
+      return default;
+    }
+
+    ExpressionToken isAnyActiveFunction(EvaluationContext context, ExpressionToken[] parameters) {
+      var targetName = parameters[0].Value;
+      var target = GetNamedGameObject(targetName);
+      if (target != null) {
+        return target.gameObjects.Any(x => x != null && x.activeSelf) ? ExpressionToken.True : ExpressionToken.False;
+      } 
+      return ExpressionToken.False;
+    }
+
+    ExpressionToken isAllActiveFunction(EvaluationContext context, ExpressionToken[] parameters) {
+      var targetName = parameters[0].Value;
+      var target = GetNamedGameObject(targetName);
+      if (target != null) {
+        return target.gameObjects.All(x => x != null && x.activeSelf) ? ExpressionToken.True : ExpressionToken.False;
+      } 
+      return ExpressionToken.False;
+    }
 
   }
 }

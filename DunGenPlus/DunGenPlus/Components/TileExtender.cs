@@ -11,8 +11,8 @@ namespace DunGenPlus.Components {
 
     public List<Doorway> entrances = new List<Doorway>();
     public List<Doorway> exits = new List<Doorway>();
+    public bool entranctExitInterchangable;
     public List<Doorway> overlappingDoorways = new List<Doorway>();
-
 
   }
 }

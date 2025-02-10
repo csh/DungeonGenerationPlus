@@ -10,7 +10,6 @@ using DunGenPlus.Components;
 using DunGenPlus.Components.Scripting;
 using DunGenPlus.Generation;
 using DunGenPlus.Utils;
-using static DunGenPlus.Managers.DoorwayManager;
 
 namespace DunGenPlus.Managers {
   public static class DoorwayManager {
@@ -57,10 +56,6 @@ namespace DunGenPlus.Managers {
       foreach(DunGenScriptingHook e in Enum.GetValues(typeof(DunGenScriptingHook))){
         scriptingLists.Add(e, new Scripts());
       }
-    }
-
-    public static void AddDoorwayCleanup(DoorwayCleanup cleanup){
-      //doorwayCleanupList.Add(cleanup);
     }
 
     public static void AddDunGenScriptHook(IDunGenScriptingParent script){
