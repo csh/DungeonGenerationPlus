@@ -40,6 +40,10 @@
       <HintPath>$(LethalCompanyPath)\Lethal Company_Data\Managed\DunGen.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="DunGen.Integration.UnityNav" Publicize="true">
+      <HintPath>$(LethalCompanyPath)\Lethal Company_Data\Managed\DunGen.Integration.UnityNav.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>$(LethalCompanyPath)\Lethal Company_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
