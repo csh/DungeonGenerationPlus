@@ -19,29 +19,44 @@ using DunGenPlus.Components;
 
 namespace DunGenPlus.Patches
 {
+  [HarmonyPatch]
   internal class DungeonPatch {
 
+    static MethodBase TargetMethod()
+    {
+      return AccessTools.EnumeratorMoveNext(
+        AccessTools.Method(typeof(Dungeon), "FromProxy")
+      );
+    }
+    
     [HarmonyTranspiler]
-    [HarmonyPatch(typeof(Dungeon), "FromProxy")]
-    public static IEnumerable<CodeInstruction> FromProxyPatch(IEnumerable<CodeInstruction> instructions){
-      var endSequence = new InstructionSequenceStandard("Forloop End");
-      endSequence.AddBasicLocal(OpCodes.Ldloca_S, 1);
-      endSequence.AddBasic(OpCodes.Constrained);
-      endSequence.AddBasic(OpCodes.Callvirt);
-      endSequence.AddBasic(OpCodes.Endfinally);
+    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original){
+      var addMethod = AccessTools.Method(
+        typeof(DunGenPlusGenerator),
+        nameof(DunGenPlusGenerator.AddTileToMainPathDictionary)
+      );
 
-      // WE MUST INJECT BEFORE ENDFINALLY
-      // DiFFoZ says cause try/catch block something
-      // Idk that makes no sense
-      // But if it works it works
+      var proxyDungeonField = AccessTools.Field(original.DeclaringType, "proxyDungeon");
+      var dictField = AccessTools.Field(original.DeclaringType, "<proxyToTileMap>5__2");
 
-      foreach(var instruction in instructions){
-        if (endSequence.VerifyStage(instruction)) {
-          var specialFunction = typeof(DunGenPlusGenerator).GetMethod("AddTileToMainPathDictionary", BindingFlags.Static | BindingFlags.Public);
+      var proxyField = AccessTools.Field(typeof(DungeonProxy), "Connections");
+      var getEnumerator = AccessTools.Method(typeof(List<ProxyDoorwayConnection>), "GetEnumerator");
 
-          yield return new CodeInstruction(OpCodes.Ldloc_0);
-          yield return new CodeInstruction(OpCodes.Call, specialFunction);
+      var endSequence = new InstructionSequenceStandard("Start Connections Loop");
+      endSequence.AddBasic(OpCodes.Ldarg_0);
+      endSequence.AddBasic(OpCodes.Ldfld, proxyDungeonField);
+      endSequence.AddBasic(OpCodes.Ldfld, proxyField);
+      endSequence.AddBasic(OpCodes.Callvirt, getEnumerator);
+
+      foreach (var instruction in instructions)
+      {
+        if (endSequence.VerifyStage(instruction))
+        {
+          yield return new CodeInstruction(OpCodes.Ldarg_0);
+          yield return new CodeInstruction(OpCodes.Ldfld, dictField);
+          yield return new CodeInstruction(OpCodes.Call, addMethod);
         }
+
         yield return instruction;
       }
 
