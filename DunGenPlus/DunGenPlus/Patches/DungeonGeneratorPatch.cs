@@ -75,15 +75,15 @@ namespace DunGenPlus.Patches {
     [HarmonyPatch(typeof(DungeonGenerator), "GenerateMainPath", MethodType.Enumerator)]
     public static IEnumerable<CodeInstruction> GenerateMainPathPatch(IEnumerable<CodeInstruction> instructions){
       
-      var addArchFunction = typeof(List<DungeonArchetype>).GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
+      var currentArchetypeField = typeof(DungeonGenerator).GetField("currentArchetype", BindingFlags.Instance | BindingFlags.NonPublic);
+      var setArchetypeMethod = typeof(TilePlacementParameters).GetMethod("set_Archetype", BindingFlags.Instance | BindingFlags.NonPublic);
 
       var archSequence = new InstructionSequenceStandard("archetype node");
-      archSequence.AddOperandTypeCheck(OpCodes.Ldfld, typeof(List<DungeonArchetype>));
-      archSequence.AddBasic(OpCodes.Ldnull);
-      archSequence.AddBasic(OpCodes.Callvirt, addArchFunction);
+      archSequence.AddBasic(OpCodes.Ldfld, currentArchetypeField);
+      archSequence.AddBasic(OpCodes.Callvirt, setArchetypeMethod);
 
       var attachToSequence = new InstructionSequenceStandard("attach to");
-      attachToSequence.AddBasicLocal(OpCodes.Stloc_S, 13);
+      attachToSequence.AddBasicLocal(OpCodes.Stloc_S, 14);
 
       foreach(var instruction in instructions){
 
@@ -106,7 +106,7 @@ namespace DunGenPlus.Patches {
 
           var modifyMethod = typeof(MainRoomDoorwayGroups).GetMethod("ModifyGroupBasedOnBehaviourSimple", BindingFlags.Public | BindingFlags.Static);
 
-          yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
+          yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
           yield return new CodeInstruction(OpCodes.Call, modifyMethod);
 
           continue;
@@ -212,15 +212,15 @@ namespace DunGenPlus.Patches {
       var addTileSequence = new InstructionSequenceStandard("Add Tile Placement");
       addTileSequence.AddBasic(OpCodes.Callvirt);
       addTileSequence.AddBasic(OpCodes.Ldc_I4_0);
-      addTileSequence.AddBasic(OpCodes.Bgt);
-      addTileSequence.AddBasicLocal(OpCodes.Ldloc_S, 9);
+      addTileSequence.Add((i) => i.opcode == OpCodes.Bgt || i.opcode == OpCodes.Bgt_S);
+      addTileSequence.AddBasicLocal(OpCodes.Ldloc_S, 8);
 
       foreach(var instruction in instructions){
         if (addTileSequence.VerifyStage(instruction)) {
           var specialFunction = typeof(DunGenPlusGenerator).GetMethod("RecordLastTilePlacementResult", BindingFlags.Static | BindingFlags.Public);
 
           yield return new CodeInstruction(OpCodes.Ldarg_0);
-          yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
+          yield return new CodeInstruction(OpCodes.Ldloc_S, 8);
           yield return new CodeInstruction(OpCodes.Call, specialFunction);
 
           yield return instruction;
@@ -254,9 +254,9 @@ namespace DunGenPlus.Patches {
     public static IEnumerable<CodeInstruction> GenerateMainPathDebugPatch(IEnumerable<CodeInstruction> instructions){
 
       var tileProxyNullSequence = new InstructionSequenceStandard("TileProxyNull");
-      tileProxyNullSequence.AddBasic(OpCodes.Br);
-      tileProxyNullSequence.AddBasicLocal(OpCodes.Ldloc_S, 14);
-      tileProxyNullSequence.AddBasic(OpCodes.Brtrue);
+      tileProxyNullSequence.Add((i) => i.opcode == OpCodes.Br || i.opcode == OpCodes.Br_S);
+      tileProxyNullSequence.AddBasicLocal(OpCodes.Ldloc_S, 15);
+      tileProxyNullSequence.Add((i) => i.opcode == OpCodes.Brtrue || i.opcode == OpCodes.Brtrue_S);
 
       FieldInfo indexField = null;
 
@@ -298,11 +298,11 @@ namespace DunGenPlus.Patches {
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DungeonGenerator), "AddTile")]
-    public static void AddTileDebugPatch(TileProxy attachTo, IEnumerable<TileSet> useableTileSets, float normalizedDepth, DungeonArchetype archetype){
+    public static void AddTileDebugPatch(TileProxy attachTo, IEnumerable<TileSet> useableTileSets, float normalizedDepth, TilePlacementParameters placementParams){
       lastAttachTo = attachTo;
       lastUseableTileSets = useableTileSets;
       lastNormalizedDepth = normalizedDepth;
-      lastArchetype = archetype;
+      lastArchetype = placementParams?.Archetype;
     }
 
   }
