@@ -64,7 +64,7 @@ namespace DunGenPlus.Generation
               if (d.TileProxy == t.previousDoorway.TileProxy) continue;
 
               // favor paths that connect to other depths
-              if (gen.DungeonFlow.CanDoorwaysConnect(d.TileProxy.PrefabTile, l.TileProxy.PrefabTile, d.DoorwayComponent, l.DoorwayComponent) && Vector3.SqrMagnitude(d.Position - l.Position) < 1E-05){
+              if (gen.DungeonFlow.CanDoorwaysConnect(new ProposedConnection(gen.proxyDungeon, d.TileProxy, l.TileProxy, d, l)) && Vector3.SqrMagnitude(d.Position - l.Position) < 1E-05){
                 var diff = Mathf.Abs(d.TileProxy.Placement.PathDepth - l.TileProxy.Placement.PathDepth);
                 var normalDiff = Mathf.Abs(d.TileProxy.Placement.NormalizedPathDepth - l.TileProxy.Placement.NormalizedPathDepth);
                 var samePath = mainPathIndex == dIndex;
@@ -184,11 +184,14 @@ namespace DunGenPlus.Generation
             foreach(var item in bestPath.list){
               MakeTileProxyConnection(gen, item);
 
-              item.tileProxy.Placement.GraphNode = item.previousDoorway.TileProxy.Placement.GraphNode;
-              item.tileProxy.Placement.GraphLine = item.previousDoorway.TileProxy.Placement.GraphLine;
+              item.tileProxy.Placement.PlacementParameters.Node = item.previousDoorway.TileProxy.Placement.GraphNode;
+              item.tileProxy.Placement.PlacementParameters.Line = item.previousDoorway.TileProxy.Placement.GraphLine;
             }
 
-            gen.injectedTiles = bestPath.injectedTiles;
+            gen.injectedTiles.Clear();
+            foreach (var kvp in bestPath.injectedTiles) 
+              gen.injectedTiles[kvp.Key] = kvp.Value;
+            
             gen.tilesPendingInjection = bestPath.tilesPendingInjection;
 
             AddMainPathTileProxies(bestPath.list.Select(x => x.tileProxy), bestPath.mainPathIndex);
@@ -238,14 +241,14 @@ namespace DunGenPlus.Generation
       DoorwayPairStopwatch.Stop();
       DoorwayPairTime += (float)DoorwayPairStopwatch.Elapsed.TotalMilliseconds;
 
-      var tilePlacementResult = new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
+      var tilePlacementResult = new TilePlacementResultProxy(new NoMatchingDoorwayPlacementResult(attachTo));
       while(doorwayPairs.Count > 0) {
         var pair = doorwayPairs.Dequeue();
         tilePlacementResult = TryPlaceTileResult(gen, pathProxy, pair, archetype);
-        if (tilePlacementResult.result == TilePlacementResult.None) break;
+        if (tilePlacementResult.result is SuccessPlacementResult) break;
       }
 
-      if (tilePlacementResult.result == TilePlacementResult.None){
+      if (tilePlacementResult.result is SuccessPlacementResult){
         if (injectedTile != null) {
           var tileProxy = tilePlacementResult.tileProxy;
           tileProxy.Placement.InjectionData = injectedTile;
@@ -255,7 +258,7 @@ namespace DunGenPlus.Generation
         return tilePlacementResult;
       }
 
-      return new TilePlacementResultProxy(TilePlacementResult.NoValidTile);
+      return new TilePlacementResultProxy(new NoMatchingDoorwayPlacementResult(attachTo));
 
     }
 
@@ -269,7 +272,7 @@ namespace DunGenPlus.Generation
       var doorwayPairFinder = new DoorwayPairFinder();
       doorwayPairFinder.DungeonFlow = gen.DungeonFlow;
       doorwayPairFinder.RandomStream = gen.RandomStream;
-      doorwayPairFinder.Archetype = archetype;
+      doorwayPairFinder.PlacementParameters = new TilePlacementParameters { Archetype = archetype };
       doorwayPairFinder.GetTileTemplateDelegate = new GetTileTemplateDelegate(gen.GetTileTemplate);
       doorwayPairFinder.IsOnMainPath = false;
       doorwayPairFinder.NormalizedDepth = normalizedDepth;
@@ -315,30 +318,30 @@ namespace DunGenPlus.Generation
     private static TilePlacementResultProxy TryPlaceTileResult(DungeonGenerator gen, BranchPathProxy pathProxy, DoorwayPair pair, DungeonArchetype archetype){
       var nextTemplate = pair.NextTemplate;
       var previousDoorway = pair.PreviousDoorway;
-      if (nextTemplate == null) return new TilePlacementResultProxy(TilePlacementResult.TemplateIsNull);
+      if (nextTemplate == null) return new TilePlacementResultProxy(new NullTemplatePlacementResult());
 
       var index = pair.NextTemplate.Doorways.IndexOf(pair.NextDoorway);
 
       var tile = new TileProxy(nextTemplate);
       tile.Placement.IsOnMainPath = false;
-      tile.Placement.Archetype = archetype;
+      tile.Placement.PlacementParameters = new TilePlacementParameters { Archetype = archetype };
       tile.Placement.TileSet = pair.NextTileSet;
 
       if (previousDoorway != null) {
         var myDoorway = tile.Doorways[index];
         tile.PositionBySocket(myDoorway, previousDoorway);
         var bounds = tile.Placement.Bounds;
-        if (gen.RestrictDungeonToBounds && !gen.TilePlacementBounds.Contains(bounds)) return new TilePlacementResultProxy(TilePlacementResult.OutOfBounds);
-        if (IsCollidingWithAnyTileAndTileResult(gen, pathProxy, tile, previousDoorway.TileProxy)) return new TilePlacementResultProxy(TilePlacementResult.TileIsColliding);
+        if (gen.RestrictDungeonToBounds && !gen.TilePlacementBounds.Contains(bounds)) return new TilePlacementResultProxy(new OutOfBoundsPlacementResult(tile));
+        if (IsCollidingWithAnyTileAndTileResult(gen, pathProxy, tile, previousDoorway.TileProxy)) return new TilePlacementResultProxy(new TileIsCollidingPlacementResult(tile));
       }
 
-      if (tile == null) return new TilePlacementResultProxy(TilePlacementResult.NewTileIsNull);
+      if (tile == null) return new TilePlacementResultProxy(new NullTemplatePlacementResult());
 
       tile.Placement.PathDepth = pair.PreviousTile.Placement.PathDepth;
       tile.Placement.NormalizedPathDepth = pair.PreviousTile.Placement.NormalizedPathDepth;
       tile.Placement.BranchDepth = pair.PreviousTile.Placement.IsOnMainPath ? 0 : (pair.PreviousTile.Placement.BranchDepth + 1);
 
-      return new TilePlacementResultProxy(TilePlacementResult.None, tile, previousDoorway, tile.Doorways[index]);
+      return new TilePlacementResultProxy(new SuccessPlacementResult(), tile, previousDoorway, tile.Doorways[index]);
     }
 
     private static bool IsCollidingWithAnyTileAndTileResult(DungeonGenerator gen, BranchPathProxy pathProxy, TileProxy newTile, TileProxy previousTile){

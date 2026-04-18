@@ -265,7 +265,8 @@ namespace DunGenPlus.Generation {
             useableTileSets = archetype.TileSets;
           }
 
-          var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, archetype, TilePlacementResult.None);
+          var placementParams = new TilePlacementParameters { Archetype = archetype };
+          var tileProxy = gen.AddTile(previousTile, useableTileSets, lineDepthRatio, placementParams);
           
           if (tileProxy == null) {  
             PrintAddTileError(gen, previousTile, archetype, useableTileSets, b + 1, t, lineDepthRatio);
@@ -280,12 +281,14 @@ namespace DunGenPlus.Generation {
 					tileProxy.Placement.BranchDepth = t;
 					tileProxy.Placement.NormalizedBranchDepth = lineDepthRatio;
 
-          if (graphNode != null) {
-            tileProxy.Placement.GraphNode = graphNode;
-					  tileProxy.Placement.GraphLine = null;
-          } else {
-            tileProxy.Placement.GraphNode = null;
-					  tileProxy.Placement.GraphLine = lineAtDepth;
+          if (graphNode != null)
+          {
+            tileProxy.Placement.PlacementParameters.Node = graphNode;
+            tileProxy.Placement.PlacementParameters.Line = null;
+          } else
+          {
+            tileProxy.Placement.PlacementParameters.Node = null;
+            tileProxy.Placement.PlacementParameters.Line = lineAtDepth;
           }
 					
 					previousTile = tileProxy;

@@ -33,14 +33,14 @@ namespace DunGenPlus.Generation {
         // try every tile, if we somehow fail than man that sucks
         foreach(var pair in allTiles){
           var t = pair.t;
-          var tileProxy = gen.AddTile(t, item.TileSets, t.Placement.NormalizedDepth, null, TilePlacementResult.None);
+          var tileProxy = gen.AddTile(t, item.TileSets, t.Placement.NormalizedDepth, new TilePlacementParameters());
           if (tileProxy == null) continue;
 
           AddTileProxy(tileProxy, GetMainPathIndexFromTileProxy(t));
           tileProxy.Placement.BranchDepth = t.Placement.BranchDepth;
 					tileProxy.Placement.NormalizedBranchDepth = t.Placement.NormalizedDepth;
-          tileProxy.Placement.GraphNode = t.Placement.GraphNode;
-					tileProxy.Placement.GraphLine = t.Placement.GraphLine;
+          tileProxy.Placement.PlacementParameters.Node = t.Placement.GraphNode;
+					tileProxy.Placement.PlacementParameters.Line = t.Placement.GraphLine;
 
           Plugin.logger.LogDebug($"Forcefully added tile {tileProxy.Prefab.name}");
           break;

@@ -219,10 +219,10 @@ namespace DunGenPlus.DevTools {
       var stats = generator.GenerationStats;
       textList.AppendLine("<u>DunGen</u>");
       textList.AppendLine($"Retrys: {stats.TotalRetries}");
-      textList.AppendLine($"Pre Process Time: {stats.PreProcessTime:F2} ms");
-      textList.AppendLine($"Main Path Time: {stats.MainPathGenerationTime:F2} ms");
-      textList.AppendLine($"Branch Path Time: {stats.BranchPathGenerationTime:F2} ms");
-      textList.AppendLine($"Post Process Time: {stats.PostProcessTime:F2} ms");
+      textList.AppendLine($"Pre Process Time: {stats.GetGenerationStepTime(GenerationStatus.PreProcessing):F2} ms");
+      textList.AppendLine($"Main Path Time: {stats.GetGenerationStepTime(GenerationStatus.MainPath):F2} ms");
+      textList.AppendLine($"Branch Path Time: {stats.GetGenerationStepTime(GenerationStatus.Branching):F2} ms");
+      textList.AppendLine($"Post Process Time: {stats.GetGenerationStepTime(GenerationStatus.PostProcessing):F2} ms");
       textList.AppendLine($"Total Time: {stats.TotalTime:F2} ms");
 
       textList.AppendLine("");

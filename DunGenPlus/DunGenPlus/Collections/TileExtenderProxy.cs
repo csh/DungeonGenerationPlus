@@ -44,9 +44,18 @@ namespace DunGenPlus.Collections {
       Exits = new List<DoorwayProxy>();
       OverlappingDoorways = new List<DoorwayProxy>();
 
-      if (PrefabTileExtender == null) {
-        if (tileProxy.Entrance != null) Entrances.Add(tileProxy.Entrance);
-        if (tileProxy.Exit != null) Exits.Add(tileProxy.Exit);
+      if (PrefabTileExtender == null)
+      {
+        if (tileProxy.Entrances is not null)
+        {
+          Entrances.AddRange(tileProxy.Entrances);
+        }
+
+        if (tileProxy.Exits is not null)
+        {
+          Exits.AddRange(tileProxy.Exits);
+        }
+
         EntranceExitInterchangable = false;
         return;
       }
